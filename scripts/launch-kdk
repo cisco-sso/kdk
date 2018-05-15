@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-KDK_IMAGE=${KDK_IMAGE:-cisco-sso/kdk}
+KDK_IMAGE=${KDK_IMAGE:-ciscosso/kdk}
 KDK_IMAGE_TAG=${KDK_IMAGE_TAG:-latest}
 KDK_CONTAINER_NAME=${KDK_CONTAINER_NAME:-kdk}
 
