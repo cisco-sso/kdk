@@ -80,7 +80,7 @@ RUN yum update --nogpgcheck -y && \
         xorg-x11-xinit \
         xorg-x11-xinit-session \
         xterm \
-        yadr \
+        yadm \
         zlib-devel && \
     sudo ln -s /usr/bin/xsubpp /usr/share/perl5/ExtUtils/xsubpp && \
     yum clean all && \
