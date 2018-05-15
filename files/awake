@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+#
+# awake -- run an Ansible playbook as if it is a Makefile.
+#
+# created by: Joshua M. Dotson <josdotso@cisco.com>
+#
+
+set -euo pipefail
+
+export AWAKE_FILE=${AWAKE_FILE:-./awake.jsonnet}
+
+## If the AWAKE_FILE doesn't exist, assume the file should be `awake.yaml`,
+## because jsonnet may not be installed. Basically, we want to encourage
+## jsonnet without breaking where not supported.
+[ -e "${AWAKE_FILE}" ] || export AWAKE_FILE="awake.yaml"
+
+export AWAKE_FILE_EXTENSION=${AWAKE_FILE##*.}
+export AWAKE_VERSION=0.2.0
+
+export ANSIBLE_COMMAND_WARNINGS=${ANSIBLE_COMMAND_WARNINGS:-False}
+export ANSIBLE_DEPRECATION_WARNINGS=${ANSIBLE_DEPRECATION_WARNINGS:-False}
+export ANSIBLE_INVENTORY_LOCALHOST_ONLY=${ANSIBLE_INVENTORY_LOCALHOST_ONLY:-True}
+export ANSIBLE_PYTHON_INTERPRETER=${ANSIBLE_PYTHON_INTERPRETER:-/usr/bin/python3.6}
+export ANSIBLE_RETRY_FILES_ENABLED=${ANSIBLE_RETRY_FILES_ENABLED:-False}
+export ANSIBLE_ROLES_PATH=${ANSIBLE_ROLES_PATH:-./tmp:./.awake}
+export ANSIBLE_STDOUT_CALLBACK=${ANSIBLE_STDOUT_CALLBACK:-default}
+export ANSIBLE_TRANSPORT=${ANSIBLE_TRANSPORT:-local}
+export ANSIBLE_VERBOSITY=${ANSIBLE_VERBOSITY:-0}
+export DISPLAY_SKIPPED_HOSTS=${DISPLAY_SKIPPED_HOSTS:-True}
+export JSONNET_ENV_VAR_ARGS=$(env | sed -e 's/=.*//g' -e 's/^/-V /g' | tr '\n' ' ')
+
+if [ "${ANSIBLE_INVENTORY_LOCALHOST_ONLY}" = "True" ] ; then
+  _ANSIBLE_INVENTORY_STRING=${ANSIBLE_INVENTORY_STRING:--i localhost,}
+fi
+
+## Ansible doesn't log to stdout realtime, so this is a hack to allow it.
+touch ./.awake.log
+tail -n0 -f ./.awake.log &
+AWAKE_ASYNC_LOG_PID=${!}
+trap "kill ${AWAKE_ASYNC_LOG_PID} ; rm -f ./.awake.log" EXIT
+
+case "${AWAKE_FILE_EXTENSION}" in
+
+  jsonnet)
+    ## If file extension is "jsonnet", pre-process that file before sending it into ansible-playbook.
+    ##
+    ansible-playbook ${_ANSIBLE_INVENTORY_STRING:-} /dev/stdin \
+      --extra-vars "ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER}" ${@} <<EOF
+$(jsonnet ${JSONNET_ENV_VAR_ARGS} "${AWAKE_FILE}")
+EOF
+  ;;
+
+  *)
+    ## In every other case (e.g. "yaml", just try it with no pre-processing.
+    ##
+    ansible-playbook ${_ANSIBLE_INVENTORY_STRING:-} "${AWAKE_FILE}" \
+      --extra-vars "ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER}" ${@}
+  ;;
+
+esac
+
+# Allow time for async threads to align...
+sleep 2

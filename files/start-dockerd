@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# clean pid after unexpected kill
+if [ -f "/var/run/docker.pid" ]; then
+  rm -rf /var/run/docker.pid
+fi
+
+echo "Starting dockerd"
+dockerd \
+  --host=unix:///var/run/docker.sock \
+  --host=tcp://0.0.0.0:2375  \
+  --storage-driver=vfs &
+
+# set docker settings
+echo "export DOCKER_HOST='tcp://127.0.0.1:2375'" >> /etc/profile
+
+# reread all config
+source /etc/profile
+
+exec "$@"

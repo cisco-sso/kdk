@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+useradd ${KDK_USERNAME} -m -G wheel -s "${KDK_SHELL}"
+chown ${KDK_USERNAME} /home/${KDK_USERNAME}
+runuser -l ${KDK_USERNAME} -c "yadm clone --bootstrap ${KDK_DOTFILES_REPO}"
+sudo sed -i 's|^# %wheel|%wheel|g' /etc/sudoers
+
+reset
+
+su ${KDK_USERNAME}

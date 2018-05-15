@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -e
+
+KDK_IMAGE=${KDK_IMAGE:-cisco-sso/kdk}
+KDK_IMAGE_TAG=${KDK_IMAGE_TAG:-latest}
+KDK_CONTAINER_NAME=${KDK_CONTAINER_NAME:-kdk}
+
+KDK_USERNAME=${KDK_USERNAME:-$USER}
+KDK_SHELL=${KDK_SHELL:-/usr/local/bin/zsh}
+KDK_DOTFILES_REPO=${KDK_DOTFILES_REPO:-https://github.com/rtluckie/work-dotfiles.git}
+
+CONTAINER_ID=$(docker ps | grep "${KDK_CONTAINER_NAME}" | awk '{print $1}')
+
+if [[ "$CONTAINER_ID" ]]; then
+  echo "> kdk container is already running."
+  echo "> Attaching to container $CONTAINER_ID"
+  docker attach "$CONTAINER_ID"
+  exit 0
+else
+  docker pull "${KDK_IMAGE}"
+  docker run \
+    -it \
+    --rm \
+    --name "${KDK_CONTAINER_NAME}" \
+    --env KDK_USERNAME="${KDK_USERNAME}" \
+    --env KDK_SHELL="${KDK_SHELL}" \
+    --env KDK_DOTFILES_REPO="${KDK_DOTFILES_REPO}" \
+    "${KDK_IMAGE}":"${KDK_IMAGE_TAG}"
+fi
+
