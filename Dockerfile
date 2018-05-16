@@ -80,7 +80,6 @@ RUN yum update --nogpgcheck -y && \
         xorg-x11-xinit \
         xorg-x11-xinit-session \
         xterm \
-        yadm \
         zlib-devel && \
     sudo ln -s /usr/bin/xsubpp /usr/share/perl5/ExtUtils/xsubpp && \
     yum clean all && \
@@ -129,6 +128,10 @@ RUN cd /tmp && curl -L https://github.com/vim/vim/archive/v8.0.1736.tar.gz | tar
     make VIMRUNTIMEDIR=/usr/local/share/vim/vim80 && \
     sudo make install && \
     cd .. && rm -fr vim-*
+
+# yadm
+RUN curl -fLo /usr/local/bin/yadm https://github.com/TheLocehiliosan/yadm/raw/master/yadm && \
+    chmod a+x /usr/local/bin/yadm
 
 # jq
 RUN cd /tmp && \
