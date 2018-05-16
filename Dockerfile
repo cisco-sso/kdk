@@ -178,6 +178,7 @@ RUN curl -L https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.4/EasyRSA
 
 # python requirements
 RUN pip2.7 install -U pip && pip3.6 install -U pip && \
+    pip2.7 install -U setuptools && pip3.6 install -U setuptools && \
     pip2.7 install -r /tmp/python-requirements/pip2.7.txt --no-cache-dir --ignore-installed six && \
     pip3.6 install -r /tmp/python-requirements/pip3.6.txt --no-cache-dir
 
