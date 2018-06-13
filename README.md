@@ -5,14 +5,16 @@ A docker image with tools for Kubernetes, Helm and Docker DevOps.
 
 ## Dependencies
 
-* Docker 
+* Docker
+* Python 3.x
+* [Python requirements](requirements.txt)
 
 ## Getting Started
 
 1. Get KDK script
 
 ```bash
-curl -so kdk https://raw.githubusercontent.com/cisco-sso/dockerized-k8s-devkit/master/scripts/kdk; chmod +x kdk
+curl -so kdk https://raw.githubusercontent.com/cisco-sso/dockerized-k8s-devkit/master/kdk; chmod +x kdk
 ```
 2. Init KDK
 
