@@ -1,0 +1,199 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import getpass
+import os
+import time
+import re
+
+import click
+import docker
+import yaml
+
+CONFIG_PATH = os.path.join(os.path.expanduser("~"), '.kdk', "config.yaml")
+
+DOCKER_CLIENT = docker.from_env()
+
+# TODO (rluckie) tweak default configs so they aren't such a security nightmare
+DEFAULT_CONFIG = {
+    "image": {
+        "repository": "ciscosso/kdk",
+        "tag": "latest"
+    },
+    "docker": {
+        "name": "kdk",
+        "privileged": True,
+        "pid_mode": "host",
+        "tmpfs": {
+            "/run": ""
+        },
+        "tty": True,
+        "detach": True,
+        "stdin_open": True,
+        "cap_add": [
+            "SYS_ADMIN"
+        ],
+        "security_opt": [
+            "seccomp:unconfined"
+        ],
+        "volumes": {},
+        "environment": {}
+    }
+}
+
+
+def load_config(config_path=CONFIG_PATH):
+    return yaml.load(open(config_path).read())
+
+
+class GroupOrderedHelp(click.Group):
+
+    def __init__(self, *args, **kwargs):
+        self.help_priorities = {}
+        super(GroupOrderedHelp, self).__init__(*args, **kwargs)
+
+    def get_help(self, ctx):
+        self.list_commands = self.list_commands_for_help
+        return super(GroupOrderedHelp, self).get_help(ctx)
+
+    def list_commands_for_help(self, ctx):
+        """reorder the list of commands when listing the help"""
+        commands = super(GroupOrderedHelp, self).list_commands(ctx)
+        return (c[1] for c in sorted(
+            (self.help_priorities.get(command, 1), command)
+            for command in commands))
+
+    def command(self, *args, **kwargs):
+        """Behaves the same as `click.Group.command()` except capture
+        a priority for listing command names in help.
+        """
+        help_priority = kwargs.pop('help_priority', 1)
+        help_priorities = self.help_priorities
+
+        def decorator(f):
+            cmd = super(GroupOrderedHelp, self).command(*args, **kwargs)(f)
+            help_priorities[cmd.name] = help_priority
+            return cmd
+
+        return decorator
+
+
+@click.group(cls=GroupOrderedHelp)
+@click.pass_context
+def kdk(ctx):
+    pass
+
+
+@kdk.command(help_priority=1)
+@click.pass_context
+def init(ctx):
+    """Init"""
+    if not os.path.exists(os.path.dirname(CONFIG_PATH)):
+        os.makedirs(os.path.dirname(CONFIG_PATH))
+    if os.path.isfile(CONFIG_PATH):
+        click.confirm(
+            "A KDK config file already exists [{}].\nDo you want to continue and overwrite existing config?".format(
+                CONFIG_PATH), abort=True)
+
+    config = DEFAULT_CONFIG
+
+    config['docker']['environment']['KDK_USERNAME'] = click.prompt('KDK username', default=getpass.getuser())
+    config['image']['repository'] = click.prompt('KDK image repository', default="ciscosso/kdk")
+    config['image']['tag'] = click.prompt('KDK image tag', default="latest")
+    config['docker']['environment']['KDK_DOTFILES_REPO'] = click.prompt('dotfiles_repo',
+                                                                        default="https://github.com/rtluckie/work-dotfiles.git")
+    config['docker']['environment']['KDK_SHELL'] = click.prompt('shell', default="zsh")
+
+    yaml.dump(config, open(CONFIG_PATH, "w"), default_flow_style=False)
+    click.echo("KDK config saved to {}.".format(CONFIG_PATH))
+    ctx.invoke(pull)
+    click.echo("KDK init complete.")
+
+
+@kdk.command(help_priority=2)
+@click.pass_context
+def pull(ctx):
+    """Pull"""
+    config = load_config()
+
+    repository = config['image']['repository']
+    tag = config['image']['tag']
+    click.echo("Pulling KDK image [{}:{}]. This may take a moment...".format(repository, tag))
+    DOCKER_CLIENT.images.pull(repository=repository, tag=tag)
+    click.echo("Finished pulling KDK image {}:{}".format(repository, tag))
+
+
+@kdk.command(help_priority=3)
+@click.pass_context
+def start(ctx, repository=None, tag=None):
+    """Start"""
+    config = load_config()
+    if repository:
+        config['image']['repository'] = repository
+    if tag:
+        config['image']['tag'] = tag
+
+    user_kdk_image_pattern = re.compile("{}-kdk:\d+".format(getpass.getuser()))
+    images = DOCKER_CLIENT.images.list()
+    user_kdk_images = []
+    user_kdk_image_tags = []
+    for i in images:
+        if "RepoTags" in i.attrs and i.attrs["RepoTags"]:
+            for image_tag in i.attrs["RepoTags"]:
+                if user_kdk_image_pattern.match(image_tag):
+                    user_kdk_images.append(i)
+                    user_kdk_image_tags.append(image_tag)
+                    break
+    if user_kdk_images:
+        click.echo("It appears KDK user snapshots exist\n{}:".format(user_kdk_image_tags))
+        desired_image = click.prompt('Which KDK image would you start?',
+                                     default="{}:{}".format(config['image']['repository'], config['image']['tag']))
+        config['image']['repository'], config['image']['tag'] = desired_image.split(":")
+    click.echo("Starting KDK container with following config:\n{}".format(yaml.dump(config, default_flow_style=False)))
+    DOCKER_CLIENT.containers.run(
+        image="{}:{}".format(config['image']['repository'], config['image']['tag']),
+        **config['docker'])
+    click.echo("KDK container started")
+
+
+@kdk.command(help_priority=4)
+@click.pass_context
+def attach(ctx):
+    """Attach"""
+    # TODO (rluckie): simplify attaching
+    # cmd = "docker exec -t kdk bash".split()
+    # p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+
+@kdk.command(help_priority=5)
+@click.pass_context
+def snapshot(ctx):
+    """Snapshot"""
+    repository = "{}-kdk".format(getpass.getuser())
+    tag = int(time.time())
+    kdk_container = DOCKER_CLIENT.containers.get('kdk')
+    kdk_container.commit(repository=repository, tag=tag)
+    return {"repository": repository, "tag": tag}
+
+
+@kdk.command(help_priority=6)
+@click.pass_context
+def restart(ctx):
+    """Restart"""
+    # TODO (rluckie): implement
+    click.echo("restart")
+
+
+@kdk.command(help_priority=7)
+@click.pass_context
+def destroy(ctx):
+    """Destroy"""
+    click.confirm("Are you sure you want to destroy the running KDK container and associated image?", abort=True)
+    kdk_container = DOCKER_CLIENT.containers.get('kdk')
+    kdk_container.kill()
+    kdk_container.remove(force=True)
+    click.echo("Destroyed KDK container and associated image")
+
+
+if __name__ == "__main__":
+    kdk()
