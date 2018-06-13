@@ -1,4 +1,4 @@
-KDK (Kubernetes Development Kit) [dockerized]
+Dockerized Kubernetes Development Kit
 ===
 
 A docker image with tools for Kubernetes, Helm and Docker DevOps.
@@ -9,25 +9,31 @@ A docker image with tools for Kubernetes, Helm and Docker DevOps.
 
 ## Getting Started
 
-### Quick Start
+1. Get KDK script
 
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/cisco-sso/k8s-devkit/master/docker/scripts/launch-kdk)
+curl -so kdk https://raw.githubusercontent.com/cisco-sso/dockerized-k8s-devkit/master/scripts/kdk; chmod +x kdk
 ```
-**OR**
-
-### Customized
-```bash
-curl -fL https://raw.githubusercontent.com/cisco-sso/k8s-devkit/master/docker/scripts/launch-kdk && chmod +x launch-kdk
-```
-Customize to fit your needs, then ...
+2. Init KDK
 
 ```bash
-./launch-kdk
+kdk init
 ```
 
-### Provision User
-After the container has started...
+Customize `~/.kdk/config.yaml` to fit your needs.
+
+3. Start KDK container
+```bash
+kdk start
+```
+
+4. Connect to KDK container
+
+```bash
+docker exec -it kdk bash
+```
+
+5. Provision user
 
 ```bash
 provision-user
@@ -36,25 +42,6 @@ provision-user
 ### Usage
 After the `provision-user` script has completed you should be ready to use all the KDK container has to offer.
 
-## Saving State and Reusing KDK Image
-
-You can save the state of your running KDK container by using `docker commit`
-
-Example:
-
-```bash
-docker commit kdk kdk-snapshot
-```
-
-You can use the snapshot image with the `launch-kdk` script by setting `KDK_IMAGE` environment variable
-
-Example
-
-```bash
-export KDK_IMAGE=kdk-snapshot
-./launch-kdk
-
-```
 
 ## Customization
 * **NOTE:**  The `launch-kdk` script uses a set of opinionated dotfiles by default
