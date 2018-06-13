@@ -127,6 +127,13 @@ def pull(ctx):
 @click.pass_context
 def start(ctx, repository=None, tag=None):
     """Start"""
+    kdk_container = DOCKER_CLIENT.containers.get('kdk')
+
+    if kdk_container:
+        click.echo("It appears KDK container is already started.")
+        click.echo("To attach to exisitng container: docker exec -it kdk bash")
+        return
+
     config = load_config()
     if repository:
         config['image']['repository'] = repository
