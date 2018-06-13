@@ -8,6 +8,7 @@ import re
 
 import click
 import docker
+from executor import execute
 import yaml
 
 CONFIG_PATH = os.path.join(os.path.expanduser("~"), '.kdk', "config.yaml")
@@ -102,10 +103,10 @@ def init(ctx):
     config['image']['tag'] = click.prompt('KDK image tag', default="latest")
     config['docker']['environment']['KDK_DOTFILES_REPO'] = click.prompt('dotfiles_repo',
                                                                         default="https://github.com/rtluckie/work-dotfiles.git")
-    config['docker']['environment']['KDK_SHELL'] = click.prompt('shell', default="zsh")
+    config['docker']['environment']['KDK_SHELL'] = click.prompt('shell', default="/usr/local/bin/zsh")
 
     yaml.dump(config, open(CONFIG_PATH, "w"), default_flow_style=False)
-    click.echo("KDK config saved to {}.".format(CONFIG_PATH))
+    click.echo("KDK config saved to {}".format(CONFIG_PATH))
     ctx.invoke(pull)
     click.echo("KDK init complete.")
 
@@ -134,8 +135,7 @@ def start(ctx, repository=None, tag=None):
         pass
 
     if kdk_container:
-        click.echo("It appears KDK container is already started.")
-        click.echo("To attach to exisitng container: docker exec -it kdk bash")
+        click.echo("KDK container is already running.")
         return
 
     config = load_config()
@@ -156,24 +156,22 @@ def start(ctx, repository=None, tag=None):
                     user_kdk_image_tags.append(image_tag)
                     break
     if user_kdk_images:
-        click.echo("It appears KDK user snapshots exist\n{}:".format(user_kdk_image_tags))
-        desired_image = click.prompt('Which KDK image would you start?',
+        click.echo("KDK user snapshots exist\n{}:".format(user_kdk_image_tags))
+        desired_image = click.prompt('Specify KDK image.',
                                      default="{}:{}".format(config['image']['repository'], config['image']['tag']))
         config['image']['repository'], config['image']['tag'] = desired_image.split(":")
     click.echo("Starting KDK container with following config:\n{}".format(yaml.dump(config, default_flow_style=False)))
     DOCKER_CLIENT.containers.run(
         image="{}:{}".format(config['image']['repository'], config['image']['tag']),
         **config['docker'])
-    click.echo("KDK container started")
+    click.echo("KDK container started.\n")
 
 
 @kdk.command(help_priority=4)
 @click.pass_context
 def attach(ctx):
     """Attach"""
-    # TODO (rluckie): simplify attaching
-    # cmd = "docker exec -t kdk bash".split()
-    # p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    execute("docker exec -it kdk bash")
 
 
 @kdk.command(help_priority=5)
@@ -199,7 +197,7 @@ def restart(ctx):
 @click.pass_context
 def destroy(ctx):
     """Destroy"""
-    click.confirm("Are you sure you want to destroy the running KDK container and associated image?", abort=True)
+    click.confirm("Destroy the running KDK container and associated image?", abort=True)
     kdk_container = DOCKER_CLIENT.containers.get('kdk')
     kdk_container.kill()
     kdk_container.remove(force=True)

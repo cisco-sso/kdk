@@ -32,7 +32,7 @@ kdk start
 4. Connect to KDK container
 
 ```bash
-docker exec -it kdk bash
+kdk attach
 ```
 
 5. Provision user
