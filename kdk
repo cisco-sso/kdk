@@ -21,6 +21,7 @@ DEFAULT_CONFIG = {
         "tag": "latest"
     },
     "docker": {
+        "hostname": "kdk",
         "name": "kdk",
         "tty": True,
         "detach": True,
@@ -116,7 +117,7 @@ def start(ctx, interactive=True, repository=None, tag=None):
         pass
     if kdk_container:
         click.echo("KDK container is already running.")
-        return
+        exit(1)
     config = load_config()
     if repository:
         config["image"]["repository"] = repository
@@ -143,21 +144,37 @@ def start(ctx, interactive=True, repository=None, tag=None):
     DOCKER_CLIENT.containers.run(
         image="{}:{}".format(config["image"]["repository"], config["image"]["tag"]),
         **config["docker"])
-    if interactive:
-        click.echo("KDK container started.")
+    ctx.invoke(provision)
 
 
 @kdk.command(help_priority=4)
 @click.pass_context
-def attach(ctx):
-    """Attach to running KDK container"""
+def provision(ctx):
+    """Provision KDK user"""
+    click.echo("Provisioning KDK user (this may take a moment)...")
     try:
-        execute("docker exec -it kdk bash")
+        execute("docker exec -it kdk /usr/local/bin/provision-user")
+    except:
+        click.echo("ERROR: Failed to provision KDK user")
+        raise
+
+
+@kdk.command(help_priority=5)
+@click.pass_context
+def attach(ctx):
+    config = load_config()
+    """Attach to running KDK container"""
+    user = config["docker"]["environment"]["KDK_USERNAME"]
+    workdir = "/home/{user}".format(user=user)
+    shell = config["docker"]["environment"]["KDK_SHELL"]
+    cmd = "docker exec -it --user {user} --workdir {workdir} kdk {shell}".format(**locals())
+    try:
+        execute(cmd)
     except:
         pass
 
 
-@kdk.command(help_priority=5)
+@kdk.command(help_priority=6)
 @click.pass_context
 def snapshot(ctx, interactive=True):
     """Create a snapshot of running KDK container"""
@@ -176,16 +193,17 @@ def snapshot(ctx, interactive=True):
     return {"repository": repository, "tag": tag}
 
 
-@kdk.command(help_priority=6)
+@kdk.command(help_priority=7)
 @click.pass_context
 def prune(ctx):
     """Prune unused KDK images"""
+    running_kdk_container = None
     try:
         running_kdk_container = DOCKER_CLIENT.containers.get("kdk")
         running_kdk_container = running_kdk_container.attrs["Config"]["Image"]
     except:
-        click.echo("ERROR: Failed to prune unused KDK images")
-        raise
+        pass
+
     user_kdk_image_pattern = re.compile("{}-kdk:\d+".format(getpass.getuser()))
     user_kdk_image_tags = []
     images = DOCKER_CLIENT.images.list()
@@ -195,7 +213,10 @@ def prune(ctx):
                 if user_kdk_image_pattern.match(image_tag):
                     user_kdk_image_tags.append(image_tag)
                     break
-    stale_user_kdk_image_tags = [i for i in user_kdk_image_tags if i != running_kdk_container]
+    if running_kdk_container:
+        stale_user_kdk_image_tags = [i for i in user_kdk_image_tags if i != running_kdk_container]
+    else:
+        stale_user_kdk_image_tags = [i for i in user_kdk_image_tags]
     if stale_user_kdk_image_tags:
         click.confirm("Prune unused KDK images?\n{}".format(stale_user_kdk_image_tags), abort=True)
         for tag in stale_user_kdk_image_tags:
@@ -204,7 +225,7 @@ def prune(ctx):
         click.echo("No stale images found.")
 
 
-@kdk.command(help_priority=7)
+@kdk.command(help_priority=8)
 @click.pass_context
 def destroy(ctx, interactive=True):
     """Destroy the running KDK container"""
@@ -220,7 +241,7 @@ def destroy(ctx, interactive=True):
     click.echo("Destroyed KDK container and associated image.")
 
 
-@kdk.command(help_priority=8)
+@kdk.command(help_priority=9)
 @click.pass_context
 def restart(ctx):
     """Restart the running KDK container (useful for config changes)"""
