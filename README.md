@@ -29,21 +29,11 @@ Customize `~/.kdk/config.yaml` to fit your needs.
 kdk start
 ```
 
-4. Connect to KDK container
+4. Connect/reconnect to KDK container
 
 ```bash
 kdk attach
 ```
-
-5. Provision user
-
-```bash
-provision-user
-```
-
-### Usage
-After the `provision-user` script has completed you should be ready to use all the KDK container has to offer.
-
 
 ## Customization
 * **NOTE:**  The `launch-kdk` script uses a set of opinionated dotfiles by default

@@ -31,6 +31,7 @@ RUN yum update --nogpgcheck -y && \
         httpd-tools \
         htop \
         initscripts \
+        kernel-devel \
         kubectl \
         libevent \
         libevent-devel \
@@ -39,6 +40,7 @@ RUN yum update --nogpgcheck -y && \
         luajit \
         luajit-devel \
         lvm2 \
+        man-pages \
         most \
         ncurses \
         ncurses-devel \

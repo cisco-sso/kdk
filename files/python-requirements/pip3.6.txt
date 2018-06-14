@@ -3,12 +3,14 @@ awscli==1.15.6
 boto==2.48.0
 boto3==1.7.6
 docker-compose==1.21.0
+idna==2.6 # requests requires <2.7,>=2.5
 Jinja2==2.9.6
 jinja2-cli[yaml]==0.6.0
 openshift==0.5.0
 passlib==1.7.1
 python-neutronclient==6.8.0
 python-openstackclient==3.14.1
+pyvmomi==6.7.0
 supernova==2.2.0
 virtualenv==15.1.0
 yq==2.5.0
