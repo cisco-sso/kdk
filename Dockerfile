@@ -141,14 +141,17 @@ RUN cd /tmp && \
     chmod +x jq && mv jq /usr/local/bin/
 
 # kops
-RUN curl -Lo kops-1.9.0 https://github.com/kubernetes/kops/releases/download/1.9.0/kops-linux-amd64 && \
-    chmod +x kops-1.9.0 && mv kops-1.9.0 /usr/local/bin/ && \
+RUN curl -Lo kops-1.9.1 https://github.com/kubernetes/kops/releases/download/1.9.1/kops-linux-amd64 && \
+    chmod +x kops-1.9.1 && mv kops-1.9.1 /usr/local/bin/ && \
     curl -Lo kops-1.8.1 https://github.com/kubernetes/kops/releases/download/1.8.1/kops-linux-amd64 && \
     chmod +x kops-1.8.1 && mv kops-1.8.1 /usr/local/bin/
 
 # helm
 RUN curl -L https://storage.googleapis.com/kubernetes-helm/helm-v2.8.2-linux-amd64.tar.gz | tar xz && \
-    chmod +x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/ && \
+    chmod +x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.8.2 && \
+    rm -fr linux-amd64 && \
+    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz | tar xz && \
+    chmod +x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.9.0 && \
     rm -fr linux-amd64
 
 # minio - mc CLI
