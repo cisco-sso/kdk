@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 if [ ! -f "/etc/kdk/provisioned" ]; then
-    mkdir /etc/kdk
-    useradd ${KDK_USERNAME} -m -G wheel -s "${KDK_SHELL}"
+    useradd ${KDK_USERNAME} -m -G wheel -s "${KDK_SHELL}" >> /var/log/kdk-provision.log 2>&1
     chown ${KDK_USERNAME} /home/${KDK_USERNAME}
-    runuser -l ${KDK_USERNAME} -c "yadm clone --bootstrap ${KDK_DOTFILES_REPO}" >> /etc/kdk/provision.log 2>&1
+    runuser -l ${KDK_USERNAME} -c "yadm clone --bootstrap ${KDK_DOTFILES_REPO}" >> /var/log/kdk-provision.log 2>&1
     sudo sed -i 's|^# %wheel|%wheel|g' /etc/sudoers
+    mkdir /etc/kdk
     echo 1 > /etc/kdk/provisioned
 fi
 exit
