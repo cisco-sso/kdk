@@ -161,9 +161,9 @@ def provision(ctx):
 
 @kdk.command(help_priority=5)
 @click.pass_context
-def attach(ctx):
+def exec(ctx):
+    """Exec to running KDK container"""
     config = load_config()
-    """Attach to running KDK container"""
     user = config["docker"]["environment"]["KDK_USERNAME"]
     workdir = "/home/{user}".format(user=user)
     shell = config["docker"]["environment"]["KDK_SHELL"]
@@ -203,7 +203,6 @@ def prune(ctx):
         running_kdk_container = running_kdk_container.attrs["Config"]["Image"]
     except:
         pass
-
     user_kdk_image_pattern = re.compile("{}-kdk:\d+".format(getpass.getuser()))
     user_kdk_image_tags = []
     images = DOCKER_CLIENT.images.list()

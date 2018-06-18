@@ -29,10 +29,10 @@ Customize `~/.kdk/config.yaml` to fit your needs.
 kdk start
 ```
 
-4. Connect/reconnect to KDK container
+4. Exec to KDK container
 
 ```bash
-kdk attach
+kdk exec
 ```
 
 ## Customization
