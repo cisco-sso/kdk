@@ -235,7 +235,6 @@ def destroy(ctx, interactive=True):
     except:
         click.echo("ERROR: Failed to destroy KDK. Confirm the container is running.")
         exit(1)
-    kdk_container.kill()
     kdk_container.remove(force=True)
     click.echo("Destroyed KDK container and associated image.")
 
