@@ -1,0 +1,194 @@
+FROM debian:9.4
+
+LABEL maintainer="rluckie@cisco.com"
+
+RUN apt-get -y update && apt-get -y install \
+        ansible \
+        apache2-utils \
+        apt-transport-https \
+        autoconf \
+        bc \
+        bridge-utils \
+        build-essential \
+        ca-certificates \
+        colordiff \
+        ctags \
+        curl \
+        dc \
+        dhcpdump \
+        dialog \
+        dnsutils \
+        dos2unix \
+        emacs25-nox \
+        gettext \
+        gnupg \
+        gnupg2 \
+        htop \
+        less \
+        libcurl4-openssl-dev \
+        libncurses5-dev \
+        libz-dev \
+        man \
+        moreutils \
+        nmap \
+        ntp \
+        ntpdate \
+        openssh-server \
+        perl \
+        python \
+        python-dev \
+        python3 \
+        python3-dev \
+        qemu-user-static \
+        ruby \
+        screen \
+        socat \
+        software-properties-common \
+        sudo \
+        tcl \
+        telnet \
+        traceroute \
+        tree \
+        unzip \
+        wget \
+        whois \
+        xauth
+
+
+# git (needs to build first as a dependency)
+RUN cd /tmp && curl -L https://github.com/git/git/archive/v2.17.0.tar.gz | tar xz && \
+    cd git-* && \
+    make configure && \
+    ./configure --prefix=/usr/local && \
+    make && sudo make install && \
+    cd .. && rm -fr git-*
+
+# direnv
+RUN cd /tmp && \
+    curl -Lo direnv https://github.com/direnv/direnv/releases/download/v2.15.2/direnv.linux-amd64 && \
+    chmod +x direnv && mv direnv /usr/local/bin
+
+# easy-rsa
+RUN curl -L https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.4/EasyRSA-3.0.4.tgz | tar xz && \
+    chmod +x EasyRSA-* && mv EasyRSA-* /usr/local/bin/easyrsa
+
+# golang
+RUN curl -L https://dl.google.com/go/go1.10.1.linux-amd64.tar.gz | tar -C /usr/local -xz
+
+# google cloud sdk
+RUN export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" && \
+    echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
+    apt-get update -y && apt-get install google-cloud-sdk -y
+
+# helm
+RUN curl -L https://storage.googleapis.com/kubernetes-helm/helm-v2.8.2-linux-amd64.tar.gz | tar xz && \
+    chmod +x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.8.2 && \
+    rm -fr linux-amd64 && \
+    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz | tar xz && \
+    chmod +x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.9.0 && \
+    rm -fr linux-amd64
+
+# jq
+RUN cd /tmp && \
+    curl -Lo jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 && \
+    chmod +x jq && mv jq /usr/local/bin/
+
+# kops
+RUN curl -Lo kops-1.9.1 https://github.com/kubernetes/kops/releases/download/1.9.1/kops-linux-amd64 && \
+    chmod +x kops-1.9.1 && mv kops-1.9.1 /usr/local/bin/ && \
+    curl -Lo kops-1.8.1 https://github.com/kubernetes/kops/releases/download/1.8.1/kops-linux-amd64 && \
+    chmod +x kops-1.8.1 && mv kops-1.8.1 /usr/local/bin/
+
+# kubectl
+RUN curl -fLo /usr/local/bin/kubectl \
+    https://storage.googleapis.com/kubernetes-release/release/v1.10.3/bin/linux/amd64/kubectl && \
+    chmod a+x /usr/local/bin/kubectl
+
+# minikube
+RUN curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.26.1/minikube-linux-amd64 && \
+    chmod +x minikube && sudo mv minikube /usr/local/bin/
+
+# minio - mc CLI
+RUN cd /tmp && \
+    curl -LO https://dl.minio.io/client/mc/release/linux-amd64/mc && \
+    chmod +x mc && mv mc /usr/local/bin
+
+# terraform
+RUN cd /tmp && \
+    curl -Lo terraform.zip https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip && \
+    unzip terraform.zip && chmod +x terraform && mv terraform /usr/local/bin && rm -f terraform.zip
+
+# testssl
+RUN git clone --depth 1 https://github.com/drwetter/testssl.sh.git /usr/local/share/testssl.sh && \
+    ln -s /usr/local/share/testssl.sh/testssl.sh /usr/local/bin/testssl && chmod +x /usr/local/bin/testssl
+
+# tmux
+RUN cd /tmp && curl -L https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz | tar xz && \
+    cd libevent-* && \
+    ./configure && make && sudo make install && \
+    cd .. && rm -fr libevent-* && \
+    cd /tmp && curl -L https://github.com/tmux/tmux/releases/download/2.7/tmux-2.7.tar.gz | tar xz && \
+    cd tmux-* && \
+    ./configure --prefix=/usr/local && \
+    make && sudo make install && \
+    cd .. && rm -fr tmux-*
+
+# vim
+RUN cd /tmp && curl -L https://github.com/vim/vim/archive/v8.0.1736.tar.gz | tar xz && \
+    cd vim-* && \
+    ./configure \
+        --with-features=huge \
+        --enable-cscope \
+        --enable-rubyinterp \
+        --enable-luainterp \
+        --enable-perlinterp \
+        --enable-pythoninterp \
+        --enable-python3interp \
+        --enable-tclinterp \
+        --enable-multibyte \
+        --prefix=/usr/local && \
+    make VIMRUNTIMEDIR=/usr/local/share/vim/vim80 && \
+    sudo make install && \
+    cd .. && rm -fr vim-*
+
+# yadm
+RUN curl -fLo /usr/local/bin/yadm https://github.com/TheLocehiliosan/yadm/raw/master/yadm && \
+    chmod a+x /usr/local/bin/yadm
+
+# zsh
+RUN cd /tmp && curl -L https://sourceforge.net/projects/zsh/files/zsh/5.5.1/zsh-5.5.1.tar.gz/download | tar xz && \
+    cd zsh-* && \
+    ./configure --with-tcsetpgrp --prefix=/usr/local && make && sudo make install && \
+    sudo echo "/usr/local/bin/zsh" >> /etc/shells && \
+    cd .. && rm -fr zsh-*
+
+
+# docker
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add - && \
+   add-apt-repository \
+     "deb [arch=amd64] https://download.docker.com/linux/debian \
+     $(lsb_release -cs) \
+     stable" && \
+   apt-get -y update && \
+   apt-get -y install docker-ce
+
+COPY files/python-requirements/** /tmp/python-requirements/
+COPY files/provision-user.debian /usr/local/bin/provision-user
+COPY files/start-dockerd /usr/local/bin/start-dockerd
+COPY files/awake /usr/local/bin/awake
+
+RUN cd /tmp && \
+      curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+      python2 get-pip.py && \
+      python3 get-pip.py && \
+      rm get-pip.py && \
+      pip2.7 install -U setuptools && \
+      pip3.5 install -U setuptools && \
+      pip2.7 install -r /tmp/python-requirements/pip2.7.txt --no-cache-dir --ignore-installed six && \
+      pip3.5 install -r /tmp/python-requirements/pip3.6.txt --no-cache-dir
+
+# Set no password for sudo users
+RUN sed -i 's@\%sudo\tALL=(ALL:ALL) ALL@\%sudo\tALL=(ALL) NOPASSWD:ALL@g' /etc/sudoers
+
+CMD ["/bin/bash"]
