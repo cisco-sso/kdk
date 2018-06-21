@@ -84,10 +84,10 @@ def init(ctx):
     config = DEFAULT_CONFIG
     config["docker"]["environment"]["KDK_USERNAME"] = click.prompt("KDK username", default=getpass.getuser())
     config["image"]["repository"] = click.prompt("KDK image repository", default="ciscosso/kdk")
-    config["image"]["tag"] = click.prompt("KDK image tag", default="latest")
+    config["image"]["tag"] = click.prompt("KDK image tag", default="debian-9.4-latest")
     config["docker"]["environment"]["KDK_DOTFILES_REPO"] = click.prompt("dotfiles_repo",
-                                                                        default="https://github.com/rtluckie/work-dotfiles.git")
-    config["docker"]["environment"]["KDK_SHELL"] = click.prompt("shell", default="/usr/local/bin/zsh")
+                                                                        default="https://github.com/cisco-sso/yadm-dotfiles.git")
+    config["docker"]["environment"]["KDK_SHELL"] = click.prompt("shell", default="/bin/bash")
     yaml.dump(config, open(CONFIG_PATH, "w"), default_flow_style=False)
     click.echo("KDK config saved to {}".format(CONFIG_PATH))
     ctx.invoke(pull)
