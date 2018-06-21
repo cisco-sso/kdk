@@ -10,5 +10,5 @@ if [ ! -f "/etc/kdk/provisioned" ]; then
     mkdir /etc/kdk
     echo 1 > /etc/kdk/provisioned
 fi
-exit
-exit
+
+exit 0

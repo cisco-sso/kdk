@@ -4,7 +4,7 @@ LABEL maintainer="rluckie@cisco.com"
 
 COPY files/yum.repos.d/** /etc/yum.repos.d/
 COPY files/python-requirements/** /tmp/python-requirements/
-COPY files/provision-user /usr/local/bin/provision-user
+COPY files/provision-user.centos7 /usr/local/bin/provision-user
 COPY files/start-dockerd /usr/local/bin/start-dockerd
 COPY files/awake /usr/local/bin/awake
 
