@@ -3,7 +3,6 @@ FROM debian:9.4
 LABEL maintainer="rluckie@cisco.com"
 
 RUN apt-get -y update && apt-get -y install \
-        ansible \
         apache2-utils \
         apt-transport-https \
         autoconf \
@@ -26,6 +25,7 @@ RUN apt-get -y update && apt-get -y install \
         htop \
         less \
         libcurl4-openssl-dev \
+        libevent-2.0-5 \
         libncurses5-dev \
         libz-dev \
         man \
@@ -52,7 +52,8 @@ RUN apt-get -y update && apt-get -y install \
         unzip \
         wget \
         whois \
-        xauth
+        xauth && \
+   apt-get -y clean && apt-get -y autoremove
 
 
 # git (needs to build first as a dependency)
@@ -75,7 +76,8 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
      $(lsb_release -cs) \
      stable" && \
    apt-get -y update && \
-   apt-get -y install docker-ce
+   apt-get -y install docker-ce && \
+   apt-get -y clean && apt-get -y autoremove
 
 # easy-rsa
 RUN curl -L https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.4/EasyRSA-3.0.4.tgz | tar xz && \
