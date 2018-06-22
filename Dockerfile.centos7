@@ -190,4 +190,11 @@ RUN pip2.7 install -U pip && pip3.6 install -U pip && \
     pip2.7 install -r /tmp/python-requirements/pip2.7.txt --no-cache-dir --ignore-installed six && \
     pip3.6 install -r /tmp/python-requirements/pip3.6.txt --no-cache-dir
 
-CMD ["/bin/bash"]
+# Configure openssh-server
+
+RUN yum -y install openssh-server && \
+     sed -i 's/#Port 22/Port 2022/' /etc/ssh/sshd_config
+
+EXPOSE 2022
+
+CMD ["/usr/bin/bash", "-c", "if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then /usr/bin/ssh-keygen -A; fi; /usr/sbin/sshd -D"]
