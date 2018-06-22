@@ -2,6 +2,7 @@ FROM centos:7
 
 LABEL maintainer="rluckie@cisco.com"
 
+COPY files/yum.repos.d/** /etc/yum.repos.d/
 RUN yum update --nogpgcheck -y && \
     yum install --nogpgcheck -y epel-release deltarpm yum-utils https://centos7.iuscommunity.org/ius-release.rpm && \
     yum group install --nogpgcheck -y "Development Tools" && \
@@ -188,14 +189,12 @@ RUN pip2.7 install -U pip && \
     pip2.7 install -r /tmp/python-requirements/pip2.7.txt --no-cache-dir --ignore-installed six && \
     pip3.6 install -r /tmp/python-requirements/pip3.6.txt --no-cache-dir
 
-# Configure openssh-server
-RUN sed -i 's/#Port 22/Port 2022/' /etc/ssh/sshd_config
-
-COPY files/yum.repos.d/** /etc/yum.repos.d/
-COPY files/provision-user.centos7 /usr/local/bin/provision-user
+COPY files/provision-user /usr/local/bin/provision-user
 COPY files/start-dockerd /usr/local/bin/start-dockerd
 COPY files/awake /usr/local/bin/awake
 
+# Configure openssh-server
+RUN sed -i 's/#Port 22/Port 2022/' /etc/ssh/sshd_config
 EXPOSE 2022
 
 CMD ["/usr/bin/bash", "-c", "if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then /usr/bin/ssh-keygen -A; fi; /usr/sbin/sshd -D"]
