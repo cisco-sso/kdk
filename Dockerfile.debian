@@ -186,17 +186,12 @@ RUN cd /tmp && \
     pip2.7 install -r /tmp/python-requirements/pip2.7.txt --no-cache-dir --ignore-installed six && \
     pip3.5 install -r /tmp/python-requirements/pip3.6.txt --no-cache-dir
 
-# Set no password for sudo users
-RUN sed -i 's@\%sudo\tALL=(ALL:ALL) ALL@\%sudo\tALL=(ALL) NOPASSWD:ALL@g' /etc/sudoers
-
-# Configure openssh-server
-RUN mkdir /var/run/sshd && \
-     sed -i 's/#Port 22/Port 2022/' /etc/ssh/sshd_config
-
-COPY files/provision-user.debian /usr/local/bin/provision-user
+COPY files/provision-user /usr/local/bin/provision-user
 COPY files/start-dockerd /usr/local/bin/start-dockerd
 COPY files/awake /usr/local/bin/awake
 
+# Configure openssh-server
+RUN sed -i 's/#Port 22/Port 2022/' /etc/ssh/sshd_config
 EXPOSE 2022
 
-CMD ["/usr/sbin/sshd", "-D"]
+CMD ["/bin/bash", "-c", "mkdir -p /var/run/sshd; /usr/sbin/sshd -D"]
