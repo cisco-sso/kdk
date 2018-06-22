@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-set -x
-
 OS=$(grep "^ID" /etc/os-release | cut -d= -f2)  # debian | centos
 SUDO_GROUP=$([ "$OS" == "debian" ] && echo "sudo" || echo "wheel")
 
