@@ -99,7 +99,7 @@ def init(ctx):
     config["docker"]["volumes"][os.path.dirname(CONFIG_SSH_KEY)+'/id_rsa.pub'] = {
         'bind': "/home/{}/.ssh/authorized_keys".format(
             config["docker"]["environment"]["KDK_USERNAME"]),
-        'mode': 'ro'
+        'mode': 'rw'
     }
 
     # Write the config to file
