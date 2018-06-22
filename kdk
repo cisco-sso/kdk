@@ -139,7 +139,7 @@ def pull(ctx):
 
 @kdk.command(help_priority=3)
 @click.pass_context
-def start(ctx, interactive=True, repository=None, tag=None):
+def up(ctx, interactive=True, repository=None, tag=None):
     """Start a KDK container"""
     kdk_container = None
     try:
@@ -192,7 +192,7 @@ def provision(ctx):
 
 @kdk.command(help_priority=5)
 @click.pass_context
-def exec(ctx):
+def ssh(ctx):
     """SSH to running KDK container"""
     config = load_config()
     user = config["docker"]["environment"]["KDK_USERNAME"]
