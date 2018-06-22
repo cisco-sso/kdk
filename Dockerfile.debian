@@ -68,6 +68,15 @@ RUN cd /tmp && \
     curl -Lo direnv https://github.com/direnv/direnv/releases/download/v2.15.2/direnv.linux-amd64 && \
     chmod +x direnv && mv direnv /usr/local/bin
 
+# docker
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add - && \
+   add-apt-repository \
+     "deb [arch=amd64] https://download.docker.com/linux/debian \
+     $(lsb_release -cs) \
+     stable" && \
+   apt-get -y update && \
+   apt-get -y install docker-ce
+
 # easy-rsa
 RUN curl -L https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.4/EasyRSA-3.0.4.tgz | tar xz && \
     chmod +x EasyRSA-* && mv EasyRSA-* /usr/local/bin/easyrsa
@@ -163,30 +172,17 @@ RUN cd /tmp && curl -L https://sourceforge.net/projects/zsh/files/zsh/5.5.1/zsh-
     sudo echo "/usr/local/bin/zsh" >> /etc/shells && \
     cd .. && rm -fr zsh-*
 
-
-# docker
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add - && \
-   add-apt-repository \
-     "deb [arch=amd64] https://download.docker.com/linux/debian \
-     $(lsb_release -cs) \
-     stable" && \
-   apt-get -y update && \
-   apt-get -y install docker-ce
-
+# install python-based utils and libs
 COPY files/python-requirements/** /tmp/python-requirements/
-COPY files/provision-user.debian /usr/local/bin/provision-user
-COPY files/start-dockerd /usr/local/bin/start-dockerd
-COPY files/awake /usr/local/bin/awake
-
 RUN cd /tmp && \
-      curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-      python2 get-pip.py && \
-      python3 get-pip.py && \
-      rm get-pip.py && \
-      pip2.7 install -U setuptools && \
-      pip3.5 install -U setuptools && \
-      pip2.7 install -r /tmp/python-requirements/pip2.7.txt --no-cache-dir --ignore-installed six && \
-      pip3.5 install -r /tmp/python-requirements/pip3.6.txt --no-cache-dir
+    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+    python2 get-pip.py && \
+    python3 get-pip.py && \
+    rm get-pip.py && \
+    pip2.7 install -U setuptools && \
+    pip3.5 install -U setuptools && \
+    pip2.7 install -r /tmp/python-requirements/pip2.7.txt --no-cache-dir --ignore-installed six && \
+    pip3.5 install -r /tmp/python-requirements/pip3.6.txt --no-cache-dir
 
 # Set no password for sudo users
 RUN sed -i 's@\%sudo\tALL=(ALL:ALL) ALL@\%sudo\tALL=(ALL) NOPASSWD:ALL@g' /etc/sudoers
@@ -194,6 +190,10 @@ RUN sed -i 's@\%sudo\tALL=(ALL:ALL) ALL@\%sudo\tALL=(ALL) NOPASSWD:ALL@g' /etc/s
 # Configure openssh-server
 RUN mkdir /var/run/sshd && \
      sed -i 's/#Port 22/Port 2022/' /etc/ssh/sshd_config
+
+COPY files/provision-user.debian /usr/local/bin/provision-user
+COPY files/start-dockerd /usr/local/bin/start-dockerd
+COPY files/awake /usr/local/bin/awake
 
 EXPOSE 2022
 
