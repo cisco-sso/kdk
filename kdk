@@ -5,6 +5,7 @@ import getpass
 import os
 import time
 import re
+import sys
 
 import click
 import docker
@@ -12,6 +13,7 @@ from executor import execute
 import yaml
 
 CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".kdk", "config.yaml")
+CONFIG_SSH_KEY = os.path.join(os.path.expanduser("~"), ".kdk", "ssh", "id_rsa")
 
 DOCKER_CLIENT = docker.from_env()
 
@@ -27,7 +29,10 @@ DEFAULT_CONFIG = {
         "detach": True,
         "stdin_open": True,
         "volumes": {},
-        "environment": {}
+        "environment": {},
+        "ports": {
+            '2022': '2022',
+        },
     }
 }
 
@@ -77,6 +82,7 @@ def init(ctx):
     """Init KDK - creates kdk config and pull latest image"""
     if not os.path.exists(os.path.dirname(CONFIG_PATH)):
         os.makedirs(os.path.dirname(CONFIG_PATH))
+
     if os.path.isfile(CONFIG_PATH):
         click.confirm(
             "A KDK config file already exists [{}].\nDo you want to continue and overwrite existing config?".format(
@@ -88,9 +94,34 @@ def init(ctx):
     config["docker"]["environment"]["KDK_DOTFILES_REPO"] = click.prompt("dotfiles_repo",
                                                                         default="https://github.com/cisco-sso/yadm-dotfiles.git")
     config["docker"]["environment"]["KDK_SHELL"] = click.prompt("shell", default="/bin/bash")
+
+    # Volume mount the host ssh-pub-key to the guest authorized_keys
+    config["docker"]["volumes"][os.path.dirname(CONFIG_SSH_KEY)+'/id_rsa.pub'] = {
+        'bind': "/home/{}/.ssh/authorized_keys".format(
+            config["docker"]["environment"]["KDK_USERNAME"]),
+        'mode': 'ro'
+    }
+
+    # Write the config to file
     yaml.dump(config, open(CONFIG_PATH, "w"), default_flow_style=False)
     click.echo("KDK config saved to {}".format(CONFIG_PATH))
+
+    # Pull the image
     ctx.invoke(pull)
+
+    # Ensure an ssh key has been generated
+    if os.path.isfile(CONFIG_SSH_KEY) is False:
+        os.makedirs(os.path.dirname(CONFIG_SSH_KEY), exist_ok=True)
+        cmd='docker run --rm -v {}:/tmp/ssh {}:{} bash -c \'echo -e "\\n\\n\\n" | /usr/bin/ssh-keygen -b 4096 -N "" -f /tmp/ssh/id_rsa\''.format(
+            os.path.dirname(CONFIG_SSH_KEY),
+            config["image"]["repository"],
+            config["image"]["tag"],
+        )
+        try:
+            execute(cmd)
+        except:
+            pass
+
     click.echo("KDK init complete.")
 
 
@@ -162,13 +193,13 @@ def provision(ctx):
 @kdk.command(help_priority=5)
 @click.pass_context
 def exec(ctx):
-    """Exec to running KDK container"""
+    """SSH to running KDK container"""
     config = load_config()
     user = config["docker"]["environment"]["KDK_USERNAME"]
-    workdir = "/home/{user}".format(user=user)
-    shell = config["docker"]["environment"]["KDK_SHELL"]
-    cmd = "docker exec -it --user {user} --workdir {workdir} kdk {shell}".format(**locals())
+
+    cmd = "ssh {user}@localhost -A -p 2022 -i ~/.kdk/ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ".format(**locals())
     try:
+        click.echo(cmd)
         execute(cmd)
     except:
         pass

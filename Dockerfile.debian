@@ -191,4 +191,10 @@ RUN cd /tmp && \
 # Set no password for sudo users
 RUN sed -i 's@\%sudo\tALL=(ALL:ALL) ALL@\%sudo\tALL=(ALL) NOPASSWD:ALL@g' /etc/sudoers
 
-CMD ["/bin/bash"]
+# Configure openssh-server
+RUN mkdir /var/run/sshd && \
+     sed -i 's/#Port 22/Port 2022/' /etc/ssh/sshd_config
+
+EXPOSE 2022
+
+CMD ["/usr/sbin/sshd", "-D"]
