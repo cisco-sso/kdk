@@ -23,15 +23,21 @@ DEFAULT_CONFIG = {
         "tag": "latest"
     },
     "docker": {
+        "detach": True,
+        "environment": {},
         "hostname": "kdk",
         "name": "kdk",
-        "tty": True,
-        "detach": True,
+        "privileged": True,
         "stdin_open": True,
-        "volumes": {},
-        "environment": {},
+        "tty": True,
         "ports": {
             '2022': '2022',
+        },
+        "volumes": {
+            '/var/run/docker.sock': {
+                'bind': '/var/run/docker.sock',
+                'mode': 'rw',
+            },
         },
     }
 }
