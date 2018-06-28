@@ -2,6 +2,9 @@ FROM debian:9.4
 
 LABEL maintainer="rluckie@cisco.com"
 
+#######################################
+# Install OS packages
+
 RUN apt-get -y update && apt-get -y install \
         apache2-utils \
         apt-transport-https \
@@ -55,6 +58,9 @@ RUN apt-get -y update && apt-get -y install \
         xauth && \
    apt-get -y clean && apt-get -y autoremove
 
+#######################################
+# Install/Build apps that are not provided by the OS packages.
+#   We sometimes install or build from source to get specific versions.
 
 # git (needs to build first as a dependency)
 RUN cd /tmp && curl -L https://github.com/git/git/archive/v2.17.0.tar.gz | tar xz && \
@@ -223,9 +229,9 @@ RUN /usr/local/go/bin/go get github.com/cisco-sso/mh && \
 # yq
 RUN /usr/local/go/bin/go get github.com/mikefarah/yq
 
-
 #######################################
-# install python-based utils and libs
+# Install python-based utils and libs
+
 COPY files/python-requirements/** /tmp/python-requirements/
 RUN cd /tmp && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
@@ -237,12 +243,60 @@ RUN cd /tmp && \
     pip2.7 install -r /tmp/python-requirements/pip2.7.txt --no-cache-dir --ignore-installed six && \
     pip3.5 install -r /tmp/python-requirements/pip3.6.txt --no-cache-dir
 
+#######################################
+# Configure systemd and disable a bunch of systemd.units
+#  Mostly taken from:
+#  https://github.com/dramaturg/docker-debian-systemd/blob/master/Dockerfile
+
+RUN cd /lib/systemd/system/sysinit.target.wants/ && \
+		ls | grep -v systemd-tmpfiles-setup.service | xargs rm -f && \
+		rm -f /lib/systemd/system/sockets.target.wants/*udev* && \
+		systemctl mask -- \
+			tmp.mount \
+			etc-hostname.mount \
+			etc-hosts.mount \
+			etc-resolv.conf.mount \
+			-.mount \
+			swap.target \
+			getty.target \
+			getty-static.service \
+			dev-mqueue.mount \
+			cgproxy.service \
+			systemd-tmpfiles-setup-dev.service \
+			systemd-remount-fs.service \
+			systemd-ask-password-wall.path \
+			systemd-logind.service && \
+                systemctl mask -- \
+                        cron.service \
+                        dbus.service \
+                        exim4.service \
+                        ntp.service && \
+		systemctl set-default multi-user.target || true
+RUN sed -ri /etc/systemd/journald.conf \
+			-e 's!^#?Storage=.*!Storage=volatile!'
+
+#######################################
+# Install local files
+
 COPY files/provision-user /usr/local/bin/provision-user
 COPY files/start-dockerd /usr/local/bin/start-dockerd
 COPY files/awake /usr/local/bin/awake
 
+#######################################
 # Configure openssh-server
+
 RUN sed -i 's/#Port 22/Port 2022/' /etc/ssh/sshd_config
 EXPOSE 2022
 
-CMD ["/bin/bash", "-c", "mkdir -p /var/run/sshd; /usr/sbin/sshd -D"]
+#######################################
+# Configure docker daemon to support docker in docker
+
+RUN mkdir /etc/docker && echo '{\n\
+    "storage-driver": "vfs"\n\
+}\n' > /etc/docker/daemon.json
+
+
+#######################################
+# Ensure systemd starts, which subsequently starts ssh and docker
+
+CMD ["/lib/systemd/systemd"]
