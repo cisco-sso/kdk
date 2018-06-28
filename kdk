@@ -33,12 +33,7 @@ DEFAULT_CONFIG = {
         "ports": {
             '2022': '2022',
         },
-        "volumes": {
-            '/var/run/docker.sock': {
-                'bind': '/var/run/docker.sock',
-                'mode': 'rw',
-            },
-        },
+        "volumes": {},
     }
 }
 
