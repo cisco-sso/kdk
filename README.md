@@ -19,20 +19,20 @@ curl -so kdk https://raw.githubusercontent.com/cisco-sso/dockerized-k8s-devkit/m
 2. Init KDK
 
 ```bash
-kdk init
+./kdk init
 ```
 
 Customize `~/.kdk/config.yaml` to fit your needs.
 
 3. Start KDK container
 ```bash
-kdk start
+./kdk up
 ```
 
 4. Exec to KDK container
 
 ```bash
-kdk exec
+./kdk ssh
 ```
 
 ## Customization
