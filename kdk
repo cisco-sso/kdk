@@ -286,7 +286,7 @@ def restart(ctx):
         click.echo("ERROR: Failed to restart -- unable to snapshot running KDK container")
         exit(1)
     ctx.invoke(destroy, interactive=False)
-    ctx.invoke(start, interactive=False, **_snapshot)
+    ctx.invoke(up, interactive=False, **_snapshot)
     click.echo("KDK container restarted.")
     ctx.invoke(prune)
 
