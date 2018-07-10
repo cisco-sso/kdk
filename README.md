@@ -5,8 +5,8 @@ A docker image with tools for Kubernetes, Helm and Docker DevOps.
 
 ## Dependencies
 
-* Docker for Mac
-* Python 3.x
+* [Docker for Mac](https://docs.docker.com/docker-for-mac/)
+* [Python 3.x](http://docs.python-guide.org/en/latest/starting/install3/osx/) and [Virtualenv](https://virtualenv.pypa.io/en/stable/)
 * [Python requirements](requirements.txt)
 
 ## Getting Started
