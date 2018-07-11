@@ -136,7 +136,7 @@ RUN curl -Lo kops-1.9.1 https://github.com/kubernetes/kops/releases/download/1.9
     chmod +x kops-1.9.1 && mv kops-1.9.1 /usr/local/bin/ && \
     curl -Lo kops-1.8.1 https://github.com/kubernetes/kops/releases/download/1.8.1/kops-linux-amd64 && \
     chmod +x kops-1.8.1 && mv kops-1.8.1 /usr/local/bin/ && \
-    ln -s /usr/local/bin/kops-1.8.1 /usr/local/bin/kops
+    ln -s /usr/local/bin/kops-1.9.1 /usr/local/bin/kops
 
 # kubectl
 RUN curl -fLo /usr/local/bin/kubectl-1.10.5 \
