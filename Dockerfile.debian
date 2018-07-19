@@ -211,6 +211,9 @@ RUN cd /tmp && curl -L https://sourceforge.net/projects/zsh/files/zsh/5.5.1/zsh-
     sudo echo "/usr/local/bin/zsh" >> /etc/shells && \
     cd .. && rm -fr zsh-*
 
+#######################################
+# Debian sets the /bin/sh symlink to dash per default. Since dash doesn't seem to support the -o pipefail option we need to change it do bash
+RUN rm /bin/sh && ln -s bash /bin/sh && chmod 0777 /bin/sh
 
 #######################################
 # go get installs
