@@ -1,4 +1,4 @@
 click==6.7
 docker==3.3.0
 executor==20.0
-PyYAML==3.12
+PyYAML==3.13
