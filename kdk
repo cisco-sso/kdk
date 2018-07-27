@@ -113,7 +113,9 @@ def init(ctx):
     # Ensure an ssh key has been generated
     if os.path.isfile(CONFIG_SSH_KEY) is False:
         os.makedirs(os.path.dirname(CONFIG_SSH_KEY), exist_ok=True)
-        cmd='docker run --rm -v {}:/tmp/ssh {}:{} bash -c \'echo -e "\\n\\n\\n" | /usr/bin/ssh-keygen -b 4096 -N "" -f /tmp/ssh/id_rsa\''.format(
+        cmd='docker run --rm --user={}:{} -v /etc/passwd:/etc/passwd -v {}:/tmp/ssh {}:{} bash -c \'echo -e "\\n\\n\\n" | /usr/bin/ssh-keygen -b 4096 -N "" -f /tmp/ssh/id_rsa\''.format(
+            os.getuid(),
+            os.getgid(),
             os.path.dirname(CONFIG_SSH_KEY),
             config["image"]["repository"],
             config["image"]["tag"],
