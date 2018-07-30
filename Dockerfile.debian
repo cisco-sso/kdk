@@ -92,6 +92,11 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
    apt-get -y install docker-ce && \
    apt-get -y clean && apt-get -y autoremove
 
+# drone
+RUN cd /tmp && \
+    curl -L https://github.com/drone/drone-cli/releases/download/v0.8.5/drone_linux_amd64.tar.gz | tar xz && \
+    chmod +x drone && mv drone /usr/local/bin
+
 # easy-rsa
 RUN curl -L https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.4/EasyRSA-3.0.4.tgz | tar xz && \
     chmod +x EasyRSA-* && mv EasyRSA-* /usr/local/bin/easyrsa
