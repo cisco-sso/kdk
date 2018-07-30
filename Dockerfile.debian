@@ -1,4 +1,4 @@
-FROM debian:9.4
+FROM debian:9.5
 
 LABEL maintainer="rluckie@cisco.com"
 
@@ -161,6 +161,15 @@ RUN curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.26.1/m
 RUN cd /tmp && \
     curl -LO https://dl.minio.io/client/mc/release/linux-amd64/mc && \
     chmod +x mc && mv mc /usr/local/bin
+
+# redis-benchmark, redis-cli
+RUN cd /tmp && \
+    curl -LO http://download.redis.io/releases/redis-4.0.10.tar.gz && \
+    mkdir -p redis && \
+    tar --strip-components=1 -C redis -xzf redis-4.0.10.tar.gz && \
+    make -C redis && \
+    cp redis/src/redis-cli redis/src/redis-benchmark /usr/local/bin &&  \
+    rm -rf redis
 
 # terraform
 RUN cd /tmp && \
