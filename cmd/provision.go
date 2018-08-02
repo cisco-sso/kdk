@@ -15,9 +15,9 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+	"github.com/sirupsen/logrus"
+	"github.com/codeskyblue/go-sh"
 )
 
 var provisionCmd = &cobra.Command{
@@ -25,7 +25,15 @@ var provisionCmd = &cobra.Command{
 	Short: "Provision KDK user",
 	Long: `Provision KDK user`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("provision called")
+		logger := logrus.New().WithField("command", "provision")
+
+		// TODO (rluckie): replace sh docker sdk
+		out, err := sh.Command("docker", "exec", "kdk", "/usr/local/bin/provision-user").Output()
+		if err != nil {
+			logger.WithField("error", err).Fatal("Failed to provision KDK user", err, out)
+			panic(err)
+		}
+		logger.Info("Successfully provisioned KDK user")
 	},
 }
 
