@@ -15,31 +15,45 @@
 package cmd
 
 import (
-	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/client"
+	"golang.org/x/net/context"
 )
 
-// pullCmd represents the pull command
 var pullCmd = &cobra.Command{
 	Use:   "pull",
 	Short: "Pull KDK docker image",
-	Long: `Pull the latest/configured KDK docker image`,
+	Long:  `Pull the latest/configured KDK docker image`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("pull called")
+		logger := logrus.New().WithField("command", "pull")
+
+		imageCoordinates := []string{viper.Get("image.repository").(string), viper.Get("image.tag").(string)}
+
+		ctx := context.Background()
+		cli, err := client.NewEnvClient()
+
+		if err != nil {
+			logger.WithField("error", err).Fatal("Failed to create docker client")
+		}
+
+		logger.Info("Pulling KDK image. This may take a few minutes...")
+
+		out, err := cli.ImagePull(ctx, strings.Join(imageCoordinates, ":"), types.ImagePullOptions{})
+		if err != nil {
+			logger.WithField("error", err).Fatal("Failed to pull KDK image")
+			panic(err)
+		}
+		defer out.Close()
+
+		logger.Info("Successfully pulled KDK image.")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(pullCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// pullCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// pullCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

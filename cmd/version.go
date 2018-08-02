@@ -15,20 +15,23 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var restartCmd = &cobra.Command{
-	Use:   "restart",
-	Short: "Restart the running KDK container (useful for config changes)",
-	Long: `Restart the running KDK container (useful for config changes)`,
+// versionCmd represents the version command
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Print version information.",
+	Long:  `Print version information.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("restart called")
+		logrus.WithFields(logrus.Fields{
+			"command": "version",
+			"version": versionNumber,
+		}).Info("kdk")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(restartCmd)
+	rootCmd.AddCommand(versionCmd)
 }
