@@ -89,7 +89,6 @@ func initConfig() {
 		log.WithFields(log.Fields{
 			"configFileUsed": viper.ConfigFileUsed(),
 			"err":            err,
-		}).Warnln("Failed to load mh config.",
-			"Please consider exporting environment variable: MH_CONFIG.")
+		}).Warnln("Failed to load KDK config.")
 	}
 }

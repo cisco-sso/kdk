@@ -15,9 +15,13 @@
 package cmd
 
 import (
-	"fmt"
+	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/sirupsen/logrus"
+	"github.com/codeskyblue/go-sh"
+	"github.com/spf13/viper"
 )
 
 var sshCmd = &cobra.Command{
@@ -25,7 +29,13 @@ var sshCmd = &cobra.Command{
 	Short: "Connect to running KDK container via ssh",
 	Long: `Connect to running KDK container via ssh`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("ssh called")
+		logger := logrus.New().WithField("command", "ssh")
+
+		connectionString := strings.Join([]string{viper.Get("docker.environment.KDK_USERNAME").(string), "localhost"}, "@")
+
+		logger.Info("Connecting to KDK container")
+		sh.Command("ssh", connectionString, "-A", "-p", "2022", "-i", "~/.kdk/ssh/id_rsa", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null").SetStdin(os.Stdin).Run()
+		logger.Info("KDK session exited")
 	},
 }
 
