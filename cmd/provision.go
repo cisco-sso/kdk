@@ -15,9 +15,9 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/sirupsen/logrus"
 	"github.com/codeskyblue/go-sh"
+	"github.com/Sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 var provisionCmd = &cobra.Command{

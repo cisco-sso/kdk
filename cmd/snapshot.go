@@ -15,15 +15,16 @@
 package cmd
 
 import (
-	"time"
-	"strings"
 	"strconv"
+	"strings"
+	"time"
 
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
+	"golang.org/x/net/context"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	"golang.org/x/net/context"
+	"github.com/Sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 var snapshotCmd = &cobra.Command{
