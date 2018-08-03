@@ -17,12 +17,13 @@ package cmd
 import (
 	"strings"
 
-	"github.com/spf13/cobra"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
+	"golang.org/x/net/context"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	"golang.org/x/net/context"
+	"github.com/Sirupsen/logrus"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var pullCmd = &cobra.Command{
