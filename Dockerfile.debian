@@ -9,6 +9,7 @@ RUN apt-get -y update && apt-get -y install \
         apache2-utils \
         apt-transport-https \
         autoconf \
+        bash-completion \
         bc \
         bridge-utils \
         build-essential \
@@ -325,6 +326,10 @@ RUN mkdir /etc/docker && echo '{\n\
     "storage-driver": "vfs"\n\
 }\n' > /etc/docker/daemon.json
 
+#######################################
+# Generate bash-completion for kubectl and helm
+RUN kubectl completion bash > /etc/bash_completion.d/kubectl_completion.sh && \
+    helm completion bash > /etc/bash_completion.d/helm_completion.sh
 
 #######################################
 # Ensure systemd starts, which subsequently starts ssh and docker
