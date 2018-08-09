@@ -15,11 +15,10 @@
 package cmd
 
 import (
+	"context"
 	"strconv"
 	"strings"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
@@ -32,23 +31,20 @@ var snapshotCmd = &cobra.Command{
 	Short: "Create a snapshot of a running KDK container",
 	Long:  `Create a snapshot of a running KDK container`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "pull")
+		logger := logrus.New().WithField("command", "snapshot")
 
-		ctx := context.Background()
 		client, err := client.NewEnvClient()
 
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to create docker client")
 		}
-
 		snapshotName := strings.Join([]string{"kdk", strconv.Itoa(int(time.Now().UnixNano()))}, "-")
 
-		_, err = client.ContainerCommit(ctx, "kdk", types.ContainerCommitOptions{Reference: snapshotName})
+		_, err = client.ContainerCommit(context.Background(), "kdk", types.ContainerCommitOptions{Reference: snapshotName})
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to create snapshot of KDK container")
 		}
 		logger.Info("Successfully created snapshot of KDK container.", snapshotName)
-
 	},
 }
 
