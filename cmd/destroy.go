@@ -15,16 +15,15 @@
 package cmd
 
 import (
+	"context"
+	"fmt"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/manifoldco/promptui"
 	"github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"fmt"
 )
 
 var destroyCmd = &cobra.Command{
@@ -34,13 +33,12 @@ var destroyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "destroy")
 
-		ctx := context.Background()
 		client, err := client.NewEnvClient()
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to create docker client")
 		}
 
-		containers, err := client.ContainerList(ctx, types.ContainerListOptions{})
+		containers, err := client.ContainerList(context.Background(), types.ContainerListOptions{})
 
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to list docker containers")
@@ -50,7 +48,7 @@ var destroyCmd = &cobra.Command{
 
 		for _, container := range containers {
 			for _, name := range container.Names {
-				if strings.Contains(name, "kdk") {
+				if strings.HasPrefix(name, "/kdk") {
 					containerIds = append(containerIds, container.ID)
 					break
 				}
@@ -64,13 +62,11 @@ var destroyCmd = &cobra.Command{
 					Label:     "Continue",
 					IsConfirm: true,
 				}
-				_, err := prompt.Run()
-				if err != nil {
+				if _, err := prompt.Run(); err != nil {
 					logger.Error("KDK container deletion canceled or invalid input.")
 					return
 				}
-				err = client.ContainerRemove(ctx, containerId, types.ContainerRemoveOptions{Force: true})
-				if err != nil {
+				if err := client.ContainerRemove(context.Background(), containerId, types.ContainerRemoveOptions{Force: true}); err != nil {
 					logger.WithField("error", err).Fatal("Failed to remove KDK container")
 				}
 			}

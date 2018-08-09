@@ -15,9 +15,8 @@
 package cmd
 
 import (
+	"context"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
@@ -35,22 +34,18 @@ var pullCmd = &cobra.Command{
 
 		imageCoordinates := []string{viper.Get("image.repository").(string), viper.Get("image.tag").(string)}
 
-		ctx := context.Background()
-		cli, err := client.NewEnvClient()
-
+		client, err := client.NewEnvClient()
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to create docker client")
 		}
 
 		logger.Info("Pulling KDK image. This may take a few minutes...")
 
-		out, err := cli.ImagePull(ctx, strings.Join(imageCoordinates, ":"), types.ImagePullOptions{})
+		out, err := client.ImagePull(context.Background(), strings.Join(imageCoordinates, ":"), types.ImagePullOptions{})
+		defer out.Close()
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to pull KDK image")
-			panic(err)
 		}
-		defer out.Close()
-
 		logger.Info("Successfully pulled KDK image.")
 	},
 }
