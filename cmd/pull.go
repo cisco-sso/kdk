@@ -16,6 +16,8 @@ package cmd
 
 import (
 	"context"
+	"io"
+	"io/ioutil"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -32,20 +34,22 @@ var pullCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "pull")
 
-		imageCoordinates := []string{viper.Get("image.repository").(string), viper.Get("image.tag").(string)}
-
 		client, err := client.NewEnvClient()
+
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to create docker client")
 		}
 
+		imageCoordinates := strings.Join([]string{viper.Get("image.repository").(string), viper.Get("image.tag").(string)}, ":")
+
 		logger.Info("Pulling KDK image. This may take a few minutes...")
 
-		out, err := client.ImagePull(context.Background(), strings.Join(imageCoordinates, ":"), types.ImagePullOptions{})
+		out, err := client.ImagePull(context.Background(), imageCoordinates, types.ImagePullOptions{})
 		defer out.Close()
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to pull KDK image")
 		}
+		io.Copy(ioutil.Discard, out)
 		logger.Info("Successfully pulled KDK image.")
 	},
 }
