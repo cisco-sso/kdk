@@ -86,6 +86,12 @@
   version = "v1.4.7"
 
 [[projects]]
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/hashicorp/hcl"
   packages = [
@@ -262,6 +268,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "17fd5d64aa80e939d4c6ed91c32ea3ced17ffafee6590fc4111ba398a10c2b90"
+  inputs-digest = "f43f94890a9f1df0f088ace69094d3660afcc99079d45191dff950b729be9af9"
   solver-name = "gps-cdcl"
   solver-version = 1
