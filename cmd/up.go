@@ -70,6 +70,7 @@ var upCmd = &cobra.Command{
 				},
 			},
 			&container.HostConfig{
+				// TODO (rluckie): shouldn't default to privileged -- issue with ssh cmd
 				Privileged: true,
 				PortBindings: nat.PortMap{
 					"2022": []nat.PortBinding{
