@@ -5,7 +5,7 @@ OS=$(grep "^ID" /etc/os-release | cut -d= -f2)  # debian | centos
 SUDO_GROUP=$([ "$OS" == "debian" ] && echo "sudo" || echo "wheel")
 
 if [ ! -f "/etc/kdk/provisioned" ]; then
-    useradd ${KDK_USERNAME} -m -G ${SUDO_GROUP},docker -s ${KDK_SHELL}
+    useradd ${KDK_USERNAME} -m -G ${SUDO_GROUP},docker -s ${KDK_SHELL} > /dev/null
     chown ${KDK_USERNAME}:${KDK_USERNAME} /home/${KDK_USERNAME}
     chown -R ${KDK_USERNAME}:${KDK_USERNAME} /home/${KDK_USERNAME}/.ssh
     touch /var/log/kdk-provision.log && \

@@ -15,17 +15,80 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"strings"
 
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
+	"github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var upCmd = &cobra.Command{
 	Use:   "up",
 	Short: "Start KDK container",
-	Long: `Start KDK container`,
+	Long:  `Start KDK container`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("up called")
+		logger := logrus.New().WithField("command", "up")
+
+		imageCoordinates := []string{viper.Get("image.repository").(string), viper.Get("image.tag").(string)}
+
+		client, err := client.NewEnvClient()
+		if err != nil {
+			logger.WithField("error", err).Fatal("Failed to create docker client")
+		}
+
+		ctx := context.Background()
+
+		var binds []string
+
+		for _, bind := range viper.Get("docker.binds").([]interface{}) {
+			configBind := make(map[string]string)
+			for key, value := range bind.(map[interface{}]interface{}) {
+				configBind[key.(string)] = value.(string)
+			}
+			binds = append(binds, fmt.Sprintf("%s:%s", configBind["source"], configBind["target"]))
+		}
+
+		containerCreateResp, err := client.ContainerCreate(
+			ctx,
+			&container.Config{
+				Hostname: viper.Get("docker.hostname").(string),
+				Image:    strings.Join(imageCoordinates, ":"),
+				Tty:      true,
+				Env: []string{
+					fmt.Sprintf("KDK_USERNAME=%s", viper.Get("docker.environment.KDK_USERNAME").(string)),
+					fmt.Sprintf("KDK_SHELL=%s", viper.Get("docker.environment.KDK_SHELL").(string)),
+					fmt.Sprintf("KDK_DOTFILES_REPO=%s", viper.Get("docker.environment.KDK_DOTFILES_REPO").(string)),
+				},
+				ExposedPorts: nat.PortSet{
+					"2022": struct{}{},
+				},
+			},
+			&container.HostConfig{
+				Privileged: true,
+				PortBindings: nat.PortMap{
+					"2022": []nat.PortBinding{
+						{
+							HostPort: "2022",
+						},
+					},
+				},
+				Binds: binds,
+			},
+			nil,
+			viper.Get("docker.hostname").(string))
+		if err != nil {
+			logger.WithField("error", err).Fatal("Failed to create KDK container")
+		}
+		if err := client.ContainerStart(ctx, containerCreateResp.ID, types.ContainerStartOptions{}); err != nil {
+			logger.WithField("error", err).Fatal("Failed to start KDK container")
+		}
+		logger.Info("Successfully started KDK container")
 	},
 }
 
