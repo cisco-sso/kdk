@@ -16,8 +16,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
@@ -35,14 +33,17 @@ var upCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "up")
 
-		imageCoordinates := []string{viper.Get("image.repository").(string), viper.Get("image.tag").(string)}
-
 		client, err := client.NewEnvClient()
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to create docker client")
 		}
 
 		ctx := context.Background()
+
+		logger.Info("Pulling KDK image. This may take a moment...")
+		if err := Pull(client, KdkImageCoordinates); err != nil {
+			logger.WithField("error", err).Fatal("Failed to pull KDK image")
+		}
 
 		var binds []string
 
@@ -51,19 +52,19 @@ var upCmd = &cobra.Command{
 			for key, value := range bind.(map[interface{}]interface{}) {
 				configBind[key.(string)] = value.(string)
 			}
-			binds = append(binds, fmt.Sprintf("%s:%s", configBind["source"], configBind["target"]))
+			binds = append(binds, configBind["source"]+":"+configBind["target"])
 		}
 
 		containerCreateResp, err := client.ContainerCreate(
 			ctx,
 			&container.Config{
 				Hostname: viper.Get("docker.hostname").(string),
-				Image:    strings.Join(imageCoordinates, ":"),
+				Image:    KdkImageCoordinates,
 				Tty:      true,
 				Env: []string{
-					fmt.Sprintf("KDK_USERNAME=%s", viper.Get("docker.environment.KDK_USERNAME").(string)),
-					fmt.Sprintf("KDK_SHELL=%s", viper.Get("docker.environment.KDK_SHELL").(string)),
-					fmt.Sprintf("KDK_DOTFILES_REPO=%s", viper.Get("docker.environment.KDK_DOTFILES_REPO").(string)),
+					"KDK_USERNAME=" + viper.Get("docker.environment.KDK_USERNAME").(string),
+					"KDK_SHELL=" + viper.Get("docker.environment.KDK_SHELL").(string),
+					"KDK_DOTFILES_REPO=" + viper.Get("docker.environment.KDK_DOTFILES_REPO").(string),
 				},
 				ExposedPorts: nat.PortSet{
 					"2022": struct{}{},
@@ -88,6 +89,12 @@ var upCmd = &cobra.Command{
 		}
 		if err := client.ContainerStart(ctx, containerCreateResp.ID, types.ContainerStartOptions{}); err != nil {
 			logger.WithField("error", err).Fatal("Failed to start KDK container")
+		}
+
+		logger.Info("Provisioning KDK user. This may take a moment...")
+
+		if out, err := Provision(); err != nil {
+			logger.WithField("error", err).Fatal("Failed to provision KDK user", err, out)
 		}
 		logger.Info("Successfully started KDK container")
 	},

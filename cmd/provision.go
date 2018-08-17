@@ -20,6 +20,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func Provision() (out []byte, err error) {
+	out, err = sh.Command("docker", "exec", "kdk", "/usr/local/bin/provision-user").Output()
+	return out, err
+}
+
 var provisionCmd = &cobra.Command{
 	Use:   "provision",
 	Short: "Provision KDK user",
@@ -27,11 +32,11 @@ var provisionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "provision")
 
+		logger.Info("Provisioning KDK user. This may take a moment...")
+
 		// TODO (rluckie): replace sh docker sdk
-		out, err := sh.Command("docker", "exec", "kdk", "/usr/local/bin/provision-user").Output()
-		if err != nil {
+		if out, err := Provision(); err != nil {
 			logger.WithField("error", err).Fatal("Failed to provision KDK user", err, out)
-			panic(err)
 		}
 		logger.Info("Successfully provisioned KDK user")
 	},

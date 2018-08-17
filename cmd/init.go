@@ -19,7 +19,6 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -91,8 +90,8 @@ var initCmd = &cobra.Command{
 		}
 
 		if _, err := os.Stat(privateKeyPath); os.IsNotExist(err) {
-			logger.Info("KDK ssh key not found.")
-			logger.Info("Generating KDK ssh key pair...")
+			logger.Warn("KDK ssh key pair not found.")
+			logger.Info("Generating ssh key pair...")
 			privateKey, err := generatePrivateKey(4096)
 			if err != nil {
 				logger.WithField("error", err).Fatal("Failed to generate ssh private key")
@@ -108,7 +107,7 @@ var initCmd = &cobra.Command{
 				logger.WithField("error", err).Fatal("Failed to write ssh private key")
 			}
 
-			err = writeKeyToFile([]byte(publicKeyBytes), path.Join(fmt.Sprintf("%s.pub", privateKeyPath)))
+			err = writeKeyToFile([]byte(publicKeyBytes), privateKeyPath+".pub")
 			if err != nil {
 				logger.WithField("error", err).Fatal("Failed to write ssh public key")
 			}

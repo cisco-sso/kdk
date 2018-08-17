@@ -49,6 +49,8 @@ A full kubernetes development environment in a container`,
 
 var KdkConfigDir string
 
+var KdkImageCoordinates string
+
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		log.WithFields(log.Fields{
@@ -58,7 +60,7 @@ func Execute() {
 }
 
 func init() {
-	versionNumber = "0.5.0"
+	versionNumber = "0.5.1"
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kdk.yaml)")
@@ -103,4 +105,6 @@ func initConfig() {
 			"err":            err,
 		}).Warnln("Failed to load KDK config.")
 	}
+	// TODO (rluckie) move KdkImageCoordinates
+	KdkImageCoordinates = viper.Get("image.repository").(string) + ":" + viper.Get("image.tag").(string)
 }

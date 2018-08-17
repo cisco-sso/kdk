@@ -18,13 +18,11 @@ import (
 	"context"
 	"io"
 	"io/ioutil"
-	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 func Pull(dockerClient *client.Client, imageCoordinates string) error {
@@ -46,10 +44,8 @@ var pullCmd = &cobra.Command{
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to create docker client")
 		}
-		imageCoordinates := strings.Join([]string{viper.Get("image.repository").(string), viper.Get("image.tag").(string)}, ":")
-		logger.Info("Pulling KDK image. This may take a few minutes...")
-		err = Pull(client, imageCoordinates)
-		if err != nil {
+		logger.Info("Pulling KDK image. This may take a moment...")
+		if err := Pull(client, KdkImageCoordinates); err != nil {
 			logger.WithField("error", err).Fatal("Failed to pull KDK image")
 		}
 		logger.Info("Successfully pulled KDK image.")
