@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"os"
-	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/codeskyblue/go-sh"
@@ -31,7 +30,7 @@ var sshCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "ssh")
 
-		connectionString := strings.Join([]string{viper.Get("docker.environment.KDK_USERNAME").(string), "localhost"}, "@")
+		connectionString := viper.Get("docker.environment.KDK_USERNAME").(string) + "@localhost"
 
 		logger.Info("Connecting to KDK container")
 		sh.Command("ssh", connectionString, "-A", "-p", "2022", "-i", "~/.kdk/ssh/id_rsa", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null").SetStdin(os.Stdin).Run()

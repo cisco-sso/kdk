@@ -17,7 +17,6 @@ package cmd
 import (
 	"context"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -38,7 +37,7 @@ var snapshotCmd = &cobra.Command{
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to create docker client")
 		}
-		snapshotName := strings.Join([]string{"kdk", strconv.Itoa(int(time.Now().UnixNano()))}, "-")
+		snapshotName := "kdk-" + strconv.Itoa(int(time.Now().UnixNano()))
 
 		_, err = client.ContainerCommit(context.Background(), "kdk", types.ContainerCommitOptions{Reference: snapshotName})
 		if err != nil {
