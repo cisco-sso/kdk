@@ -15,14 +15,8 @@
 package cmd
 
 import (
-	"context"
-	"fmt"
-	"strings"
-
 	"github.com/Sirupsen/logrus"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
-	"github.com/manifoldco/promptui"
+	"github.com/cisco-sso/kdk/internal/app/kdk"
 	"github.com/spf13/cobra"
 )
 
@@ -32,48 +26,7 @@ var destroyCmd = &cobra.Command{
 	Long:  `Destroy the running KDK container`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "destroy")
-
-		client, err := client.NewEnvClient()
-		if err != nil {
-			logger.WithField("error", err).Fatal("Failed to create docker client")
-		}
-
-		containers, err := client.ContainerList(context.Background(), types.ContainerListOptions{})
-
-		if err != nil {
-			logger.WithField("error", err).Fatal("Failed to list docker containers")
-		}
-
-		var containerIds []string
-
-		for _, container := range containers {
-			for _, name := range container.Names {
-				if strings.HasPrefix(name, "/kdk") {
-					containerIds = append(containerIds, container.ID)
-					break
-				}
-			}
-		}
-		if len(containerIds) > 0 {
-			logger.Info("Destroying KDK container(s)...")
-			for _, containerId := range containerIds {
-				fmt.Printf("Delete KDK container [%v]\n", containerId[:8])
-				prompt := promptui.Prompt{
-					Label:     "Continue",
-					IsConfirm: true,
-				}
-				if _, err := prompt.Run(); err != nil {
-					logger.Error("KDK container deletion canceled or invalid input.")
-					return
-				}
-				if err := client.ContainerRemove(context.Background(), containerId, types.ContainerRemoveOptions{Force: true}); err != nil {
-					logger.WithField("error", err).Fatal("Failed to remove KDK container")
-				}
-			}
-			logger.Info("KDK destroy complete.")
-		} else {
-			logger.Info("No KDK containers found. Nothing to destroy...")
-		}
+		kdk.Destroy(kdk.Ctx, kdk.DockerClient, *logger)
 	},
 }
 

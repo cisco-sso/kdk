@@ -12,25 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package utils
 
 import (
-	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
-	"github.com/spf13/cobra"
+	"bytes"
+	"text/template"
 )
 
-var provisionCmd = &cobra.Command{
-	Use:   "provision",
-	Short: "Provision KDK user",
-	Long:  `Provision KDK user`,
-	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "provision")
-
-		kdk.Provision(*logger)
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(provisionCmd)
+func Tprintf(tmpl string, data map[string]interface{}) string {
+	t := template.Must(template.New("kdkConfig").Parse(tmpl))
+	buffer := &bytes.Buffer{}
+	if err := t.Execute(buffer, data); err != nil {
+		panic(err)
+	} else {
+		return buffer.String()
+	}
 }
