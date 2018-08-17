@@ -20,9 +20,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	"github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 

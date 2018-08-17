@@ -15,8 +15,8 @@
 package cmd
 
 import (
-	"crypto/rsa"
 	"crypto/rand"
+	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
@@ -24,8 +24,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/spf13/cobra"
 	"github.com/Sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -63,7 +63,7 @@ func generatePublicKey(privatekey *rsa.PublicKey) ([]byte, error) {
 	}
 }
 
-func writeKeyToFile(key []byte, destination string ) error {
+func writeKeyToFile(key []byte, destination string) error {
 	if err := ioutil.WriteFile(destination, key, 0600); err != nil {
 		return err
 	} else {

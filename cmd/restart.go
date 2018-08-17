@@ -23,7 +23,7 @@ import (
 var restartCmd = &cobra.Command{
 	Use:   "restart",
 	Short: "Restart the running KDK container (useful for config changes)",
-	Long: `Restart the running KDK container (useful for config changes)`,
+	Long:  `Restart the running KDK container (useful for config changes)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("restart called")
 	},

@@ -20,14 +20,14 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	"github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-func Pull(dockerClient *client.Client, imageCoordinates string, ) (error) {
+func Pull(dockerClient *client.Client, imageCoordinates string) error {
 	out, err := dockerClient.ImagePull(context.Background(), imageCoordinates, types.ImagePullOptions{})
 	defer out.Close()
 	io.Copy(ioutil.Discard, out)
