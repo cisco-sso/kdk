@@ -15,15 +15,15 @@
 package cmd
 
 import (
-	"github.com/codeskyblue/go-sh"
 	"github.com/Sirupsen/logrus"
+	"github.com/codeskyblue/go-sh"
 	"github.com/spf13/cobra"
 )
 
 var provisionCmd = &cobra.Command{
 	Use:   "provision",
 	Short: "Provision KDK user",
-	Long: `Provision KDK user`,
+	Long:  `Provision KDK user`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "provision")
 

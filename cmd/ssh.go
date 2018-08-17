@@ -18,8 +18,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/codeskyblue/go-sh"
 	"github.com/Sirupsen/logrus"
+	"github.com/codeskyblue/go-sh"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -27,7 +27,7 @@ import (
 var sshCmd = &cobra.Command{
 	Use:   "ssh",
 	Short: "Connect to running KDK container via ssh",
-	Long: `Connect to running KDK container via ssh`,
+	Long:  `Connect to running KDK container via ssh`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "ssh")
 
