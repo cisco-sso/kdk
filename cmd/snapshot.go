@@ -15,13 +15,8 @@
 package cmd
 
 import (
-	"context"
-	"strconv"
-	"time"
-
 	"github.com/Sirupsen/logrus"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
+	"github.com/cisco-sso/kdk/internal/app/kdk"
 	"github.com/spf13/cobra"
 )
 
@@ -32,18 +27,7 @@ var snapshotCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "snapshot")
 
-		client, err := client.NewEnvClient()
-
-		if err != nil {
-			logger.WithField("error", err).Fatal("Failed to create docker client")
-		}
-		snapshotName := "kdk-" + strconv.Itoa(int(time.Now().UnixNano()))
-
-		_, err = client.ContainerCommit(context.Background(), "kdk", types.ContainerCommitOptions{Reference: snapshotName})
-		if err != nil {
-			logger.WithField("error", err).Fatal("Failed to create snapshot of KDK container")
-		}
-		logger.Info("Successfully created snapshot of KDK container.", snapshotName)
+		kdk.Snapshot(kdk.Ctx, kdk.DockerClient, *logger)
 	},
 }
 

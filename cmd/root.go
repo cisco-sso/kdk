@@ -15,15 +15,17 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
 
+	"github.com/Sirupsen/logrus"
+	"github.com/cisco-sso/kdk/internal/app/kdk"
+	"github.com/docker/docker/client"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	log "github.com/Sirupsen/logrus"
 )
 
 var (
@@ -47,20 +49,14 @@ var rootCmd = &cobra.Command{
 A full kubernetes development environment in a container`,
 }
 
-var KdkConfigDir string
-
-var KdkImageCoordinates string
-
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-		}).Fatal("Failed to execute RootCmd.")
+		logrus.WithFields(logrus.Fields{"err": err}).Fatal("Failed to execute RootCmd.")
 	}
 }
 
 func init() {
-	versionNumber = "0.5.1"
+	versionNumber = "0.5.2"
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kdk.yaml)")
@@ -70,6 +66,7 @@ func initConfig() {
 
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
+		kdk.ConfigPath = cfgFile
 	} else {
 		home, err := homedir.Dir()
 		if err != nil {
@@ -77,34 +74,41 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		KdkConfigDir = path.Join(home, ".kdk")
+		kdk.ConfigDir = path.Join(home, ".kdk")
+		kdk.ConfigName = "config"
+		kdk.ConfigPath = path.Join(kdk.ConfigDir, kdk.ConfigName+".yaml")
 
-		if _, err := os.Stat(KdkConfigDir); os.IsNotExist(err) {
-			err = os.Mkdir(KdkConfigDir, 0700)
+		if _, err := os.Stat(kdk.ConfigDir); os.IsNotExist(err) {
+			err = os.Mkdir(kdk.ConfigDir, 0700)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 		}
 
-		viper.AddConfigPath(KdkConfigDir)
+		viper.AddConfigPath(kdk.ConfigDir)
 		viper.SetConfigName("config")
 	}
 
-	// TODO (rluckie) allow config to be set from env var
 	viper.SetEnvPrefix("kdk")
 	viper.AutomaticEnv()
 
 	err := viper.ReadInConfig()
 	if viper.GetBool("json") {
-		log.SetFormatter(&log.JSONFormatter{})
+		logrus.SetFormatter(&logrus.JSONFormatter{})
 	}
 	if err != nil {
-		log.WithFields(log.Fields{
-			"configFileUsed": viper.ConfigFileUsed(),
-			"err":            err,
-		}).Warnln("Failed to load KDK config.")
+		logrus.WithFields(logrus.Fields{"configFileUsed": viper.ConfigFileUsed(), "err": err}).Warnln("Failed to load KDK config.")
 	}
-	// TODO (rluckie) move KdkImageCoordinates
-	KdkImageCoordinates = viper.Get("image.repository").(string) + ":" + viper.Get("image.tag").(string)
+	if _, err := os.Stat(kdk.ConfigPath); err == nil {
+		kdk.ImageCoordinates = viper.Get("image.repository").(string) + ":" + viper.Get("image.tag").(string)
+		kdk.Name = viper.Get("docker.name").(string)
+		kdk.Port = viper.Get("docker.environment.KDK_PORT").(string)
+	}
+	kdk.Ctx = context.Background()
+
+	kdk.DockerClient, err = client.NewEnvClient()
+	if err != nil {
+		logrus.WithField("error", err).Fatal("Failed to create docker client")
+	}
 }

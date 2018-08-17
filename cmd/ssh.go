@@ -18,6 +18,7 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/cisco-sso/kdk/internal/app/kdk"
 	"github.com/codeskyblue/go-sh"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -31,9 +32,8 @@ var sshCmd = &cobra.Command{
 		logger := logrus.New().WithField("command", "ssh")
 
 		connectionString := viper.Get("docker.environment.KDK_USERNAME").(string) + "@localhost"
-
 		logger.Info("Connecting to KDK container")
-		sh.Command("ssh", connectionString, "-A", "-p", "2022", "-i", "~/.kdk/ssh/id_rsa", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null").SetStdin(os.Stdin).Run()
+		sh.Command("ssh", connectionString, "-A", "-p", kdk.Port, "-i", "~/.kdk/ssh/id_rsa", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null").SetStdin(os.Stdin).Run()
 		logger.Info("KDK session exited")
 	},
 }

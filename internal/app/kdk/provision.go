@@ -12,29 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package kdk
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
-	"github.com/spf13/cobra"
+	"github.com/codeskyblue/go-sh"
 )
 
-var pullCmd = &cobra.Command{
-	Use:   "pull",
-	Short: "Pull KDK docker image",
-	Long:  `Pull the latest/configured KDK docker image`,
-	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "pull")
-
-		logger.Info("Pulling KDK image. This may take a moment...")
-		if err := kdk.Pull(kdk.Ctx, kdk.DockerClient, kdk.ImageCoordinates); err != nil {
-			logger.WithField("error", err).Fatal("Failed to pull KDK image")
-		}
-		logger.Info("Successfully pulled KDK image.")
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(pullCmd)
+func Provision(logger logrus.Entry) error {
+	// TODO (rluckie): replace sh docker sdk
+	logger.Info("Starting KDK user provisioning. This may take a moment.  Hang tight...")
+	if _, err := sh.Command("docker", "exec", Name, "/usr/local/bin/provision-user").Output(); err != nil {
+		logger.WithField("error", err).Fatal("Failed to provision KDK user.")
+		return err
+	} else {
+		logger.Info("Completed KDK user provisioning.")
+		return nil
+	}
 }
