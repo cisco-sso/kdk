@@ -47,6 +47,8 @@ var rootCmd = &cobra.Command{
 A full kubernetes development environment in a container`,
 }
 
+var KdkConfigDir string
+
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		log.WithFields(log.Fields{
@@ -62,7 +64,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kdk.yaml)")
 }
 
-// initConfig reads in config file and ENV variables if set.
 func initConfig() {
 
 	if cfgFile != "" {
@@ -73,7 +74,18 @@ func initConfig() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		viper.AddConfigPath(path.Join(home, ".kdk"))
+
+		KdkConfigDir = path.Join(home, ".kdk")
+
+		if _, err := os.Stat(KdkConfigDir); os.IsNotExist(err) {
+			err = os.Mkdir(KdkConfigDir, 0700)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+
+		viper.AddConfigPath(KdkConfigDir)
 		viper.SetConfigName("config")
 	}
 

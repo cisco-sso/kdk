@@ -27,6 +27,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+func Pull(dockerClient *client.Client, imageCoordinates string, ) (error) {
+	out, err := dockerClient.ImagePull(context.Background(), imageCoordinates, types.ImagePullOptions{})
+	defer out.Close()
+	io.Copy(ioutil.Discard, out)
+	return err
+}
+
 var pullCmd = &cobra.Command{
 	Use:   "pull",
 	Short: "Pull KDK docker image",
@@ -39,17 +46,12 @@ var pullCmd = &cobra.Command{
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to create docker client")
 		}
-
 		imageCoordinates := strings.Join([]string{viper.Get("image.repository").(string), viper.Get("image.tag").(string)}, ":")
-
 		logger.Info("Pulling KDK image. This may take a few minutes...")
-
-		out, err := client.ImagePull(context.Background(), imageCoordinates, types.ImagePullOptions{})
-		defer out.Close()
+		err = Pull(client, imageCoordinates)
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to pull KDK image")
 		}
-		io.Copy(ioutil.Discard, out)
 		logger.Info("Successfully pulled KDK image.")
 	},
 }
