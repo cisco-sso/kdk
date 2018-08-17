@@ -86,12 +86,6 @@
   version = "v1.4.7"
 
 [[projects]]
-  name = "github.com/ghodss/yaml"
-  packages = ["."]
-  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
-  version = "v1.0.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/hashicorp/hcl"
   packages = [
@@ -223,7 +217,16 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
+  packages = [
+    "curve25519",
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "internal/chacha20",
+    "internal/subtle",
+    "poly1305",
+    "ssh",
+    "ssh/terminal"
+  ]
   revision = "de0752318171da717af4ce24d0a2e8626afaeb11"
 
 [[projects]]
@@ -268,6 +271,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f43f94890a9f1df0f088ace69094d3660afcc99079d45191dff950b729be9af9"
+  inputs-digest = "4379396d604c4d5325ac4b3b7ae5f302eb494741ebea660b6f8c838ee305ff98"
   solver-name = "gps-cdcl"
   solver-version = 1
