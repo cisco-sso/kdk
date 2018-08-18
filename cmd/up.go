@@ -27,10 +27,6 @@ var upCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "up")
 
-		logger.Info("Pulling KDK image. This may take a moment...")
-		if err := kdk.Pull(kdk.Ctx, kdk.DockerClient, kdk.ImageCoordinates); err != nil {
-			logger.WithField("error", err).Fatal("Failed to pull KDK image")
-		}
 		kdk.Up(kdk.Ctx, kdk.DockerClient, kdk.ImageCoordinates, *logger)
 		kdk.Provision(*logger)
 	},
