@@ -5,12 +5,10 @@ OS=$(grep "^ID" /etc/os-release | cut -d= -f2)  # debian | centos
 SUDO_GROUP=$([ "$OS" == "debian" ] && echo "sudo" || echo "wheel")
 
 if [ ! -f "/etc/kdk/provisioned" ]; then
-    useradd ${KDK_USERNAME} -m -G ${SUDO_GROUP},docker -s ${KDK_SHELL} > /dev/null
+    useradd ${KDK_USERNAME} -m -G ${SUDO_GROUP},docker -s ${KDK_SHELL} > /dev/null 2>&1
     chown ${KDK_USERNAME}:${KDK_USERNAME} /home/${KDK_USERNAME}
     chown -R ${KDK_USERNAME}:${KDK_USERNAME} /home/${KDK_USERNAME}/.ssh
-    touch /var/log/kdk-provision.log && \
-      chown ${KDK_USERNAME} /var/log/kdk-provision.log && \
-      chmod 0600 /var/log/kdk-provision.log
+    install -m 0600 -o ${KDK_USERNAME} /dev/null /var/log/kdk-provision.log
 
     # Set no password for sudo users
     if [ "$OS" == "debian" ]; then
