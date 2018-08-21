@@ -24,7 +24,7 @@ import (
 )
 
 func Pull(ctx context.Context, dockerClient *client.Client, imageCoordinates string) error {
-	out, err := dockerClient.ImagePull(ctx, imageCoordinates, types.ImagePullOptions{})
+	out, err := dockerClient.ImagePull(ctx, KdkConfig.ContainerConfig.Image, types.ImagePullOptions{})
 	defer out.Close()
 	io.Copy(os.Stdout, out)
 	return err
