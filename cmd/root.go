@@ -17,9 +17,11 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 
+	"github.com/ghodss/yaml"
 	"github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/internal/app/kdk"
 	"github.com/docker/docker/client"
@@ -70,8 +72,7 @@ func initConfig() {
 	} else {
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			logrus.WithField("err", err).Fatal("Unable to find Home Directory")
 		}
 
 		kdk.ConfigDir = path.Join(home, ".kdk")
@@ -81,8 +82,7 @@ func initConfig() {
 		if _, err := os.Stat(kdk.ConfigDir); os.IsNotExist(err) {
 			err = os.Mkdir(kdk.ConfigDir, 0700)
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				logrus.WithField("err", err).Fatal("Unable to create Config Directory")
 			}
 		}
 
@@ -101,14 +101,23 @@ func initConfig() {
 		logrus.WithFields(logrus.Fields{"configFileUsed": viper.ConfigFileUsed(), "err": err}).Warnln("Failed to load KDK config.")
 	}
 	if _, err := os.Stat(kdk.ConfigPath); err == nil {
-		kdk.ImageCoordinates = viper.Get("image.repository").(string) + ":" + viper.Get("image.tag").(string)
-		kdk.Name = viper.Get("docker.name").(string)
-		kdk.Port = viper.Get("docker.environment.KDK_PORT").(string)
+
+		// read the mh main.yaml
+		data, err := ioutil.ReadFile(kdk.ConfigPath)
+		if err != nil {
+			logrus.WithField("err", err).Fatalf("Failed to read configFile %v", kdk.ConfigPath))
+		}
+
+		err = yaml.Unmarshal(data, &kdk.KdkConfig)
+		if err != nil {
+			logrus.WithField("err", err).Error("Corrupted or deprecated kdk config file format")
+			logrus.Fatal("Please rebuild config file with `kdk init`")
+		}
 	}
 	kdk.Ctx = context.Background()
 
 	kdk.DockerClient, err = client.NewEnvClient()
 	if err != nil {
-		logrus.WithField("error", err).Fatal("Failed to create docker client")
+		logrus.WithField("err", err).Fatal("Failed to create docker client")
 	}
 }

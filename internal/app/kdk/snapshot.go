@@ -26,9 +26,9 @@ import (
 
 func Snapshot(ctx context.Context, dockerClient *client.Client, logger logrus.Entry) error {
 
-	snapshotName := Name + "-" + strconv.Itoa(int(time.Now().UnixNano()))
+	snapshotName := KdkConfig.AppConfig.Name + "-" + strconv.Itoa(int(time.Now().UnixNano()))
 
-	_, err := dockerClient.ContainerCommit(context.Background(), Name, types.ContainerCommitOptions{Reference: snapshotName})
+	_, err := dockerClient.ContainerCommit(context.Background(), KdkConfig.AppConfig.Name, types.ContainerCommitOptions{Reference: snapshotName})
 	if err != nil {
 		logger.WithField("error", err).Fatal("Failed to create snapshot of KDK container")
 		return err

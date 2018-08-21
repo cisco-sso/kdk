@@ -22,7 +22,7 @@ import (
 func Provision(logger logrus.Entry) error {
 	// TODO (rluckie): replace sh docker sdk
 	logger.Info("Starting KDK user provisioning. This may take a moment.  Hang tight...")
-	if _, err := sh.Command("docker", "exec", Name, "/usr/local/bin/provision-user").Output(); err != nil {
+	if _, err := sh.Command("docker", "exec", KdkConfig.AppConfig.Name, "/usr/local/bin/provision-user").Output(); err != nil {
 		logger.WithField("error", err).Fatal("Failed to provision KDK user.")
 		return err
 	} else {
