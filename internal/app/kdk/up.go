@@ -20,20 +20,24 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/spf13/viper"
 )
 
 func Up(ctx context.Context, dockerClient *client.Client, imageCoordinates string, logger logrus.Entry) error {
-	var binds []string
+	var volumes map[string]struct{}
+	var mounts []mount.Mount
+	volumes = make(map[string]struct{})
 
 	for _, bind := range viper.Get("docker.binds").([]interface{}) {
 		configBind := make(map[string]string)
 		for key, value := range bind.(map[interface{}]interface{}) {
 			configBind[key.(string)] = value.(string)
 		}
-		binds = append(binds, configBind["source"]+":"+configBind["target"])
+		mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: configBind["source"], Target: configBind["target"]})
+		volumes[configBind["target"]] = struct{}{}
 	}
 
 	containerCreateResp, err := dockerClient.ContainerCreate(
@@ -50,6 +54,7 @@ func Up(ctx context.Context, dockerClient *client.Client, imageCoordinates strin
 			ExposedPorts: nat.PortSet{
 				"2022/tcp": struct{}{},
 			},
+			Volumes: volumes,
 		},
 		&container.HostConfig{
 			// TODO (rluckie): shouldn't default to privileged -- issue with ssh cmd
@@ -61,7 +66,7 @@ func Up(ctx context.Context, dockerClient *client.Client, imageCoordinates strin
 					},
 				},
 			},
-			Binds: binds,
+			Mounts: mounts,
 		},
 		nil,
 		viper.Get("docker.hostname").(string))
