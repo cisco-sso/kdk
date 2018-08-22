@@ -21,11 +21,16 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
+	"io/ioutil"
 )
 
 func Pull(ctx context.Context, dockerClient *client.Client, imageCoordinates string) error {
 	out, err := dockerClient.ImagePull(ctx, KdkConfig.ContainerConfig.Image, types.ImagePullOptions{})
 	defer out.Close()
-	io.Copy(os.Stdout, out)
+	if Verbose {
+		io.Copy(os.Stdout, out)
+	} else {
+		io.Copy(ioutil.Discard, out)
+	}
 	return err
 }
