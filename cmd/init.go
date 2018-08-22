@@ -29,6 +29,7 @@ var initCmd = &cobra.Command{
 
 		kdk.InitKdkConfig(*logger)
 		kdk.InitKdkSshKeyPair(*logger)
+		logger.Infof("KDK config written to %s. Modify this file to suit your needs.", kdk.ConfigPath)
 	},
 }
 

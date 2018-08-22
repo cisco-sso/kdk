@@ -16,10 +16,9 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/ghodss/yaml"
 	"github.com/Sirupsen/logrus"
@@ -33,6 +32,7 @@ import (
 var (
 	versionNumber string
 	cfgFile       string
+	verbose       bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -58,13 +58,15 @@ func Execute() {
 }
 
 func init() {
-	versionNumber = "0.5.2"
+	versionNumber = "0.5.3"
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kdk.yaml)")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 }
 
 func initConfig() {
+	kdk.Verbose = verbose
 
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
@@ -75,9 +77,12 @@ func initConfig() {
 			logrus.WithField("err", err).Fatal("Unable to find Home Directory")
 		}
 
-		kdk.ConfigDir = path.Join(home, ".kdk")
+		kdk.ConfigDir = filepath.Join(home, ".kdk")
 		kdk.ConfigName = "config"
-		kdk.ConfigPath = path.Join(kdk.ConfigDir, kdk.ConfigName+".yaml")
+		kdk.ConfigPath = filepath.Join(kdk.ConfigDir, kdk.ConfigName+".yaml")
+		kdk.KeypairDir = filepath.Join(kdk.ConfigDir, "ssh")
+		kdk.PrivateKeyPath = filepath.Join(kdk.KeypairDir, "id_rsa")
+		kdk.PublicKeyPath = filepath.Join(kdk.KeypairDir, "id_rsa.pub")
 
 		if _, err := os.Stat(kdk.ConfigDir); os.IsNotExist(err) {
 			err = os.Mkdir(kdk.ConfigDir, 0700)
@@ -102,10 +107,10 @@ func initConfig() {
 	}
 	if _, err := os.Stat(kdk.ConfigPath); err == nil {
 
-		// read the mh main.yaml
+		// read the config.yaml file
 		data, err := ioutil.ReadFile(kdk.ConfigPath)
 		if err != nil {
-			logrus.WithField("err", err).Fatalf("Failed to read configFile %v", kdk.ConfigPath))
+			logrus.WithField("err", err).Fatalf("Failed to read configFile %v", kdk.ConfigPath)
 		}
 
 		err = yaml.Unmarshal(data, &kdk.KdkConfig)

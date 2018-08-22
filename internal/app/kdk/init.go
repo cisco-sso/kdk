@@ -21,8 +21,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/user"
-	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/docker/go-connections/nat"
 	"github.com/ghodss/yaml"
@@ -30,6 +30,7 @@ import (
 	"github.com/cisco-sso/kdk/internal/pkg/utils"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/manifoldco/promptui"
 )
 
@@ -37,6 +38,10 @@ var (
 	ConfigDir        string
 	ConfigName       string
 	ConfigPath       string
+	Verbose          bool
+	KeypairDir       string
+	PrivateKeyPath   string
+	PublicKeyPath    string
 	DockerClient     *client.Client
 	Ctx              context.Context
 	KdkConfig        *kdkConfig
@@ -58,10 +63,26 @@ type appConfig struct {
 func InitKdkConfig(logger logrus.Entry) error {
 
 	currentUser, _ := user.Current()
+	username := currentUser.Username
 
-	// Define volume bindings for mounting the ssh pub key into authorized keys
-	binds := []string{fmt.Sprintf("/Users/%v/.kdk/ssh/id_rsa.pub:/home/%v/.ssh/authorized_keys",
-		currentUser.Username, currentUser.Username)}
+	// Windows usernames are `domain\username`.  Strip the domain in case we are running on Windows.
+	if strings.Contains(username, "\\") {
+		username = strings.Split(username, "\\")[1]
+	}
+
+	// Initialize storage mounts/volumes
+	mounts  := []mount.Mount{}       // hostConfig
+	volumes := map[string]struct{}{} // containerConfig
+
+	// Define mount configurations for mounting the ssh pub key into a tmp location where the bootstrap script may
+	// copy into <userdir>/.ssh/authorized keys.  This is required because Windows mounts squash permissions to 777
+	// which makes ssh fail a strict check on pubkey permissions.
+	source := PublicKeyPath
+	target := "/tmp/id_rsa.pub"
+	mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target, ReadOnly: true})
+	volumes[target] = struct{}{}
+
+	// Define volume binding for public key
 
 	// Define volume bindings for the keybase directory
 	//   Linux & OSX: Detec /keybase
@@ -71,9 +92,11 @@ func InitKdkConfig(logger logrus.Entry) error {
 	for _, keybaseRoot := range keybaseRoots {
 		if absPath, err := filepath.Abs(filepath.Join(keybaseRoot, keybaseTestSubdir)); err == nil {
 			if path, err := filepath.EvalSymlinks(absPath); err == nil {
-				target := filepath.Dir(path)+":/keybase"
+				source := filepath.Dir(path)
+				target := "/keybase"
 
-				logger.Info("Detected /keybase filesystem")
+				logger.Infof("Detected /keybase filesystem at: %v", source)
+
 				prompt := promptui.Prompt {
 					Label: "Mount your /keybase directory within KDK? [y/n]",
 				Default: "y",
@@ -81,8 +104,10 @@ func InitKdkConfig(logger logrus.Entry) error {
 					Validate: promptuiValidateYorN,
 				}
 				if result, err := prompt.Run(); err == nil && result == "y" {
-					logger.Info(fmt.Sprintf("Adding Bind target `%v` to configuration", target))
-					binds = append(binds, path+":/keybase")
+					logger.Info("Adding /keybase mount to configuration")
+					mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target})
+					volumes[target] = struct{}{}
+
 				} else {
 					logger.Info(fmt.Sprintf("Skip Adding of Bind target `%v` to configuration", target))
 				}
@@ -95,20 +120,21 @@ func InitKdkConfig(logger logrus.Entry) error {
 		AppConfig: appConfig{
 			Name: "kdk",
 			Port: "2022",
-			Username: currentUser.Username,
+			Username: username,
 		},
 		ContainerConfig: container.Config{
 			Hostname: "kdk",
 			Image:    "ciscosso/kdk:debian-latest",
 			Tty:      true,
 			Env: []string{
-				"KDK_USERNAME=" + currentUser.Username,
+				"KDK_USERNAME=" + username,
 				"KDK_SHELL=/bin/bash",
 				"KDK_DOTFILES_REPO=https://github.com/cisco-sso/yadm-dotfiles.git",
 			},
 			ExposedPorts: nat.PortSet{
 				"2022/tcp": struct{}{},
 			},
+			Volumes: volumes,
 		},
 		HostConfig: container.HostConfig{
 			// TODO (rluckie): shouldn't default to privileged -- issue with ssh cmd
@@ -120,7 +146,7 @@ func InitKdkConfig(logger logrus.Entry) error {
 					},
 				},
 			},
-			Binds: binds,
+			Mounts: mounts,
 		},
 	}
 
@@ -162,22 +188,18 @@ func InitKdkConfig(logger logrus.Entry) error {
 }
 
 func InitKdkSshKeyPair(logger logrus.Entry) error {
-	keypairName := "id_rsa"
-	keypairDir := path.Join(ConfigDir, "ssh")
-
-	privateKeyPath := path.Join(keypairDir, keypairName)
 
 	if _, err := os.Stat(ConfigDir); os.IsNotExist(err) {
 		if err := os.Mkdir(ConfigDir, 0700); err != nil {
 			logger.WithField("error", err).Fatal("Failed to create KDK config directory")
 		}
 	}
-	if _, err := os.Stat(keypairDir); os.IsNotExist(err) {
-		if err := os.Mkdir(keypairDir, 0700); err != nil {
+	if _, err := os.Stat(KeypairDir); os.IsNotExist(err) {
+		if err := os.Mkdir(KeypairDir, 0700); err != nil {
 			logger.WithField("error", err).Fatal("Failed to create ssh key directory")
 		}
 	}
-	if _, err := os.Stat(privateKeyPath); os.IsNotExist(err) {
+	if _, err := os.Stat(PrivateKeyPath); os.IsNotExist(err) {
 		logger.Warn("KDK ssh key pair not found.")
 		logger.Info("Generating ssh key pair...")
 		privateKey, err := utils.GeneratePrivateKey(4096)
@@ -190,12 +212,12 @@ func InitKdkSshKeyPair(logger logrus.Entry) error {
 			logger.WithField("error", err).Fatal("Failed to generate ssh public key")
 			return err
 		}
-		err = utils.WriteKeyToFile(utils.EncodePrivateKey(privateKey), privateKeyPath)
+		err = utils.WriteKeyToFile(utils.EncodePrivateKey(privateKey), PrivateKeyPath)
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to write ssh private key")
 			return err
 		}
-		err = utils.WriteKeyToFile([]byte(publicKeyBytes), privateKeyPath+".pub")
+		err = utils.WriteKeyToFile([]byte(publicKeyBytes), PublicKeyPath)
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to write ssh public key")
 			return err
