@@ -1,4 +1,4 @@
-Dockerized Kubernetes Development Kit (KDK)
+Kubernetes Development Kit (KDK)
 ===
 
 This Dockerized KDK has only been tested with OSX.  If you need Windows10
@@ -48,7 +48,7 @@ brew cask install keybase
 open https://docs.docker.com/docker-for-mac/install/
 ```
 
-### (UNTESTED, DO NOT USE) Windows Specific Setup Instructions
+### Windows Specific Setup Instructions
 
 ```bash
 # Open a Windows Powershell
@@ -61,6 +61,8 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.We
 #   If you are a Keybase user, the KeybaseFS may be mounted directly into the docker image.
 choco.exe install -y keybase openssh git curl
 ```
+
+* Download and install docker from [here](https://docs.docker.com/docker-for-windows/release-notes/)
 
 ## Dependencies Configuration
 
@@ -123,17 +125,20 @@ cd ~/
 OSX: mkdir ~/Dev; cd ~/Dev
 Windows: <Ignore This>
 
-# Start ssh-agent and load your key
-eval `ssh-agent`
-ssh-add ~/.ssh/id_rsa
-ssh-add -l  # verify that the key has been loaded
+
 
 # Download the binary for your kdk (OSX)
-curl -sSL https://github.com/cisco-sso/kdk/releases/download/0.5.2/kdk-0.5.2-darwin-amd64.tar.gz \
+curl -sSL https://github.com/cisco-sso/kdk/releases/download/0.5.3/kdk-0.5.3-darwin-amd64.tar.gz \
   | tar xz && chmod +x darwin-amd64/kdk && sudo mv darwin-amd64/kdk /usr/local/bin/kdk && rm -rf darwin-amd64
 
 # Create your ~/.kdk/config.yaml
 kdk init
+
+# Start ssh-agent and load your key
+eval `ssh-agent`
+ssh-add ~/.kdk/ssh/id_rsa
+ssh-add -l  # verify that the key has been loaded
+
 
 # Edit your ~/.kdk/config.yaml with additional volume mounts if you would like
 #   to mount host directories into the docker machine.  Additional volume bind
@@ -149,6 +154,9 @@ kdk init
 ## Use the KDK
 
 ```bash
+# Pull the latest KDK image
+kdk pull
+
 # Start the KDK
 kdk up
 
@@ -244,7 +252,7 @@ direnv allow
 
 ```bash
 # Re-install by downloading the latest binary (OSX)
-curl -sSL https://github.com/cisco-sso/kdk/releases/download/0.5.2/kdk-0.5.2-darwin-amd64.tar.gz \
+curl -sSL https://github.com/cisco-sso/kdk/releases/download/0.5.3/kdk-0.5.3-darwin-amd64.tar.gz \
   | tar xz && chmod +x darwin-amd64/kdk && sudo mv darwin-amd64/kdk /usr/local/bin/kdk && rm -rf darwin-amd64
 
 # Download the latest image
@@ -258,12 +266,6 @@ kdk up
 It is often useful to save a snapshot of the vagrant machine.
 
 TODO: Finish this section
-
-```
-# Halt before saving snapshots
-kdk snapshot
-kdk snapshot list
-```
 
 ## Building the KDK from scratch
 
