@@ -57,6 +57,8 @@ RUN echo "Install OS packages" && \
         socat \
         software-properties-common \
         sudo \
+        systemd \
+        systemd-sysv \
         tcl \
         telnet \
         traceroute \
@@ -271,4 +273,3 @@ RUN echo "Misc configuration" && \
 
 EXPOSE 2022
 CMD ["/lib/systemd/systemd"]
-

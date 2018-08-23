@@ -23,7 +23,6 @@ import (
 )
 
 func Up(ctx context.Context, dockerClient *client.Client, imageCoordinates string, logger logrus.Entry) error {
-
 	containerCreateResp, err := dockerClient.ContainerCreate(
 		ctx,
 		&KdkConfig.ContainerConfig,
