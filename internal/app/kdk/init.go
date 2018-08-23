@@ -65,7 +65,7 @@ func InitKdkConfig(logger logrus.Entry) error {
 	currentUser, _ := user.Current()
 	username := currentUser.Username
 
-	//user.Current().Username can contain '\' on windows.
+	// Windows usernames are `domain\username`.  Strip the domain in case we are running on Windows.
 	if strings.Contains(username, "\\") {
 		username = strings.Split(username, "\\")[1]
 	}
