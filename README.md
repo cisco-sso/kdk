@@ -275,13 +275,12 @@ TODO: Finish this section
 * [x] (Dave) Fixed issue with new kdk where it bombs out on encountering old config file format.
 * [x] (Ryan) Verbose output for KDK commands
 * [x] (Dave) KDK init: Autodetect keybase dirs and ask if user wants to mount them in
-* [ ] (Ryan) Windows 10 instructions and testing
-* [ ] (Dave) Refactor kdk config.yaml file to directly use Docker lib structs
+* [x] (Ryan) Windows 10 instructions and testing
+* [x] (Dave) Refactor kdk config.yaml file to directly use Docker lib structs
+* [x] (Dave) KDK init: Prompt the user and ask if they want to mount additional directories with explanation
 * [ ] (Dave) Windows 10 keybase mounts
-* [ ] (???) KDK init: Enable starting of more than one kdk (Needed for development)
-* [ ] (???) KDK init: Prompt the user and ask if they want to mount additional directories with explanation
-* [ ] (???) KDK init: If a dir doesn't exist upon startup it should warn or error with an explanation to check that keybaseFS is mounted.
-* [ ] (???) Curl installation/upgrade script
+* [ ] (Ryan) KDK init: Enable starting of more than one kdk (Needed for development)
+* [ ] (Ryan) Curl installation/upgrade script
 * [ ] (???) KDK doctor (like brew doctor)  Verifies current dependencies
 * [ ] (???) Image Upgrades: Check if a later version of an image exists, and ask user if they wish to download
 * [ ] (???) KDK Upgrades: Check if a later version of a KDK binary exists, and ask user if they wish to download

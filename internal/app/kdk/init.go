@@ -75,20 +75,19 @@ func InitKdkConfig(logger logrus.Entry) error {
 	volumes := map[string]struct{}{} // containerConfig
 
 	// Define mount configurations for mounting the ssh pub key into a tmp location where the bootstrap script may
-	// copy into <userdir>/.ssh/authorized keys.  This is required because Windows mounts squash permissions to 777
-	// which makes ssh fail a strict check on pubkey permissions.
+	//   copy into <userdir>/.ssh/authorized keys.  This is required because Windows mounts squash permissions to
+	//   777 which makes ssh fail a strict check on pubkey permissions.
 	source := PublicKeyPath
 	target := "/tmp/id_rsa.pub"
 	mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target, ReadOnly: true})
 	volumes[target] = struct{}{}
-
-	// Define volume binding for public key
 
 	// Define volume bindings for the keybase directory
 	//   Linux & OSX: Detec /keybase
 	//   Windows10: Detect k: and /k
 	keybaseRoots := []string{ "/keybase", "k:", "/k" }
 	keybaseTestSubdir := "/private"
+	keybaseFound := false
 	for _, keybaseRoot := range keybaseRoots {
 		if absPath, err := filepath.Abs(filepath.Join(keybaseRoot, keybaseTestSubdir)); err == nil {
 			if path, err := filepath.EvalSymlinks(absPath); err == nil {
@@ -99,19 +98,60 @@ func InitKdkConfig(logger logrus.Entry) error {
 
 				prompt := promptui.Prompt {
 					Label: "Mount your /keybase directory within KDK? [y/n]",
-				Default: "y",
+					Default: "y",
 					IsVimMode: true,
 					Validate: promptuiValidateYorN,
 				}
 				if result, err := prompt.Run(); err == nil && result == "y" {
 					logger.Info("Adding /keybase mount to configuration")
-					mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target})
+					mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target, ReadOnly: false})
 					volumes[target] = struct{}{}
-
+					keybaseFound = true
 				} else {
 					logger.Info(fmt.Sprintf("Skip Adding of Bind target `%v` to configuration", target))
 				}
 			}
+		}
+	}
+	if !keybaseFound {
+		logger.Warn("Failed to detect potential /keybase filesystem mounts")
+	}
+
+	// Define Additional volume bindings
+	for {
+		prompt := promptui.Prompt {
+			Label: "Would you like to mount additional docker host directories into the KDK? [y/n]",
+			Default: "",
+			IsVimMode: true,
+			Validate: promptuiValidateYorN,
+		}
+		if result, err := prompt.Run(); err == nil && result == "y" {
+			prompt = promptui.Prompt {
+				Label: "Please enter the docker host source directory (e.g. /Users/<username>/Projects)",
+				Default: "",
+				IsVimMode: true,
+				Validate: promptuiValidateDirectoryExists,
+			}
+			source, err := prompt.Run()
+			if err == nil {
+				logger.Infof("Entered host source directory mount %v", source)
+			}
+
+			prompt = promptui.Prompt {
+				Label: "Please enter the docker container target directory (e.g. /home/<username>/Projects)",
+				Default: "",
+				IsVimMode: true,
+				Validate: nil,
+			}
+			target, err := prompt.Run()
+			if err == nil {
+				logger.Infof("Entered container target directory mount %v", target)
+			}
+
+			mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target, ReadOnly: false})
+			volumes[target] = struct{}{}
+		} else {
+			break
 		}
 	}
 
@@ -235,4 +275,12 @@ func promptuiValidateYorN(input string) error {
 		return nil
 	}
 	return errors.New("Input must be 'y' or 'n'")
+}
+
+func promptuiValidateDirectoryExists(input string) error {
+
+	if _, err := os.Stat(input); err == nil {
+		return nil
+	}
+	return errors.New("Input directory must exist")
 }
