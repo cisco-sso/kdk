@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/internal/app/kdk"
@@ -31,6 +31,7 @@ import (
 var (
 	versionNumber string
 	cfgFile       string
+	verbose       bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -56,13 +57,15 @@ func Execute() {
 }
 
 func init() {
-	versionNumber = "0.5.2"
+	versionNumber = "0.5.3"
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kdk.yaml)")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 }
 
 func initConfig() {
+	kdk.Verbose = verbose
 
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
@@ -74,9 +77,12 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		kdk.ConfigDir = path.Join(home, ".kdk")
+		kdk.ConfigDir = filepath.Join(home, ".kdk")
 		kdk.ConfigName = "config"
-		kdk.ConfigPath = path.Join(kdk.ConfigDir, kdk.ConfigName+".yaml")
+		kdk.ConfigPath = filepath.Join(kdk.ConfigDir, kdk.ConfigName+".yaml")
+		kdk.KeypairDir = filepath.Join(kdk.ConfigDir, "ssh")
+		kdk.PrivateKeyPath = filepath.Join(kdk.KeypairDir, "id_rsa")
+		kdk.PublicKeyPath = filepath.Join(kdk.KeypairDir, "id_rsa.pub")
 
 		if _, err := os.Stat(kdk.ConfigDir); os.IsNotExist(err) {
 			err = os.Mkdir(kdk.ConfigDir, 0700)

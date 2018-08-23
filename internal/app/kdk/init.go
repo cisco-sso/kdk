@@ -19,7 +19,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/user"
-	"path"
+	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/internal/pkg/utils"
@@ -31,6 +31,10 @@ var (
 	ConfigDir        string
 	ConfigName       string
 	ConfigPath       string
+	Verbose          bool
+	KeypairDir       string
+	PrivateKeyPath   string
+	PublicKeyPath    string
 	ImageCoordinates string
 	Name             string
 	Port             string
@@ -41,6 +45,13 @@ var (
 func InitKdkConfig(logger logrus.Entry) error {
 
 	currentUser, _ := user.Current()
+
+	username := currentUser.Username
+
+	//user.Current().Username can contain '\' on windows.
+	if strings.Contains(username, "\\") {
+		username = strings.Split(username, "\\")[1]
+	}
 
 	configTemplate := `image:
   repository: {{ .imageRepository }}
@@ -54,8 +65,8 @@ docker:
     KDK_USERNAME: {{ .username }}
     KDK_PORT: "{{ .port }}"
   binds:
-    - source: /Users/{{ .username }}/.kdk/ssh/id_rsa.pub
-      target: /home/{{ .username }}/.ssh/authorized_keys
+    - source: {{ .publicKeyPath }}
+      target: /tmp/id_rsa.pub
 `
 
 	configDefaults := map[string]interface{}{
@@ -63,7 +74,8 @@ docker:
 		"imageTag":        "debian-latest",
 		"name":            "kdk",
 		"port":            "2022",
-		"username":        currentUser.Username,
+		"publicKeyPath":   PublicKeyPath,
+		"username":        username,
 		"dotfilesRepo":    "https://github.com/cisco-sso/yadm-dotfiles.git",
 		"shell":           "/bin/bash",
 	}
@@ -94,22 +106,18 @@ docker:
 }
 
 func InitKdkSshKeyPair(logger logrus.Entry) error {
-	keypairName := "id_rsa"
-	keypairDir := path.Join(ConfigDir, "ssh")
-
-	privateKeyPath := path.Join(keypairDir, keypairName)
 
 	if _, err := os.Stat(ConfigDir); os.IsNotExist(err) {
 		if err := os.Mkdir(ConfigDir, 0700); err != nil {
 			logger.WithField("error", err).Fatal("Failed to create KDK config directory")
 		}
 	}
-	if _, err := os.Stat(keypairDir); os.IsNotExist(err) {
-		if err := os.Mkdir(keypairDir, 0700); err != nil {
+	if _, err := os.Stat(KeypairDir); os.IsNotExist(err) {
+		if err := os.Mkdir(KeypairDir, 0700); err != nil {
 			logger.WithField("error", err).Fatal("Failed to create ssh key directory")
 		}
 	}
-	if _, err := os.Stat(privateKeyPath); os.IsNotExist(err) {
+	if _, err := os.Stat(PrivateKeyPath); os.IsNotExist(err) {
 		logger.Warn("KDK ssh key pair not found.")
 		logger.Info("Generating ssh key pair...")
 		privateKey, err := utils.GeneratePrivateKey(4096)
@@ -122,12 +130,12 @@ func InitKdkSshKeyPair(logger logrus.Entry) error {
 			logger.WithField("error", err).Fatal("Failed to generate ssh public key")
 			return err
 		}
-		err = utils.WriteKeyToFile(utils.EncodePrivateKey(privateKey), privateKeyPath)
+		err = utils.WriteKeyToFile(utils.EncodePrivateKey(privateKey), PrivateKeyPath)
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to write ssh private key")
 			return err
 		}
-		err = utils.WriteKeyToFile([]byte(publicKeyBytes), privateKeyPath+".pub")
+		err = utils.WriteKeyToFile([]byte(publicKeyBytes), PublicKeyPath)
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to write ssh public key")
 			return err

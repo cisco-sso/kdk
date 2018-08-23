@@ -4,14 +4,32 @@ set -euo pipefail
 OS=$(grep "^ID" /etc/os-release | cut -d= -f2)  # debian | centos
 SUDO_GROUP=$([ "$OS" == "debian" ] && echo "sudo" || echo "wheel")
 
-if [ ! -f "/etc/kdk/provisioned" ]; then
-    useradd ${KDK_USERNAME} -m -G ${SUDO_GROUP},docker -s ${KDK_SHELL} > /dev/null 2>&1
+if [[ ! -f "/etc/kdk/provisioned" ]]; then
+    # Check if user exists. If not, create
+    if ! getent passwd ${KDK_USERNAME} > /dev/null 2>&1; then
+      useradd ${KDK_USERNAME} -m -G ${SUDO_GROUP},docker -s ${KDK_SHELL} > /dev/null 2>&1
+    fi
+    # Check if .ssh dir exists
+    if [[ ! -d /home/${KDK_USERNAME}/.ssh/ ]]; then
+      install -d -o ${KDK_USERNAME} -g ${KDK_USERNAME} -m 0700 /home/${KDK_USERNAME}/.ssh
+    fi
+
+    # Check if ~/.ssh/authorized_keys exists. If not and /tmp/id_rsa.pub exists then cp
+    if [[ ! -f /home/${KDK_USERNAME}/.ssh/authorized_keys ]]; then
+      if [[ -f /tmp/id_rsa.pub ]]; then
+        install -o ${KDK_USERNAME} -g ${KDK_USERNAME} -m 0700 /tmp/id_rsa.pub /home/${KDK_USERNAME}/.ssh/authorized_keys
+        else
+          echo "Public key file not found at /tmp/id_rsa.pub"
+          exit 1
+        fi
+    fi
     chown ${KDK_USERNAME}:${KDK_USERNAME} /home/${KDK_USERNAME}
     chown -R ${KDK_USERNAME}:${KDK_USERNAME} /home/${KDK_USERNAME}/.ssh
+    chmod -R 0600 /home/${KDK_USERNAME}/.ssh/*
     install -m 0600 -o ${KDK_USERNAME} /dev/null /var/log/kdk-provision.log
 
     # Set no password for sudo users
-    if [ "$OS" == "debian" ]; then
+    if [[ "$OS" == "debian" ]]; then
       sed -i 's@\%sudo\tALL=(ALL:ALL) ALL@\%sudo\tALL=(ALL) NOPASSWD:ALL@g' /etc/sudoers
     else
       sed -i 's@^# %wheel@%wheel@g' /etc/sudoers

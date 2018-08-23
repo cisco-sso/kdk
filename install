@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+VERSION=$(curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/cmd/root.go | grep -e 'versionNumber' | grep "[0-9]" | sed 's|.*"\(.*\)"|\1|g')
+
+ARCHTYPE=$(uname -m)
+if [[ ${ARCHTYPE} == 'x86_64' ]]; then
+  ARCH="amd64"
+elif [[ ${ARCHTYPE}  == 'x86_32' ]]; then
+  ARCH="386"
+else
+  echo "Unsupported architecture"
+  exit 1
+fi
+
+if [[ "$OSTYPE" == "linux-gnu" ]]; then
+  OS="linux"
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  OS="darwin"
+elif [[ "$OSTYPE" =~ ^(cygwin|msys)$ ]]; then
+  OS="windows"
+else
+  echo "Unsupported OS"
+  exit 1
+fi
+
+DIST_TGZ=kdk-${VERSION}-${OS}-${ARCH}.tar.gz
+
+DOWNLOAD_URI=https://github.com/cisco-sso/kdk/releases/download/${VERSION}/${DIST_TGZ}
+
+if [[ $OS == "windows" ]]; then
+  KDK_DESTINATION=/usr/bin/kdk
+elif [[ ${OS} =~ ^(linux|darwin)$ ]]; then
+  KDK_DESTINATION=/usr/local/bin/kdk
+fi
+
+curl -sSL ${DOWNLOAD_URI} | tar -C /tmp -xz
+if [[ $OS == "windows" ]]; then
+  mv /tmp/${OS}-${ARCH}/kdk.exe ${KDK_DESTINATION}
+elif [[ ${OS} =~ ^(linux|darwin)$ ]]; then
+  if [[ $EUID -ne 0 ]]; then
+     echo "This script must be run as root, use sudo $0 instead" 1>&2
+     exit 1
+  fi
+  mv /tmp/${OS}-${ARCH}/kdk /usr/local/bin/ && chmod a+x ${KDK_DESTINATION}
+fi
+
+rm -fr /tmp/${OS}-${ARCH}
+
+exit 0

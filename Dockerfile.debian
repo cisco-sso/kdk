@@ -1,4 +1,4 @@
-FROM debian:9.5-slim
+FROM debian:9.5
 
 LABEL maintainer="rluckie@cisco.com"
 
@@ -57,8 +57,6 @@ RUN echo "Install OS packages" && \
         socat \
         software-properties-common \
         sudo \
-        systemd \
-        systemd-sysv \
         tcl \
         telnet \
         traceroute \
