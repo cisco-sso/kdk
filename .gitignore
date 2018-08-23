@@ -5,3 +5,4 @@ _dist/
 bin/
 vendor/
 .idea/
+dist/
