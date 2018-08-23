@@ -17,16 +17,12 @@ if [[ ! -f "/etc/kdk/provisioned" ]]; then
     # Check if ~/.ssh/authorized_keys exists. If not and /tmp/id_rsa.pub exists then cp
     if [[ ! -f /home/${KDK_USERNAME}/.ssh/authorized_keys ]]; then
       if [[ -f /tmp/id_rsa.pub ]]; then
-        install -o ${KDK_USERNAME} -g ${KDK_USERNAME} -m 0700 /tmp/id_rsa.pub /home/${KDK_USERNAME}/.ssh/authorized_keys
+        install -o ${KDK_USERNAME} -g ${KDK_USERNAME} -m 0600 /tmp/id_rsa.pub /home/${KDK_USERNAME}/.ssh/authorized_keys
         else
           echo "Public key file not found at /tmp/id_rsa.pub"
           exit 1
         fi
     fi
-    chown ${KDK_USERNAME}:${KDK_USERNAME} /home/${KDK_USERNAME}
-    chown -R ${KDK_USERNAME}:${KDK_USERNAME} /home/${KDK_USERNAME}/.ssh
-    chmod -R 0600 /home/${KDK_USERNAME}/.ssh/*
-    install -m 0600 -o ${KDK_USERNAME} /dev/null /var/log/kdk-provision.log
 
     # Set no password for sudo users
     if [[ "$OS" == "debian" ]]; then
@@ -39,6 +35,11 @@ if [[ ! -f "/etc/kdk/provisioned" ]]; then
     runuser -l ${KDK_USERNAME} -c "yadm clone --bootstrap ${KDK_DOTFILES_REPO}" >> /var/log/kdk-provision.log 2>&1
     mkdir -p /etc/kdk
     echo 1 > /etc/kdk/provisioned
+
+    # Ensure permissions for a few locations
+    chown ${KDK_USERNAME}:${KDK_USERNAME} /home/${KDK_USERNAME}
+    chown -R ${KDK_USERNAME}:${KDK_USERNAME} /go
+    install -m 0600 -o ${KDK_USERNAME} /dev/null /var/log/kdk-provision.log
 fi
 
 exit 0
