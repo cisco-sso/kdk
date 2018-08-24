@@ -39,6 +39,10 @@ dist:
 		$(DIST_DIRS) zip -r $(SHORT_NAME)-${VERSION}-{}.zip {} \; \
 	)
 
+.PHONY: gofmt
+gofmt:
+	gofmt -w -s $$(find ./cmd ./internal -type f -name '*.go')
+
 .PHONY: clean
 clean:
 	@rm -rf $(BINDIR) ./_dist ./bin
