@@ -64,7 +64,7 @@ func Prune(ctx context.Context, dockerClient *client.Client, logger logrus.Entry
 
 	// iterate through imageIds and add imageIds that are NOT associated with currently running containers
 	for imageId := range imageIds {
-		if utils.SliceContains(runningContainerImageIds, imageIds[imageId]) {
+		if utils.Contains(runningContainerImageIds, imageIds[imageId]) {
 		} else {
 			staleImageIds = append(staleImageIds, imageIds[imageId])
 		}

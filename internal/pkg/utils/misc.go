@@ -14,10 +14,19 @@
 
 package utils
 
-func SliceContains(input []string, target string) bool {
-	for _, item := range input {
-		if item == target {
-			return true
+import "reflect"
+
+func Contains(input interface{}, target interface{}) bool {
+	rValue := reflect.ValueOf(input)
+	rTarget := reflect.ValueOf(target)
+	if rValue.IsValid() {
+		for i := 0; i < rValue.Len(); i++ {
+			rVal := rValue.Index(i)
+			if rVal.IsValid() {
+				if rVal.Interface() == rTarget.Interface() {
+					return true
+				}
+			}
 		}
 	}
 	return false
