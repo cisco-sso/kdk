@@ -3,6 +3,7 @@ FROM debian:9.5
 LABEL maintainer="rluckie@cisco.com" \
       kdk=""
 
+
 #######################################
 # Copy local files
 COPY files/tmp/python-requirements/** /tmp/python-requirements/
