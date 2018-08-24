@@ -39,6 +39,7 @@ var (
 	ConfigName     string
 	ConfigPath     string
 	Verbose        bool
+	Version        string
 	KeypairDir     string
 	PrivateKeyPath string
 	PublicKeyPath  string
@@ -81,6 +82,7 @@ func InitKdkConfig(
 	// Initialize storage mounts/volumes
 	mounts := []mount.Mount{}        // hostConfig
 	volumes := map[string]struct{}{} // containerConfig
+	labels := map[string]string{"kdk": Version}
 
 	// Define mount configurations for mounting the ssh pub key into a tmp location where the bootstrap script may
 	//   copy into <userdir>/.ssh/authorized keys.  This is required because Windows mounts squash permissions to
@@ -183,6 +185,7 @@ func InitKdkConfig(
 				"2022/tcp": struct{}{},
 			},
 			Volumes: volumes,
+			Labels:  labels,
 		},
 		HostConfig: container.HostConfig{
 			// TODO (rluckie): shouldn't default to privileged -- issue with ssh cmd

@@ -12,23 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package utils
 
-import (
-	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
-	"github.com/spf13/cobra"
-)
-
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Print version information.",
-	Long:  `Print version information.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		logrus.WithFields(logrus.Fields{"command": "version", "version": kdk.Version}).Info("kdk")
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(versionCmd)
+func SliceContains(input []string, target string) bool {
+	for _, item := range input {
+		if item == target {
+			return true
+		}
+	}
+	return false
 }
