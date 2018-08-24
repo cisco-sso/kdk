@@ -24,18 +24,20 @@ else
   exit 1
 fi
 
+tmpdir=/tmp/kdk-${os}-${arch}
 if [[ ${os} =~ ^(linux|darwin)$ ]]; then
-  kdk_bin=/tmp/${os}-${arch}/kdk
+  kdk_bin=${tmpdir}/kdk
   kdk_destination=/usr/local/bin/kdk
 elif [[ $os == "windows" ]]; then
-  kdk_bin=/tmp/${os}-${arch}/kdk.exe
+  kdk_bin=${tmpdir}/kdk.exe
   kdk_destination=/usr/local/bin/kdk.exe
 fi
 
 dist_tgz=kdk-${version}-${os}-${arch}.tar.gz
 download_uri=https://github.com/cisco-sso/kdk/releases/download/${version}/${dist_tgz}
 
-curl -sSL ${download_uri} | tar -C /tmp -xz
+mkdir -p ${tmpdir}
+curl -sSL ${download_uri} | tar -xz -C ${tmpdir}
 
 if [[ ! -d /usr/local/bin ]]; then
     # Echo the command so the user may view what was executed
@@ -43,4 +45,4 @@ if [[ ! -d /usr/local/bin ]]; then
 fi
 (set -x; sudo install -m 0755 ${kdk_bin} ${kdk_destination})
 
-rm -fr /tmp/${os}-${arch}
+rm -fr ${tmpdir}
