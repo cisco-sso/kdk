@@ -63,7 +63,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.We
 
 ```console
 # Open Powershell as Administrator
-choco install -y openssh git curl
+choco install -y openssh git curl sudo
 ```
 
 3. Install Docker from [here](https://docs.docker.com/docker-for-windows/release-notes/)
@@ -137,7 +137,7 @@ Windows: <Windows_Search -> "Git Bash">
 2. Install the KDK
 
 ```console
-curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/install | sudo bash
+curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/install | bash
 ```
 
 3. create KDK config [`~/.kdk/kdk/config.yaml`] and ssh keys 
@@ -216,7 +216,7 @@ aws_secret_access_key = YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
 
 1. Update KDK bin
 ```console
-curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/install | sudo bash
+curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/install | bash
 ```
 2. Download latest KDK image
 
@@ -292,3 +292,4 @@ TODO: Finish this section
 * [ ] (???) KDK doctor (like brew doctor)  Verifies current dependencies
 * [ ] (???) Image Upgrades: Check if a later version of an image exists, and ask user if they wish to download
 * [ ] (???) KDK Upgrades: Check if a later version of a KDK binary exists, and ask user if they wish to download
+* [ ] (???) KDK tool add: Install [goreleaser](https://github.com/goreleaser/goreleaser/releases).
