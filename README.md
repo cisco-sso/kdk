@@ -140,7 +140,7 @@ Windows: <Windows_Search -> "Git Bash">
 curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/install | sudo bash
 ```
 
-3. create KDK config [`~/.kdk/config.yaml`] and ssh keys 
+3. create KDK config [`~/.kdk/kdk/config.yaml`] and ssh keys 
 
 ```console
 kdk init
@@ -152,23 +152,7 @@ kdk init
 ssh-add ~/.kdk/ssh/id_rsa
 ```
 
-5. Edit KDK config [`~/.kdk/config.yaml`] to suit your needs.
-
-```yaml
-# Edit the KDK config to add additional volume mounts if you would like to mount host directories into the KDK container.
-
-# Additional volume binds may include:
-...
-docker:
-...
-  binds:
-    ...
-    - source: /Users/<YOUR_USERID>/<YOUR_PROJECT_DIR>
-      target: /home/<YOUR_USERID>/<YOUR_PROJECT_DIR>
-    - source:  "/Volumes/Keybase (<YOUR_KEYBASE_ID)/"
-      target: /keybase
-...
-```
+5. Edit KDK config [`~/.kdk/kdk/config.yaml`] to suit your needs.
 
 ## Use the KDK
 
@@ -186,12 +170,10 @@ kdk ssh
 kdk destroy
 ```
 
-
 ## Customization
 
 * **NOTE:**  By default, the `KDK` uses a set of opinionated dotfiles. 
 To customize, fork [this](https://github.com/cisco-sso/yadm-dotfiles) repo, make changes, and update `~/.kdk/config.yaml` to reference customized fork.
-
 
 ## Common Configurations
 ### AWS
@@ -253,13 +235,39 @@ kdk destroy
 kdk init
 ```
 
-5. Customize `~/.kdk/config.yaml` to suit your needs (if config was regenerated).
+5. Customize `~/.kdk/kdk/config.yaml` to suit your needs (if config was regenerated).
 
 6. Start KDK container
 
 ```console
 kdk up
 ```
+
+## Running Multiple KDK Containers
+
+You might have a need to run multiple KDK containers.  The KDK CLI can do that!
+
+1. Create a new KDK config
+
+  - **NOTE:** port and name arguments must be unique (no other container can have this name or port assignment) 
+```console
+kdk init --name kdk1 --port 2023
+```
+
+2. Start `kdk1` container
+
+```console
+kdk up --name kdk1
+```
+
+3. Connect to `kdk1` container
+
+```console
+kdk ssh --name kdk1
+```
+
+
+**NOTE:** There are many configuration options available in `kdk init`.See `kdk init --help` for details 
 
 ## Saving and Restoring snapshots
 
@@ -279,8 +287,8 @@ TODO: Finish this section
 * [x] (Dave) Refactor kdk config.yaml file to directly use Docker lib structs
 * [x] (Dave) KDK init: Prompt the user and ask if they want to mount additional directories with explanation
 * [ ] (Dave) Windows 10 keybase mounts
-* [ ] (Ryan) KDK init: Enable starting of more than one kdk (Needed for development)
-* [ ] (Ryan) Curl installation/upgrade script
+* [x] (Ryan) KDK init: Enable starting of more than one kdk (Needed for development)
+* [x] (Ryan) Curl installation/upgrade script
 * [ ] (???) KDK doctor (like brew doctor)  Verifies current dependencies
 * [ ] (???) Image Upgrades: Check if a later version of an image exists, and ask user if they wish to download
 * [ ] (???) KDK Upgrades: Check if a later version of a KDK binary exists, and ask user if they wish to download

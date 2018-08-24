@@ -20,10 +20,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ghodss/yaml"
 	"github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/internal/app/kdk"
 	"github.com/docker/docker/client"
+	"github.com/ghodss/yaml"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -31,7 +31,7 @@ import (
 
 var (
 	versionNumber string
-	cfgFile       string
+	KdkName       string
 	verbose       bool
 )
 
@@ -61,49 +61,45 @@ func init() {
 	versionNumber = "0.5.3"
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kdk.yaml)")
+	rootCmd.PersistentFlags().StringVar(&KdkName, "name", "kdk", "KDK name")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 }
 
 func initConfig() {
 	kdk.Verbose = verbose
 
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-		kdk.ConfigPath = cfgFile
-	} else {
-		home, err := homedir.Dir()
-		if err != nil {
-			logrus.WithField("err", err).Fatal("Unable to find Home Directory")
-		}
-
-		kdk.ConfigDir = filepath.Join(home, ".kdk")
-		kdk.ConfigName = "config"
-		kdk.ConfigPath = filepath.Join(kdk.ConfigDir, kdk.ConfigName+".yaml")
-		kdk.KeypairDir = filepath.Join(kdk.ConfigDir, "ssh")
-		kdk.PrivateKeyPath = filepath.Join(kdk.KeypairDir, "id_rsa")
-		kdk.PublicKeyPath = filepath.Join(kdk.KeypairDir, "id_rsa.pub")
-
-		if _, err := os.Stat(kdk.ConfigDir); os.IsNotExist(err) {
-			err = os.Mkdir(kdk.ConfigDir, 0700)
-			if err != nil {
-				logrus.WithField("err", err).Fatal("Unable to create Config Directory")
-			}
-		}
-
-		viper.AddConfigPath(kdk.ConfigDir)
-		viper.SetConfigName("config")
+	home, err := homedir.Dir()
+	if err != nil {
+		logrus.WithField("err", err).Fatal("Unable to find Home Directory")
 	}
+
+	kdk.ConfigDir = filepath.Join(home, ".kdk")
+	kdk.ConfigName = "config"
+	kdk.ConfigPath = filepath.Join(kdk.ConfigDir, KdkName, kdk.ConfigName+".yaml")
+	kdk.KeypairDir = filepath.Join(kdk.ConfigDir, "ssh")
+	kdk.PrivateKeyPath = filepath.Join(kdk.KeypairDir, "id_rsa")
+	kdk.PublicKeyPath = filepath.Join(kdk.KeypairDir, "id_rsa.pub")
+
+	if _, err := os.Stat(kdk.ConfigDir); os.IsNotExist(err) {
+		err = os.Mkdir(kdk.ConfigDir, 0700)
+		if err != nil {
+			logrus.WithField("err", err).Fatal("Unable to create Config Directory")
+		}
+	}
+
+	viper.SetConfigFile(kdk.ConfigPath)
+	viper.AddConfigPath(filepath.Dir(kdk.ConfigPath))
+	viper.SetConfigName(kdk.ConfigName)
 
 	viper.SetEnvPrefix("kdk")
 	viper.AutomaticEnv()
 
-	err := viper.ReadInConfig()
+	if err := viper.ReadInConfig(); err != nil {
+		logrus.WithFields(logrus.Fields{"configFileUsed": viper.ConfigFileUsed(), "err": err}).Warnln("Failed to load KDK config.")
+	}
+
 	if viper.GetBool("json") {
 		logrus.SetFormatter(&logrus.JSONFormatter{})
-	}
-	if err != nil {
-		logrus.WithFields(logrus.Fields{"configFileUsed": viper.ConfigFileUsed(), "err": err}).Warnln("Failed to load KDK config.")
 	}
 	if _, err := os.Stat(kdk.ConfigPath); err == nil {
 

@@ -20,6 +20,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	port            string
+	imageRepository string
+	imageTag        string
+	dotfilesRepo    string
+	shell           string
+)
+
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize KDK",
@@ -27,12 +35,19 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "init")
 
-		kdk.InitKdkConfig(*logger)
+		kdk.InitKdkConfig(KdkName, port, imageRepository, imageTag, dotfilesRepo, shell, *logger)
 		kdk.InitKdkSshKeyPair(*logger)
 		logger.Infof("KDK config written to %s. Modify this file to suit your needs.", kdk.ConfigPath)
 	},
 }
 
 func init() {
+	initCmd.Flags().StringVarP(&KdkName, "name", "n", "kdk", "KDK Name")
+	initCmd.Flags().StringVarP(&port, "port", "p", "2022", "KDK Port")
+	initCmd.Flags().StringVarP(&imageRepository, "image-repository", "r", "ciscosso/kdk", "KDK Image Repository")
+	initCmd.Flags().StringVarP(&imageTag, "image-tag", "t", "debian-latest", "KDK Image Tag")
+	initCmd.Flags().StringVarP(&dotfilesRepo, "dotfiles-repo", "d", "https://github.com/cisco-sso/yadm-dotfiles.git", "KDK Dotfiles Repo")
+	initCmd.Flags().StringVarP(&shell, "shell", "s", "/bin/bash", "KDK shell")
+
 	rootCmd.AddCommand(initCmd)
 }
