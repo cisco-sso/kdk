@@ -29,14 +29,7 @@ if [[ ${os} =~ ^(linux|darwin)$ ]]; then
   kdk_destination=/usr/local/bin/kdk
 elif [[ $os == "windows" ]]; then
   kdk_bin=/tmp/${os}-${arch}/kdk.exe
-  kdk_destination=/usr/bin/kdk
-fi
-
-if [[ ${os} =~ ^(linux|darwin)$ ]]; then
-  if [[ $EUID -ne 0 ]]; then
-     echo "This script must be run as root" 1>&2
-     exit 1
-  fi
+  kdk_destination=/usr/local/bin/kdk.exe
 fi
 
 dist_tgz=kdk-${version}-${os}-${arch}.tar.gz
@@ -44,7 +37,10 @@ download_uri=https://github.com/cisco-sso/kdk/releases/download/${version}/${dis
 
 curl -sSL ${download_uri} | tar -C /tmp -xz
 
-chmod a+x ${kdk_bin}
-mv ${kdk_bin} ${kdk_destination}
+if [[ ! -d /usr/local/bin ]]; then
+    # Echo the command so the user may view what was executed
+    (set -x; sudo install -m 0755 -d $(dirname ${kdk_destination}))
+fi
+(set -x; sudo install -m 0755 ${kdk_bin} ${kdk_destination})
 
 rm -fr /tmp/${os}-${arch}
