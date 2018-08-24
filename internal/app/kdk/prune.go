@@ -94,5 +94,4 @@ func Prune(ctx context.Context, dockerClient *client.Client, logger logrus.Entry
 		logger.Infof("No stale KDK images to delete")
 	}
 	return nil
-
 }

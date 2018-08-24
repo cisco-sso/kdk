@@ -173,7 +173,7 @@ kdk destroy
 ## Customization
 
 * **NOTE:**  By default, the `KDK` uses a set of opinionated dotfiles. 
-To customize, fork [this](https://github.com/cisco-sso/yadm-dotfiles) repo, make changes, and update `~/.kdk/config.yaml` to reference customized fork.
+To customize, fork [this](https://github.com/cisco-sso/yadm-dotfiles) repo, make changes, and update `~/.kdk/kdk/config.yaml` to reference customized fork.
 
 ## Common Configurations
 ### AWS
