@@ -15,8 +15,8 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/Sirupsen/logrus"
+	"github.com/cisco-sso/kdk/internal/app/kdk"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +25,8 @@ var pruneCmd = &cobra.Command{
 	Short: "Prune unused KDK container images",
 	Long:  `Prune unused KDK container images`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("prune called")
+		logger := logrus.New().WithField("command", "prune")
+		kdk.Prune(kdk.Ctx, kdk.DockerClient, *logger)
 	},
 }
 

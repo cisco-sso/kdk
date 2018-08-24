@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-version=$(curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/cmd/root.go | grep -e 'versionNumber' | grep "[0-9]" | sed 's|.*"\(.*\)"|\1|g')
+version=$(curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/cmd/root.go | grep -e 'kdk.Version' | grep "[0-9]" | sed 's|.*"\(.*\)"|\1|g')
 
 archtype=$(uname -m)
 if [[ ${archtype} == 'x86_64' ]]; then

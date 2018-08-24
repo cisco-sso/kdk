@@ -30,9 +30,8 @@ import (
 )
 
 var (
-	versionNumber string
-	KdkName       string
-	verbose       bool
+	KdkName string
+	verbose bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -58,9 +57,9 @@ func Execute() {
 }
 
 func init() {
-	versionNumber = "0.5.3"
 	cobra.OnInitialize(initConfig)
 
+	kdk.Version = "0.6.0"
 	rootCmd.PersistentFlags().StringVar(&KdkName, "name", "kdk", "KDK name")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 }

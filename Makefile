@@ -1,7 +1,7 @@
 SHORT_NAME        ?= kdk
 TARGETS           ?= darwin/amd64 linux/amd64 linux/386 linux/arm linux/arm64 linux/ppc64le linux/s390x windows/amd64
 DIST_DIRS         = find * -type d -exec
-VERSION           ?= $(shell cat cmd/root.go| grep -e 'versionNumber' | grep [0-9] | sed 's|.*"\(.*\)"|\1|g')
+VERSION           ?= $(shell cat cmd/root.go| grep -e 'kdk.Version' | grep [0-9] | sed 's|.*"\(.*\)"|\1|g')
 
 # go option
 GO        ?= go
