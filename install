@@ -42,7 +42,20 @@ curl -sSL ${download_uri} | tar -xz -C ${tmpdir}
 if [[ ! -d /usr/local/bin ]]; then
     # Echo the command so the user may view what was executed
     (set -x; sudo install -m 0755 -d $(dirname ${kdk_destination}))
+
+    # Handle a windows-ism where the above may not take effect until
+    #   later despite the subshell.
+    while [[ ! -d /usr/local/bin ]]; do
+	sleep 1
+    done
 fi
+
+# Echo the command so the user may view what was executed
 (set -x; sudo install -m 0755 ${kdk_bin} ${kdk_destination})
+# Handle a windows-ism where the above may not take effect until
+#   later despite the subshell.
+while [[ ! -f ${kdk_destination} ]]; do
+  sleep 1
+done
 
 rm -fr ${tmpdir}
