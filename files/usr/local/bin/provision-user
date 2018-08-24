@@ -31,15 +31,14 @@ if [[ ! -f "/etc/kdk/provisioned" ]]; then
       sed -i 's@^# %wheel@%wheel@g' /etc/sudoers
     fi
 
-    # Setup yadm dotfiles
-    runuser -l ${KDK_USERNAME} -c "yadm clone --bootstrap ${KDK_DOTFILES_REPO}" >> /var/log/kdk-provision.log 2>&1
-    mkdir -p /etc/kdk
-    echo 1 > /etc/kdk/provisioned
-
     # Ensure permissions for a few locations
     chown ${KDK_USERNAME}:${KDK_USERNAME} /home/${KDK_USERNAME}
     chown -R ${KDK_USERNAME}:${KDK_USERNAME} /go
     install -m 0600 -o ${KDK_USERNAME} /dev/null /var/log/kdk-provision.log
-fi
 
-exit 0
+    # Setup yadm dotfiles
+    runuser -l ${KDK_USERNAME} -c "yadm clone --bootstrap ${KDK_DOTFILES_REPO}" >> /var/log/kdk-provision.log 2>&1
+
+    mkdir -p /etc/kdk
+    echo 1 > /etc/kdk/provisioned
+fi

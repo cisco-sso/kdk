@@ -4,7 +4,7 @@ Kubernetes Development Kit (KDK)
 ## Quickstart (`TL;DR`)
 
 ```console
-curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/install | bash && kdk pull && kdk init && kdk up && kdk ssh
+curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/install | bash && kdk init && kdk pull && kdk up && kdk ssh
 ```
 
 ## Background
