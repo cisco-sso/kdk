@@ -22,13 +22,17 @@ import (
 	"github.com/docker/docker/client"
 )
 
-func Up(ctx context.Context, dockerClient *client.Client, imageCoordinates string, logger logrus.Entry) error {
+func Up(
+	ctx context.Context,
+	dockerClient *client.Client,
+	cfg *kdkConfig,
+	logger logrus.Entry) error {
 	containerCreateResp, err := dockerClient.ContainerCreate(
 		ctx,
-		&KdkConfig.ContainerConfig,
-		&KdkConfig.HostConfig,
+		&cfg.ContainerConfig,
+		&cfg.HostConfig,
 		nil,
-		KdkConfig.AppConfig.Name,
+		cfg.AppConfig.Name,
 	)
 	if err != nil {
 		logger.WithField("error", err).Fatal("Failed to create KDK container")

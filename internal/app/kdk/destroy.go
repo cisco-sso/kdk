@@ -17,8 +17,6 @@ package kdk
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
@@ -36,7 +34,7 @@ func Destroy(ctx context.Context, dockerClient *client.Client, logger logrus.Ent
 	}
 	for _, container := range containers {
 		for _, name := range container.Names {
-			if strings.HasPrefix(name, "/kdk") {
+			if name == "/"+KdkConfig.AppConfig.Name {
 				containerIds = append(containerIds, container.ID)
 				break
 			}
@@ -45,7 +43,7 @@ func Destroy(ctx context.Context, dockerClient *client.Client, logger logrus.Ent
 	if len(containerIds) > 0 {
 		logger.Info("Destroying KDK container(s)...")
 		for _, containerId := range containerIds {
-			fmt.Printf("Delete KDK container [%v]\n", containerId[:8])
+			fmt.Printf("Delete KDK container [%s][%v]\n", KdkConfig.AppConfig.Name, containerId[:8])
 			prompt := promptui.Prompt{
 				Label:     "Continue",
 				IsConfirm: true,
