@@ -66,9 +66,12 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.We
 choco install -y openssh git curl sudo
 ```
 
-3. Install Docker from [here](https://docs.docker.com/docker-for-windows/release-notes/)
+3. Unintall a few utils which interfere with Docker for Windows
+choco uninstall vagrant virtualbox
 
-4. Install Keybase from [here](https://keybase.io/docs/the_app/install_windows)
+4. Install Docker from [here](https://docs.docker.com/docker-for-windows/release-notes/)
+
+5. Install Keybase from [here](https://keybase.io/docs/the_app/install_windows)
 
 
 ## Dependency Configuration

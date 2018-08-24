@@ -20,9 +20,9 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/internal/pkg/utils"
+	"github.com/cisco-sso/kdk/internal/pkg/utils/simpleprompt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	"github.com/manifoldco/promptui"
 )
 
 func Prune(ctx context.Context, dockerClient *client.Client, logger logrus.Entry) error {
@@ -75,11 +75,12 @@ func Prune(ctx context.Context, dockerClient *client.Client, logger logrus.Entry
 		for staleImage := range staleImageIds {
 			targetImage := staleImageIds[staleImage]
 			logger.Infof("Delete stale KDK image [%s]?", targetImage)
-			prompt := promptui.Prompt{
-				Label:     "Continue",
-				IsConfirm: true,
+			prompt := simpleprompt.Prompt{
+				Text:     "Continue? [y/n] ",
+				Loop:     true,
+				Validate: simpleprompt.ValidateYorN,
 			}
-			if _, err := prompt.Run(); err != nil {
+			if result, err := prompt.Run(); err != nil || result == "n" {
 				logger.Error("KDK stale image deletion canceled or invalid input.")
 				return err
 			}

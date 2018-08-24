@@ -16,7 +16,6 @@ package kdk
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -26,12 +25,12 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/internal/pkg/utils"
+	"github.com/cisco-sso/kdk/internal/pkg/utils/simpleprompt"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/ghodss/yaml"
-	"github.com/manifoldco/promptui"
 )
 
 var (
@@ -106,11 +105,10 @@ func InitKdkConfig(
 
 				logger.Infof("Detected /keybase filesystem at: %v", source)
 
-				prompt := promptui.Prompt{
-					Label:     "Mount your /keybase directory within KDK? [y/n]",
-					Default:   "y",
-					IsVimMode: true,
-					Validate:  promptuiValidateYorN,
+				prompt := simpleprompt.Prompt{
+					Text:     "Mount your /keybase directory within KDK? [y/n] ",
+					Loop:     true,
+					Validate: simpleprompt.ValidateYorN,
 				}
 				if result, err := prompt.Run(); err == nil && result == "y" {
 					logger.Info("Adding /keybase mount to configuration")
@@ -129,29 +127,26 @@ func InitKdkConfig(
 
 	// Define Additional volume bindings
 	for {
-		prompt := promptui.Prompt{
-			Label:     "Would you like to mount additional docker host directories into the KDK? [y/n]",
-			Default:   "",
-			IsVimMode: true,
-			Validate:  promptuiValidateYorN,
+		prompt := simpleprompt.Prompt{
+			Text:     "Would you like to mount additional docker host directories into the KDK? [y/n] ",
+			Loop:     true,
+			Validate: simpleprompt.ValidateYorN,
 		}
 		if result, err := prompt.Run(); err == nil && result == "y" {
-			prompt = promptui.Prompt{
-				Label:     "Please enter the docker host source directory (e.g. /Users/<username>/Projects)",
-				Default:   "",
-				IsVimMode: true,
-				Validate:  promptuiValidateDirectoryExists,
+			prompt = simpleprompt.Prompt{
+				Text:     "Please enter the docker host source directory (e.g. /Users/<username>/Projects) ",
+				Loop:     true,
+				Validate: simpleprompt.ValidateDirExists,
 			}
 			source, err := prompt.Run()
 			if err == nil {
 				logger.Infof("Entered host source directory mount %v", source)
 			}
 
-			prompt = promptui.Prompt{
-				Label:     "Please enter the docker container target directory (e.g. /home/<username>/Projects)",
-				Default:   "",
-				IsVimMode: true,
-				Validate:  nil,
+			prompt = simpleprompt.Prompt{
+				Text:     "Please enter the docker container target directory (e.g. /home/<username>/Projects) ",
+				Loop:     false,
+				Validate: nil,
 			}
 			target, err := prompt.Run()
 			if err == nil {
@@ -229,11 +224,10 @@ func InitKdkConfig(
 		ioutil.WriteFile(ConfigPath, y, 0600)
 	} else {
 		logger.Warn("KDK config exists")
-		prompt := promptui.Prompt{
-			Label:     "Overwrite existing KDK config? [y/n]",
-			Default:   "n",
-			IsVimMode: true,
-			Validate:  promptuiValidateYorN,
+		prompt := simpleprompt.Prompt{
+			Text:     "Overwrite existing KDK config? [y/n] ",
+			Loop:     true,
+			Validate: simpleprompt.ValidateYorN,
 		}
 		if result, err := prompt.Run(); err == nil && result == "y" {
 			logger.Info("Creating KDK config")
@@ -288,19 +282,4 @@ func InitKdkSshKeyPair(logger logrus.Entry) error {
 		logger.Info("KDK ssh key pair exists.")
 	}
 	return nil
-}
-
-func promptuiValidateYorN(input string) error {
-	if input == "y" || input == "n" {
-		return nil
-	}
-	return errors.New("Input must be 'y' or 'n'")
-}
-
-func promptuiValidateDirectoryExists(input string) error {
-
-	if _, err := os.Stat(input); err == nil {
-		return nil
-	}
-	return errors.New("Input directory must exist")
 }
