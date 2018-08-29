@@ -93,8 +93,8 @@ func InitKdkConfig(
 
 	// Define volume bindings for the keybase directory
 	//   Linux & OSX: Detec /keybase
-	//   Windows10: Detect k: and /k
-	keybaseRoots := []string{"/keybase", "k:", "/k"}
+	//   Windows10: Detect /k
+	keybaseRoots := []string{"/keybase", "k:"}
 	keybaseTestSubdir := "/private"
 	keybaseFound := false
 	for _, keybaseRoot := range keybaseRoots {
