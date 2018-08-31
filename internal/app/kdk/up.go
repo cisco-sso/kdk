@@ -16,8 +16,10 @@ package kdk
 
 import (
 	"context"
+	"runtime"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/cisco-sso/kdk/internal/pkg/utils"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 )
@@ -27,6 +29,12 @@ func Up(
 	dockerClient *client.Client,
 	cfg *kdkConfig,
 	logger logrus.Entry) error {
+	if runtime.GOOS == "windows" {
+		if err := utils.KeybaseStartMirror(ConfigDir); err != nil {
+			logger.WithField("error", err).Fatal("Failed to start keybase mirror")
+			return err
+		}
+	}
 	containerCreateResp, err := dockerClient.ContainerCreate(
 		ctx,
 		&cfg.ContainerConfig,

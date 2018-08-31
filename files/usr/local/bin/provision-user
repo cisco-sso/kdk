@@ -33,7 +33,9 @@ if [[ ! -f "/etc/kdk/provisioned" ]]; then
 
     # Ensure permissions for a few locations
     chown ${KDK_USERNAME}:${KDK_USERNAME} /home/${KDK_USERNAME}
-    chown -R ${KDK_USERNAME}:${KDK_USERNAME} /go
+    if [[ -d /go ]]; then
+      chown -R ${KDK_USERNAME}:${KDK_USERNAME} /go
+    fi
     install -m 0600 -o ${KDK_USERNAME} /dev/null /var/log/kdk-provision.log
 
     # Setup yadm dotfiles
