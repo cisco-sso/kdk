@@ -15,38 +15,32 @@
 package kdk
 
 import (
-	"context"
 	"runtime"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/pkg/utils"
+	"github.com/cisco-sso/kdk/pkg/keybase"
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
 )
 
-func Up(
-	ctx context.Context,
-	dockerClient *client.Client,
-	cfg *kdkConfig,
-	logger logrus.Entry) error {
+func Up(cfg KdkEnvConfig, logger logrus.Entry) error {
 	if runtime.GOOS == "windows" {
-		if err := utils.KeybaseStartMirror(ConfigDir); err != nil {
+		if err := keybase.StartMirror(cfg.ConfigRootDir(), cfg.Debug, logger); err != nil {
 			logger.WithField("error", err).Fatal("Failed to start keybase mirror")
 			return err
 		}
 	}
-	containerCreateResp, err := dockerClient.ContainerCreate(
-		ctx,
-		&cfg.ContainerConfig,
-		&cfg.HostConfig,
+	containerCreateResp, err := cfg.DockerClient.ContainerCreate(
+		cfg.Ctx,
+		&cfg.KdkCfg.ContainerConfig,
+		&cfg.KdkCfg.HostConfig,
 		nil,
-		cfg.AppConfig.Name,
+		cfg.Name,
 	)
 	if err != nil {
 		logger.WithField("error", err).Fatal("Failed to create KDK container")
 		return err
 	}
-	if err := DockerClient.ContainerStart(ctx, containerCreateResp.ID, types.ContainerStartOptions{}); err != nil {
+	if err := cfg.DockerClient.ContainerStart(cfg.Ctx, containerCreateResp.ID, types.ContainerStartOptions{}); err != nil {
 		logger.WithField("error", err).Fatal("Failed to start KDK container")
 		return err
 	}

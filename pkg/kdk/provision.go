@@ -12,26 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package kdk
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
-	"github.com/spf13/cobra"
+	"github.com/codeskyblue/go-sh"
 )
 
-var upCmd = &cobra.Command{
-	Use:   "up",
-	Short: "Start KDK container",
-	Long:  `Start KDK container`,
-	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "up")
-
-		kdk.Up(kdk.Ctx, kdk.DockerClient, kdk.KdkConfig, *logger)
-		kdk.Provision(*logger)
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(upCmd)
+func Provision(cfg KdkEnvConfig, logger logrus.Entry) error {
+	// TODO (rluckie): replace sh docker sdk
+	logger.Info("Starting KDK user provisioning. This may take a moment.  Hang tight...")
+	if _, err := sh.Command("docker", "exec", cfg.Name, "/usr/local/bin/provision-user").Output(); err != nil {
+		logger.WithField("error", err).Fatal("Failed to provision KDK user.")
+		return err
+	} else {
+		logger.Info("Completed KDK user provisioning.")
+		return nil
+	}
 }

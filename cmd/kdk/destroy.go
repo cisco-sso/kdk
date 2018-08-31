@@ -16,21 +16,21 @@ package cmd
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
+	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
 )
 
-var provisionCmd = &cobra.Command{
-	Use:   "provision",
-	Short: "Provision KDK user",
-	Long:  `Provision KDK user`,
+var destroyCmd = &cobra.Command{
+	Use:   "destroy",
+	Short: "Destroy the running KDK container",
+	Long:  `Destroy the running KDK container`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "provision")
+		logger := logrus.New().WithField("command", "destroy")
 
-		kdk.Provision(*logger)
+		kdk.Destroy(CurrentKdkEnvConfig, *logger)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(provisionCmd)
+	rootCmd.AddCommand(destroyCmd)
 }

@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
+	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +27,7 @@ var snapshotCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "snapshot")
 
-		kdk.Snapshot(kdk.Ctx, kdk.DockerClient, *logger)
+		kdk.Snapshot(CurrentKdkEnvConfig, *logger)
 	},
 }
 
