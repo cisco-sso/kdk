@@ -28,7 +28,7 @@ var pullCmd = &cobra.Command{
 		logger := logrus.New().WithField("command", "pull")
 
 		logger.Info("Pulling KDK image. This may take a moment...")
-		if err := kdk.Pull(kdk.Ctx, kdk.DockerClient, kdk.KdkConfig.ContainerConfig.Image); err != nil {
+		if err := kdk.Pull(kdk.Ctx, kdk.DockerClient); err != nil {
 			logger.WithField("error", err).Fatal("Failed to pull KDK image")
 		}
 		logger.Info("Successfully pulled KDK image.")

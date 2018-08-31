@@ -59,7 +59,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	kdk.Version = "0.7.0"
+	kdk.Version = "0.8.0"
 	rootCmd.PersistentFlags().StringVar(&KdkName, "name", "kdk", "KDK name")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 }

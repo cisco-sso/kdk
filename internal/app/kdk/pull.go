@@ -24,7 +24,7 @@ import (
 	"io/ioutil"
 )
 
-func Pull(ctx context.Context, dockerClient *client.Client, imageCoordinates string) error {
+func Pull(ctx context.Context, dockerClient *client.Client) error {
 	out, err := dockerClient.ImagePull(ctx, KdkConfig.ContainerConfig.Image, types.ImagePullOptions{})
 	defer out.Close()
 	if Verbose {
