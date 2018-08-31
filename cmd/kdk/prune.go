@@ -12,21 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package kdk
+package cmd
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/codeskyblue/go-sh"
+	"github.com/cisco-sso/kdk/pkg/kdk"
+	"github.com/spf13/cobra"
 )
 
-func Provision(logger logrus.Entry) error {
-	// TODO (rluckie): replace sh docker sdk
-	logger.Info("Starting KDK user provisioning. This may take a moment.  Hang tight...")
-	if _, err := sh.Command("docker", "exec", KdkConfig.AppConfig.Name, "/usr/local/bin/provision-user").Output(); err != nil {
-		logger.WithField("error", err).Fatal("Failed to provision KDK user.")
-		return err
-	} else {
-		logger.Info("Completed KDK user provisioning.")
-		return nil
-	}
+var pruneCmd = &cobra.Command{
+	Use:   "prune",
+	Short: "Prune unused KDK container images",
+	Long:  `Prune unused KDK container images`,
+	Run: func(cmd *cobra.Command, args []string) {
+		logger := logrus.New().WithField("command", "prune")
+		kdk.Prune(CurrentKdkEnvConfig, *logger)
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(pruneCmd)
 }

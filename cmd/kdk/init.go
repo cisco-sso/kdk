@@ -16,16 +16,8 @@ package cmd
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
+	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
-)
-
-var (
-	port            string
-	imageRepository string
-	imageTag        string
-	dotfilesRepo    string
-	shell           string
 )
 
 var initCmd = &cobra.Command{
@@ -35,19 +27,19 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "init")
 
-		kdk.InitKdkConfig(KdkName, port, imageRepository, imageTag, dotfilesRepo, shell, *logger)
-		kdk.InitKdkSshKeyPair(*logger)
-		logger.Infof("KDK config written to %s. Modify this file to suit your needs.", kdk.ConfigPath)
+		kdk.InitKdkConfig(CurrentKdkEnvConfig, *logger)
+		kdk.InitKdkSshKeyPair(CurrentKdkEnvConfig, *logger)
+		logger.Infof("KDK config written to %s. Modify this file to suit your needs.", CurrentKdkEnvConfig.ConfigPath())
 	},
 }
 
 func init() {
-	initCmd.Flags().StringVarP(&KdkName, "name", "n", "kdk", "KDK Name")
-	initCmd.Flags().StringVarP(&port, "port", "p", "2022", "KDK Port")
-	initCmd.Flags().StringVarP(&imageRepository, "image-repository", "r", "ciscosso/kdk", "KDK Image Repository")
-	initCmd.Flags().StringVarP(&imageTag, "image-tag", "t", "debian-latest", "KDK Image Tag")
-	initCmd.Flags().StringVarP(&dotfilesRepo, "dotfiles-repo", "d", "https://github.com/cisco-sso/yadm-dotfiles.git", "KDK Dotfiles Repo")
-	initCmd.Flags().StringVarP(&shell, "shell", "s", "/bin/bash", "KDK shell")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.Name, "name", "n", "kdk", "KDK Name")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.Port, "port", "p", "2022", "KDK Port")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ImageRepository, "image-repository", "r", "ciscosso/kdk", "KDK Image Repository")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ImageTag, "image-tag", "t", "debian-latest", "KDK Image Tag")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.DotfilesRepo, "dotfiles-repo", "", "https://github.com/cisco-sso/yadm-dotfiles.git", "KDK Dotfiles Repo")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.Shell, "shell", "s", "/bin/bash", "KDK shell")
 
 	rootCmd.AddCommand(initCmd)
 }

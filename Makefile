@@ -1,7 +1,8 @@
+DOCKER_REGISTRY   ?=
+IMAGE_PREFIX      ?= ciscosso
 SHORT_NAME        ?= kdk
 TARGETS           ?= darwin/amd64 linux/amd64 linux/386 linux/arm linux/arm64 linux/ppc64le linux/s390x windows/amd64
 DIST_DIRS         = find * -type d -exec
-VERSION           ?= $(shell cat cmd/root.go| grep -e 'kdk.Version' | grep [0-9] | sed 's|.*"\(.*\)"|\1|g')
 
 # go option
 GO        ?= go
@@ -23,7 +24,7 @@ all: build
 build:
 	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./
 
-# usage: make clean build-cross dist VERSION=v2.0.0-alpha.3
+# usage: make clean build-cross dist VERSION=1.0.0
 .PHONY: build-cross
 build-cross: LDFLAGS += -extldflags "-static"
 build-cross:
@@ -35,17 +36,27 @@ dist:
 		cd _dist && \
 		$(DIST_DIRS) cp ../LICENSE {} \; && \
 		$(DIST_DIRS) cp ../README.md {} \; && \
-		$(DIST_DIRS) tar -zcf $(SHORT_NAME)-${VERSION}-{}.tar.gz {} \; && \
-		$(DIST_DIRS) zip -r $(SHORT_NAME)-${VERSION}-{}.zip {} \; \
+		$(DIST_DIRS) tar -zcf $(SHORT_NAME)-${VERSION}-{}.tar.gz {} \; \
 	)
+
+.PHONY: check-docker
+check-docker:
+	@if [ -z $$(which docker) ]; then \
+	  echo "Missing \`docker\` client which is required for development"; \
+	  exit 2; \
+	fi
+
+.PHONY: docker-build
+docker-build: check-docker
+	docker build --rm -t ${IMAGE} -t ${MUTABLE_IMAGE} files
 
 .PHONY: gofmt
 gofmt:
-	gofmt -w -s $$(find ./cmd ./internal -type f -name '*.go')
+	gofmt -w -s $$(find ./cmd ./pkg -type f -name '*.go')
 
 .PHONY: clean
 clean:
-	@rm -rf $(BINDIR) ./_dist ./bin
+	@rm -rf $(BINDIR) ./_dist ./bin vendor
 
 HAS_DEP := $(shell command -v dep;)
 HAS_GIT := $(shell command -v git;)
@@ -62,3 +73,5 @@ ifndef HAS_GIT
 	$(error You must install Git)
 endif
 	dep ensure
+
+include versioning.mk

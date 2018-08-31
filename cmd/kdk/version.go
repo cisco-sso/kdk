@@ -16,20 +16,19 @@ package cmd
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
+	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
 )
 
-var pruneCmd = &cobra.Command{
-	Use:   "prune",
-	Short: "Prune unused KDK container images",
-	Long:  `Prune unused KDK container images`,
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Print version information.",
+	Long:  `Print version information.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "prune")
-		kdk.Prune(kdk.Ctx, kdk.DockerClient, *logger)
+		logrus.WithFields(logrus.Fields{"command": "version", "version": kdk.GetVersion()}).Info("kdk")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(pruneCmd)
+	rootCmd.AddCommand(versionCmd)
 }

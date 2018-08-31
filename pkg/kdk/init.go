@@ -15,67 +15,22 @@
 package kdk
 
 import (
-	"context"
 	"io/ioutil"
 	"os"
-	"os/user"
 	"path/filepath"
-	"strings"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/pkg/utils"
-	"github.com/cisco-sso/kdk/internal/pkg/utils/simpleprompt"
+	"github.com/cisco-sso/kdk/pkg/keybase"
+	"github.com/cisco-sso/kdk/pkg/prompt"
+	"github.com/cisco-sso/kdk/pkg/ssh"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
-	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/ghodss/yaml"
 )
 
-var (
-	ConfigDir      string
-	ConfigName     string
-	ConfigPath     string
-	Verbose        bool
-	Version        string
-	KeypairDir     string
-	PrivateKeyPath string
-	PublicKeyPath  string
-	DockerClient   *client.Client
-	Ctx            context.Context
-	KdkConfig      *kdkConfig
-)
-
-// Struct of configs from the docker lib, to be saved directly as ~/.kdk/config.yaml
-type kdkConfig struct {
-	AppConfig       appConfig
-	ContainerConfig container.Config     `json:",omitempty"`
-	HostConfig      container.HostConfig `json:",omitempty"`
-}
-
-type appConfig struct {
-	Name     string
-	Port     string
-	Username string
-}
-
 // TODO (rluckie) refactor to be a method of kdkConfig type
-func InitKdkConfig(
-	kdkName string,
-	port string,
-	imageRepository string,
-	imageTag string,
-	dotfilesRepo string,
-	shell string,
-	logger logrus.Entry) error {
-
-	currentUser, _ := user.Current()
-	username := currentUser.Username
-
-	// Windows usernames are `domain\username`.  Strip the domain in case we are running on Windows.
-	if strings.Contains(username, "\\") {
-		username = strings.Split(username, "\\")[1]
-	}
+func InitKdkConfig(cfg KdkEnvConfig, logger logrus.Entry) error {
 
 	// Initialize storage mounts/volumes
 	var mounts []mount.Mount         // hostConfig
@@ -85,13 +40,13 @@ func InitKdkConfig(
 	// Define mount configurations for mounting the ssh pub key into a tmp location where the bootstrap script may
 	//   copy into <userdir>/.ssh/authorized keys.  This is required because Windows mounts squash permissions to
 	//   777 which makes ssh fail a strict check on pubkey permissions.
-	source := PublicKeyPath
+	source := cfg.PublicKeyPath()
 	target := "/tmp/id_rsa.pub"
 	mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target, ReadOnly: true})
 	volumes[target] = struct{}{}
 
 	// Keybase mounts
-	source, target, err := utils.KeybaseGetMounts(ConfigDir, logger)
+	source, target, err := keybase.GetMounts(cfg.ConfigRootDir(), logger)
 	if err != nil {
 		logger.Warn("Failed to add keybase mount:", err)
 	} else {
@@ -101,28 +56,28 @@ func InitKdkConfig(
 
 	// Define Additional volume bindings
 	for {
-		prompt := simpleprompt.Prompt{
+		prmpt := prompt.Prompt{
 			Text:     "Would you like to mount additional docker host directories into the KDK? [y/n] ",
 			Loop:     true,
-			Validate: simpleprompt.ValidateYorN,
+			Validate: prompt.ValidateYorN,
 		}
-		if result, err := prompt.Run(); err == nil && result == "y" {
-			prompt = simpleprompt.Prompt{
+		if result, err := prmpt.Run(); err == nil && result == "y" {
+			prmpt = prompt.Prompt{
 				Text:     "Please enter the docker host source directory (e.g. /Users/<username>/Projects) ",
 				Loop:     true,
-				Validate: simpleprompt.ValidateDirExists,
+				Validate: prompt.ValidateDirExists,
 			}
-			source, err := prompt.Run()
+			source, err := prmpt.Run()
 			if err == nil {
 				logger.Infof("Entered host source directory mount %v", source)
 			}
 
-			prompt = simpleprompt.Prompt{
+			prmpt = prompt.Prompt{
 				Text:     "Please enter the docker container target directory (e.g. /home/<username>/Projects) ",
 				Loop:     false,
 				Validate: nil,
 			}
-			target, err := prompt.Run()
+			target, err := prmpt.Run()
 			if err == nil {
 				logger.Infof("Entered container target directory mount %v", target)
 			}
@@ -135,20 +90,15 @@ func InitKdkConfig(
 	}
 
 	// Create the Default configuration struct that will be written as the config file
-	KdkConfig = &kdkConfig{
-		AppConfig: appConfig{
-			Name:     kdkName,
-			Port:     port,
-			Username: username,
-		},
+	cfg.KdkCfg = &kdkConfig{
 		ContainerConfig: container.Config{
-			Hostname: kdkName,
-			Image:    imageRepository + ":" + imageTag,
+			Hostname: cfg.Name,
+			Image:    cfg.ImageCoordinates(),
 			Tty:      true,
 			Env: []string{
-				"KDK_USERNAME=" + username,
-				"KDK_SHELL=" + shell,
-				"KDK_DOTFILES_REPO=" + dotfilesRepo,
+				"KDK_USERNAME=" + cfg.User(),
+				"KDK_SHELL=" + cfg.Shell,
+				"KDK_DOTFILES_REPO=" + cfg.DotfilesRepo,
 			},
 			ExposedPorts: nat.PortSet{
 				"2022/tcp": struct{}{},
@@ -162,7 +112,7 @@ func InitKdkConfig(
 			PortBindings: nat.PortMap{
 				"2022/tcp": []nat.PortBinding{
 					{
-						HostPort: port,
+						HostPort: cfg.Port,
 					},
 				},
 			},
@@ -171,41 +121,41 @@ func InitKdkConfig(
 	}
 
 	// Ensure that the ~/.kdk directory exists
-	if _, err := os.Stat(ConfigDir); os.IsNotExist(err) {
-		if err := os.Mkdir(ConfigDir, 0700); err != nil {
-			logger.WithField("error", err).Fatalf("Failed to create KDK config directory [%s]", ConfigDir)
+	if _, err := os.Stat(cfg.ConfigRootDir()); os.IsNotExist(err) {
+		if err := os.Mkdir(cfg.ConfigRootDir(), 0700); err != nil {
+			logger.WithField("error", err).Fatalf("Failed to create KDK config directory [%s]", cfg.ConfigRootDir())
 			return err
 		}
 	}
 
 	// Ensure that the ~/.kdk/<kdkName> directory exists
-	if _, err := os.Stat(filepath.Dir(ConfigPath)); os.IsNotExist(err) {
-		if err := os.Mkdir(filepath.Dir(ConfigPath), 0700); err != nil {
-			logger.WithField("error", err).Fatalf("Failed to create KDK config directory", filepath.Dir(ConfigPath))
+	if _, err := os.Stat(cfg.ConfigDir()); os.IsNotExist(err) {
+		if err := os.Mkdir(cfg.ConfigDir(), 0700); err != nil {
+			logger.WithField("error", err).Fatalf("Failed to create KDK config directory", filepath.Dir(cfg.ConfigDir()))
 			return err
 		}
 	}
 
 	// Create the ~/.kdk/<kdkName>/config.yaml file if it doesn't exist
-	y, err := yaml.Marshal(KdkConfig)
+	y, err := yaml.Marshal(&cfg)
 	if err != nil {
 		logger.Fatal("Failed to create YAML string of configuration", err)
 	}
-	if _, err := os.Stat(ConfigPath); os.IsNotExist(err) {
+	if _, err := os.Stat(cfg.ConfigPath()); os.IsNotExist(err) {
 		logger.Warn("KDK config does not exist")
 		logger.Info("Creating KDK config")
 
-		ioutil.WriteFile(ConfigPath, y, 0600)
+		ioutil.WriteFile(cfg.ConfigPath(), y, 0600)
 	} else {
 		logger.Warn("KDK config exists")
-		prompt := simpleprompt.Prompt{
+		prmpt := prompt.Prompt{
 			Text:     "Overwrite existing KDK config? [y/n] ",
 			Loop:     true,
-			Validate: simpleprompt.ValidateYorN,
+			Validate: prompt.ValidateYorN,
 		}
-		if result, err := prompt.Run(); err == nil && result == "y" {
+		if result, err := prmpt.Run(); err == nil && result == "y" {
 			logger.Info("Creating KDK config")
-			ioutil.WriteFile(ConfigPath, y, 0600)
+			ioutil.WriteFile(cfg.ConfigPath(), y, 0600)
 		} else {
 			logger.Info("Existing KDK config not overwritten")
 			return err
@@ -215,37 +165,37 @@ func InitKdkConfig(
 }
 
 // TODO (rluckie) refactor to be a method of kdkConfig type
-func InitKdkSshKeyPair(logger logrus.Entry) error {
+func InitKdkSshKeyPair(cfg KdkEnvConfig, logger logrus.Entry) error {
 
-	if _, err := os.Stat(ConfigDir); os.IsNotExist(err) {
-		if err := os.Mkdir(ConfigDir, 0700); err != nil {
+	if _, err := os.Stat(cfg.ConfigRootDir()); os.IsNotExist(err) {
+		if err := os.Mkdir(cfg.ConfigRootDir(), 0700); err != nil {
 			logger.WithField("error", err).Fatal("Failed to create KDK config directory")
 		}
 	}
-	if _, err := os.Stat(KeypairDir); os.IsNotExist(err) {
-		if err := os.Mkdir(KeypairDir, 0700); err != nil {
+	if _, err := os.Stat(cfg.KeypairDir()); os.IsNotExist(err) {
+		if err := os.Mkdir(cfg.KeypairDir(), 0700); err != nil {
 			logger.WithField("error", err).Fatal("Failed to create ssh key directory")
 		}
 	}
-	if _, err := os.Stat(PrivateKeyPath); os.IsNotExist(err) {
+	if _, err := os.Stat(cfg.PrivateKeyPath()); os.IsNotExist(err) {
 		logger.Warn("KDK ssh key pair not found.")
 		logger.Info("Generating ssh key pair...")
-		privateKey, err := utils.GeneratePrivateKey(4096)
+		privateKey, err := ssh.GeneratePrivateKey(4096)
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to generate ssh private key")
 			return err
 		}
-		publicKeyBytes, err := utils.GeneratePublicKey(&privateKey.PublicKey)
+		publicKeyBytes, err := ssh.GeneratePublicKey(&privateKey.PublicKey)
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to generate ssh public key")
 			return err
 		}
-		err = utils.WriteKeyToFile(utils.EncodePrivateKey(privateKey), PrivateKeyPath)
+		err = ssh.WriteKeyToFile(ssh.EncodePrivateKey(privateKey), cfg.PrivateKeyPath())
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to write ssh private key")
 			return err
 		}
-		err = utils.WriteKeyToFile([]byte(publicKeyBytes), PublicKeyPath)
+		err = ssh.WriteKeyToFile([]byte(publicKeyBytes), cfg.PublicKeyPath())
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to write ssh public key")
 			return err

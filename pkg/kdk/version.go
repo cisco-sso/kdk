@@ -12,24 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package kdk
 
-import (
-	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
-	"github.com/spf13/cobra"
+var (
+	Version       = "0.8.0"
+	BuildMetadata = "unreleased"
+	GitCommit     = ""
+	GitTreeState  = ""
 )
 
-var destroyCmd = &cobra.Command{
-	Use:   "destroy",
-	Short: "Destroy the running KDK container",
-	Long:  `Destroy the running KDK container`,
-	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "destroy")
-		kdk.Destroy(kdk.Ctx, kdk.DockerClient, *logger)
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(destroyCmd)
+func GetVersion() string {
+	if BuildMetadata == "" {
+		return Version
+	}
+	return Version + "+" + BuildMetadata
 }

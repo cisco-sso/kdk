@@ -15,26 +15,25 @@
 package kdk
 
 import (
-	"context"
 	"fmt"
+
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/pkg/utils/simpleprompt"
+	"github.com/cisco-sso/kdk/pkg/prompt"
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
 )
 
-func Destroy(ctx context.Context, dockerClient *client.Client, logger logrus.Entry) error {
+func Destroy(cfg KdkEnvConfig, logger logrus.Entry) error {
 
 	var containerIds []string
 
-	containers, err := dockerClient.ContainerList(ctx, types.ContainerListOptions{})
+	containers, err := cfg.DockerClient.ContainerList(cfg.Ctx, types.ContainerListOptions{})
 
 	if err != nil {
 		logger.WithField("error", err).Fatal("Failed to list docker containers")
 	}
 	for _, container := range containers {
 		for _, name := range container.Names {
-			if name == "/"+KdkConfig.AppConfig.Name {
+			if name == "/"+cfg.Name {
 				containerIds = append(containerIds, container.ID)
 				break
 			}
@@ -43,17 +42,17 @@ func Destroy(ctx context.Context, dockerClient *client.Client, logger logrus.Ent
 	if len(containerIds) > 0 {
 		logger.Info("Destroying KDK container(s)...")
 		for _, containerId := range containerIds {
-			fmt.Printf("Delete KDK container [%s][%v]\n", KdkConfig.AppConfig.Name, containerId[:8])
-			prompt := simpleprompt.Prompt{
+			fmt.Printf("Delete KDK container [%s][%v]\n", cfg.Name, containerId[:8])
+			prmpt := prompt.Prompt{
 				Text:     "Continue? [y/n] ",
 				Loop:     true,
-				Validate: simpleprompt.ValidateYorN,
+				Validate: prompt.ValidateYorN,
 			}
-			if result, err := prompt.Run(); err != nil || result == "n" {
+			if result, err := prmpt.Run(); err != nil || result == "n" {
 				logger.Error("KDK container deletion canceled or invalid input.")
 				return nil
 			}
-			if err := dockerClient.ContainerRemove(ctx, containerId, types.ContainerRemoveOptions{Force: true}); err != nil {
+			if err := cfg.DockerClient.ContainerRemove(cfg.Ctx, containerId, types.ContainerRemoveOptions{Force: true}); err != nil {
 				logger.WithField("error", err).Fatal("Failed to remove KDK container")
 			}
 		}

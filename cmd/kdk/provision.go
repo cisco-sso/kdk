@@ -12,25 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package kdk
+package cmd
 
 import (
-	"context"
-	"io"
-	"os"
-
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
-	"io/ioutil"
+	"github.com/Sirupsen/logrus"
+	"github.com/cisco-sso/kdk/pkg/kdk"
+	"github.com/spf13/cobra"
 )
 
-func Pull(ctx context.Context, dockerClient *client.Client) error {
-	out, err := dockerClient.ImagePull(ctx, KdkConfig.ContainerConfig.Image, types.ImagePullOptions{})
-	defer out.Close()
-	if Verbose {
-		io.Copy(os.Stdout, out)
-	} else {
-		io.Copy(ioutil.Discard, out)
-	}
-	return err
+var provisionCmd = &cobra.Command{
+	Use:   "provision",
+	Short: "Provision KDK user",
+	Long:  `Provision KDK user`,
+	Run: func(cmd *cobra.Command, args []string) {
+		logger := logrus.New().WithField("command", "provision")
+
+		kdk.Provision(CurrentKdkEnvConfig, *logger)
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(provisionCmd)
 }

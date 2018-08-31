@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/cisco-sso/kdk/cmd"
+import "github.com/cisco-sso/kdk/cmd/kdk"
 
 func main() {
 	cmd.Execute()
