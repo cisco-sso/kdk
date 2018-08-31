@@ -16,7 +16,6 @@ package kdk
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -79,7 +78,7 @@ func InitKdkConfig(
 	}
 
 	// Initialize storage mounts/volumes
-	mounts := []mount.Mount{}        // hostConfig
+	var mounts []mount.Mount         // hostConfig
 	volumes := map[string]struct{}{} // containerConfig
 	labels := map[string]string{"kdk": Version}
 
@@ -91,38 +90,13 @@ func InitKdkConfig(
 	mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target, ReadOnly: true})
 	volumes[target] = struct{}{}
 
-	// Define volume bindings for the keybase directory
-	//   Linux & OSX: Detec /keybase
-	//   Windows10: Detect k: and /k
-	keybaseRoots := []string{"/keybase", "k:", "/k"}
-	keybaseTestSubdir := "/private"
-	keybaseFound := false
-	for _, keybaseRoot := range keybaseRoots {
-		if absPath, err := filepath.Abs(filepath.Join(keybaseRoot, keybaseTestSubdir)); err == nil {
-			if path, err := filepath.EvalSymlinks(absPath); err == nil {
-				source := filepath.Dir(path)
-				target := "/keybase"
-
-				logger.Infof("Detected /keybase filesystem at: %v", source)
-
-				prompt := simpleprompt.Prompt{
-					Text:     "Mount your /keybase directory within KDK? [y/n] ",
-					Loop:     true,
-					Validate: simpleprompt.ValidateYorN,
-				}
-				if result, err := prompt.Run(); err == nil && result == "y" {
-					logger.Info("Adding /keybase mount to configuration")
-					mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target, ReadOnly: false})
-					volumes[target] = struct{}{}
-					keybaseFound = true
-				} else {
-					logger.Info(fmt.Sprintf("Skip Adding of Bind target `%v` to configuration", target))
-				}
-			}
-		}
-	}
-	if !keybaseFound {
-		logger.Warn("Failed to detect potential /keybase filesystem mounts")
+	// Keybase mounts
+	source, target, err := utils.KeybaseGetMounts(ConfigDir, logger)
+	if err != nil {
+		logger.Warn("Failed to add keybase mount:", err)
+	} else {
+		mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target, ReadOnly: false})
+		volumes[target] = struct{}{}
 	}
 
 	// Define Additional volume bindings
