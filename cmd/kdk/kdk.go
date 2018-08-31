@@ -15,24 +15,17 @@
 package cmd
 
 import (
-	"context"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
-	"github.com/docker/docker/client"
+	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/ghodss/yaml"
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"io/ioutil"
 )
 
-var (
-	KdkName string
-	verbose bool
-)
+var CurrentKdkEnvConfig = kdk.KdkEnvConfig{}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -58,36 +51,22 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	CurrentKdkEnvConfig.Init()
 
-	rootCmd.PersistentFlags().StringVar(&KdkName, "name", "kdk", "KDK name")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
+	rootCmd.PersistentFlags().StringVar(&CurrentKdkEnvConfig.Name, "name", "kdk", "KDK name")
+	rootCmd.PersistentFlags().BoolVarP(&CurrentKdkEnvConfig.Debug, "debug", "d", false, "Debug Mode")
 }
 
 func initConfig() {
-	kdk.Verbose = verbose
 
-	home, err := homedir.Dir()
-	if err != nil {
-		logrus.WithField("err", err).Fatal("Unable to find Home Directory")
-	}
-
-	kdk.ConfigDir = filepath.Join(home, ".kdk")
-	kdk.ConfigName = "config"
-	kdk.ConfigPath = filepath.Join(kdk.ConfigDir, KdkName, kdk.ConfigName+".yaml")
-	kdk.KeypairDir = filepath.Join(kdk.ConfigDir, "ssh")
-	kdk.PrivateKeyPath = filepath.Join(kdk.KeypairDir, "id_rsa")
-	kdk.PublicKeyPath = filepath.Join(kdk.KeypairDir, "id_rsa.pub")
-
-	if _, err := os.Stat(kdk.ConfigDir); os.IsNotExist(err) {
-		err = os.Mkdir(kdk.ConfigDir, 0700)
+	if _, err := os.Stat(CurrentKdkEnvConfig.ConfigRootDir()); os.IsNotExist(err) {
+		err = os.Mkdir(CurrentKdkEnvConfig.ConfigRootDir(), 0700)
 		if err != nil {
 			logrus.WithField("err", err).Fatal("Unable to create Config Directory")
 		}
 	}
 
-	viper.SetConfigFile(kdk.ConfigPath)
-	viper.AddConfigPath(filepath.Dir(kdk.ConfigPath))
-	viper.SetConfigName(kdk.ConfigName)
+	viper.SetConfigFile(CurrentKdkEnvConfig.ConfigPath())
 
 	viper.SetEnvPrefix("kdk")
 	viper.AutomaticEnv()
@@ -99,24 +78,16 @@ func initConfig() {
 	if viper.GetBool("json") {
 		logrus.SetFormatter(&logrus.JSONFormatter{})
 	}
-	if _, err := os.Stat(kdk.ConfigPath); err == nil {
-
+	if _, err := os.Stat(CurrentKdkEnvConfig.ConfigPath()); err == nil {
 		// read the config.yaml file
-		data, err := ioutil.ReadFile(kdk.ConfigPath)
+		data, err := ioutil.ReadFile(CurrentKdkEnvConfig.ConfigPath())
 		if err != nil {
-			logrus.WithField("err", err).Fatalf("Failed to read configFile %v", kdk.ConfigPath)
+			logrus.WithField("err", err).Fatalf("Failed to read configFile %v", CurrentKdkEnvConfig.ConfigPath())
 		}
-
-		err = yaml.Unmarshal(data, &kdk.KdkConfig)
+		err = yaml.Unmarshal(data, &CurrentKdkEnvConfig)
 		if err != nil {
 			logrus.WithField("err", err).Error("Corrupted or deprecated kdk config file format")
 			logrus.Fatal("Please rebuild config file with `kdk init`")
 		}
-	}
-	kdk.Ctx = context.Background()
-
-	kdk.DockerClient, err = client.NewEnvClient()
-	if err != nil {
-		logrus.WithField("err", err).Fatal("Failed to create docker client")
 	}
 }

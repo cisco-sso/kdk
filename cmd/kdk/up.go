@@ -16,19 +16,22 @@ package cmd
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
+	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
 )
 
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Print version information.",
-	Long:  `Print version information.`,
+var upCmd = &cobra.Command{
+	Use:   "up",
+	Short: "Start KDK container",
+	Long:  `Start KDK container`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logrus.WithFields(logrus.Fields{"command": "version", "version": kdk.Version}).Info("kdk")
+		logger := logrus.New().WithField("command", "up")
+
+		kdk.Up(CurrentKdkEnvConfig, *logger)
+		kdk.Provision(CurrentKdkEnvConfig, *logger)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(upCmd)
 }

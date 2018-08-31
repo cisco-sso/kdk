@@ -1,4 +1,4 @@
-package simpleprompt
+package prompt
 
 /* Usage
 sp := Prompt{

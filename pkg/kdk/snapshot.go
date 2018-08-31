@@ -12,29 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package kdk
 
 import (
+	"context"
+	"strconv"
+	"time"
+
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
-	"github.com/spf13/cobra"
+	"github.com/docker/docker/api/types"
 )
 
-var pullCmd = &cobra.Command{
-	Use:   "pull",
-	Short: "Pull KDK docker image",
-	Long:  `Pull the latest/configured KDK docker image`,
-	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "pull")
-
-		logger.Info("Pulling KDK image. This may take a moment...")
-		if err := kdk.Pull(kdk.Ctx, kdk.DockerClient); err != nil {
-			logger.WithField("error", err).Fatal("Failed to pull KDK image")
-		}
-		logger.Info("Successfully pulled KDK image.")
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(pullCmd)
+func Snapshot(cfg KdkEnvConfig, logger logrus.Entry) error {
+	snapshotName := cfg.Name + "-" + strconv.Itoa(int(time.Now().UnixNano()))
+	_, err := cfg.DockerClient.ContainerCommit(context.Background(), cfg.Name, types.ContainerCommitOptions{Reference: snapshotName})
+	if err != nil {
+		logger.WithField("error", err).Fatal("Failed to create snapshot of KDK container")
+		return err
+	}
+	logger.Info("Successfully created snapshot of KDK container.", snapshotName)
+	return nil
 }

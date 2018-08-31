@@ -15,17 +15,15 @@
 package kdk
 
 import (
-	"context"
 	"strings"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/pkg/utils"
-	"github.com/cisco-sso/kdk/internal/pkg/utils/simpleprompt"
+	"github.com/cisco-sso/kdk/pkg/prompt"
+	"github.com/cisco-sso/kdk/pkg/utils"
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
 )
 
-func Prune(ctx context.Context, dockerClient *client.Client, logger logrus.Entry) error {
+func Prune(cfg KdkEnvConfig, logger logrus.Entry) error {
 	logger.Info("Starting Prune...")
 
 	var (
@@ -35,12 +33,12 @@ func Prune(ctx context.Context, dockerClient *client.Client, logger logrus.Entry
 	)
 
 	// Get containers
-	containers, err := dockerClient.ContainerList(ctx, types.ContainerListOptions{})
+	containers, err := cfg.DockerClient.ContainerList(cfg.Ctx, types.ContainerListOptions{})
 	if err != nil {
 		logger.WithField("error", err).Fatal("Failed to list docker containers")
 	}
 	// Get images
-	images, err := dockerClient.ImageList(ctx, types.ImageListOptions{})
+	images, err := cfg.DockerClient.ImageList(cfg.Ctx, types.ImageListOptions{})
 	if err != nil {
 		logger.WithField("error", err).Fatal("Failed to list docker images")
 	}
@@ -52,10 +50,10 @@ func Prune(ctx context.Context, dockerClient *client.Client, logger logrus.Entry
 		}
 	}
 
-	// Iterate through images and track images that have a `kdk` label key
+	// Iterate through images and track images that have a `main` label key
 	for _, image := range images {
 		for key := range image.Labels {
-			if key == "kdk" {
+			if key == "main" {
 				imageIds = append(imageIds, image.ID)
 				break
 			}
@@ -71,20 +69,20 @@ func Prune(ctx context.Context, dockerClient *client.Client, logger logrus.Entry
 	}
 
 	if len(staleImageIds) > 0 {
-		// iterate through staleImageIds, prompt user to confirm deletion
+		// iterate through staleImageIds, prmpt user to confirm deletion
 		for staleImage := range staleImageIds {
 			targetImage := staleImageIds[staleImage]
 			logger.Infof("Delete stale KDK image [%s]?", targetImage)
-			prompt := simpleprompt.Prompt{
+			prmpt := prompt.Prompt{
 				Text:     "Continue? [y/n] ",
 				Loop:     true,
-				Validate: simpleprompt.ValidateYorN,
+				Validate: prompt.ValidateYorN,
 			}
-			if result, err := prompt.Run(); err != nil || result == "n" {
+			if result, err := prmpt.Run(); err != nil || result == "n" {
 				logger.Error("KDK stale image deletion canceled or invalid input.")
 				return err
 			}
-			if _, err := dockerClient.ImageRemove(ctx, targetImage, types.ImageRemoveOptions{Force: true, PruneChildren: true}); err != nil {
+			if _, err := cfg.DockerClient.ImageRemove(cfg.Ctx, targetImage, types.ImageRemoveOptions{Force: true, PruneChildren: true}); err != nil {
 				logger.WithField("error", err).Fatalf("Failed to prune KDK image [%s]", targetImage)
 				return err
 			} else {

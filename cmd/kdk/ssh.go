@@ -15,13 +15,8 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-	"strings"
-
 	"github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
-	"github.com/codeskyblue/go-sh"
+	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
 )
 
@@ -32,19 +27,8 @@ var sshCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "ssh")
 
-		logger.Info("Connecting to KDK container")
+		kdk.Ssh(CurrentKdkEnvConfig, *logger)
 
-		connectionString := kdk.KdkConfig.AppConfig.Username + "@localhost"
-		commandString := fmt.Sprintf("ssh %s -A -p %s -i %s -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null", connectionString, kdk.KdkConfig.AppConfig.Port, kdk.PrivateKeyPath)
-		if kdk.Verbose {
-			logger.Infof("executing ssh command: %s", commandString)
-		}
-		commandMap := strings.Split(commandString, " ")
-		if err := sh.Command(commandMap[0], commandMap[1:]).SetStdin(os.Stdin).Run(); err != nil {
-			logger.WithField("error", err).Fatal("Failed to ssh to KDK container.")
-		}
-
-		logger.Info("KDK session exited")
 	},
 }
 

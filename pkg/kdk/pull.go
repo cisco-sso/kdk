@@ -15,24 +15,20 @@
 package kdk
 
 import (
-	"context"
-	"strconv"
-	"time"
+	"io"
+	"os"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
+	"io/ioutil"
 )
 
-func Snapshot(ctx context.Context, dockerClient *client.Client, logger logrus.Entry) error {
-
-	snapshotName := KdkConfig.AppConfig.Name + "-" + strconv.Itoa(int(time.Now().UnixNano()))
-
-	_, err := dockerClient.ContainerCommit(context.Background(), KdkConfig.AppConfig.Name, types.ContainerCommitOptions{Reference: snapshotName})
-	if err != nil {
-		logger.WithField("error", err).Fatal("Failed to create snapshot of KDK container")
-		return err
+func Pull(cfg KdkEnvConfig) error {
+	out, err := cfg.DockerClient.ImagePull(cfg.Ctx, cfg.ImageCoordinates(), types.ImagePullOptions{})
+	defer out.Close()
+	if cfg.Debug {
+		io.Copy(os.Stdout, out)
+	} else {
+		io.Copy(ioutil.Discard, out)
 	}
-	logger.Info("Successfully created snapshot of KDK container.", snapshotName)
-	return nil
+	return err
 }
