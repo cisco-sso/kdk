@@ -14,8 +14,14 @@
 
 package main
 
-import "github.com/cisco-sso/kdk/cmd"
+import (
+	"github.com/cisco-sso/kdk/cmd"
+	"github.com/cisco-sso/kdk/internal/app/kdk"
+)
+
+var Version string = "undefined"
 
 func main() {
+	kdk.Version = Version
 	cmd.Execute()
 }

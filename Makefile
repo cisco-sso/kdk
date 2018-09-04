@@ -9,7 +9,7 @@ PKG       := $(shell dep ensure)
 TAGS      :=
 TESTS     := .
 TESTFLAGS :=
-LDFLAGS   := -w -s
+LDFLAGS   := -w -s -X main.Version=$(shell git describe --tags --long --dirty | sed 's/-/+/2')
 GOFLAGS   :=
 BINDIR    := $(CURDIR)/bin
 
