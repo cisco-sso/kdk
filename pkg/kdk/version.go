@@ -15,15 +15,5 @@
 package kdk
 
 var (
-	Version       = "0.8.0"
-	BuildMetadata = "unreleased"
-	GitCommit     = ""
-	GitTreeState  = ""
+	Version       = "undefined"
 )
-
-func GetVersion() string {
-	if BuildMetadata == "" {
-		return Version
-	}
-	return Version + "+" + BuildMetadata
-}

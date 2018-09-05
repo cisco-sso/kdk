@@ -25,7 +25,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print version information.",
 	Long:  `Print version information.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logrus.WithFields(logrus.Fields{"command": "version", "version": kdk.GetVersion()}).Info("kdk")
+		logrus.WithFields(logrus.Fields{"command": "version", "version": kdk.Version}).Info("kdk")
 	},
 }
 
