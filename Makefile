@@ -10,7 +10,7 @@ PKG       := $(shell dep ensure)
 TAGS      :=
 TESTS     := .
 TESTFLAGS :=
-LDFLAGS   := -w -s -X main.Version=$(shell git describe --tags --long --dirty | sed 's/-/+/2')
+LDFLAGS   := -w -s -X main.Version=$(shell git describe --tags --long --dirty | sed 's/-0-........$$//; s/-/+/2')
 GOFLAGS   :=
 BINDIR    := $(CURDIR)/bin
 
@@ -73,5 +73,3 @@ ifndef HAS_GIT
 	$(error You must install Git)
 endif
 	dep ensure
-
-include versioning.mk
