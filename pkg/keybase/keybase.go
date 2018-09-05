@@ -94,6 +94,8 @@ func StartMirror(configDir string, debug bool, logger logrus.Entry) error {
 // Stop keybase mirror [windows only]
 func StopMirror(configDir string, debug bool, logger logrus.Entry) error {
 	// TODO(rluckie) Fix StopMirror to work with multiple KDK containers
+	// Use docker client to iterate though all running containers and ensure that no containers have mirror dir mounted
+	// If so, stop mirror
 	logger.Info("Writing keybase mirror script")
 	scriptPath, err := writeMirrorScript(configDir)
 	if err != nil {
