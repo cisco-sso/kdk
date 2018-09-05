@@ -24,17 +24,17 @@ import (
 
 func Up(cfg KdkEnvConfig, logger logrus.Entry) error {
 	if runtime.GOOS == "windows" {
-		if err := keybase.StartMirror(cfg.ConfigRootDir(), cfg.Debug, logger); err != nil {
+		if err := keybase.StartMirror(cfg.ConfigRootDir(), cfg.ConfigFile.AppConfig.Debug, logger); err != nil {
 			logger.WithField("error", err).Fatal("Failed to start keybase mirror")
 			return err
 		}
 	}
 	containerCreateResp, err := cfg.DockerClient.ContainerCreate(
 		cfg.Ctx,
-		&cfg.KdkCfg.ContainerConfig,
-		&cfg.KdkCfg.HostConfig,
+		cfg.ConfigFile.ContainerConfig,
+		cfg.ConfigFile.HostConfig,
 		nil,
-		cfg.Name,
+		cfg.ConfigFile.AppConfig.Name,
 	)
 	if err != nil {
 		logger.WithField("error", err).Fatal("Failed to create KDK container")

@@ -33,7 +33,7 @@ func Destroy(cfg KdkEnvConfig, logger logrus.Entry) error {
 	}
 	for _, container := range containers {
 		for _, name := range container.Names {
-			if name == "/"+cfg.Name {
+			if name == "/"+cfg.ConfigFile.AppConfig.Name {
 				containerIds = append(containerIds, container.ID)
 				break
 			}
@@ -42,7 +42,7 @@ func Destroy(cfg KdkEnvConfig, logger logrus.Entry) error {
 	if len(containerIds) > 0 {
 		logger.Info("Destroying KDK container(s)...")
 		for _, containerId := range containerIds {
-			fmt.Printf("Delete KDK container [%s][%v]\n", cfg.Name, containerId[:8])
+			fmt.Printf("Delete KDK container [%s][%v]\n", cfg.ConfigFile.AppConfig.Name, containerId[:8])
 			prmpt := prompt.Prompt{
 				Text:     "Continue? [y/n] ",
 				Loop:     true,

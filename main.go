@@ -15,8 +15,8 @@
 package main
 
 import (
-	"github.com/cisco-sso/kdk/cmd"
-	"github.com/cisco-sso/kdk/internal/app/kdk"
+	"github.com/cisco-sso/kdk/cmd/kdk"
+	"github.com/cisco-sso/kdk/pkg/kdk"
 )
 
 var Version string = "undefined"
