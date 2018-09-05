@@ -27,8 +27,8 @@ func Ssh(cfg KdkEnvConfig, logger logrus.Entry) error {
 	logger.Info("Connecting to KDK container")
 
 	connectionString := cfg.User() + "@localhost"
-	commandString := fmt.Sprintf("ssh %s -A -p %s -i %s -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null", connectionString, cfg.Port, cfg.PrivateKeyPath())
-	if cfg.Debug {
+	commandString := fmt.Sprintf("ssh %s -A -p %s -i %s -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null", connectionString, cfg.ConfigFile.AppConfig.Port, cfg.PrivateKeyPath())
+	if cfg.ConfigFile.AppConfig.Debug {
 		logger.Infof("executing ssh command: %s", commandString)
 	}
 	commandMap := strings.Split(commandString, " ")

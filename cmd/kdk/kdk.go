@@ -53,8 +53,8 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	CurrentKdkEnvConfig.Init()
 
-	rootCmd.PersistentFlags().StringVar(&CurrentKdkEnvConfig.Name, "name", "kdk", "KDK name")
-	rootCmd.PersistentFlags().BoolVarP(&CurrentKdkEnvConfig.Debug, "debug", "d", false, "Debug Mode")
+	rootCmd.PersistentFlags().StringVar(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Name, "name", "kdk", "KDK name")
+	rootCmd.PersistentFlags().BoolVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Debug, "debug", "d", false, "Debug Mode")
 }
 
 func initConfig() {
@@ -84,7 +84,8 @@ func initConfig() {
 		if err != nil {
 			logrus.WithField("err", err).Fatalf("Failed to read configFile %v", CurrentKdkEnvConfig.ConfigPath())
 		}
-		err = yaml.Unmarshal(data, &CurrentKdkEnvConfig)
+
+		err = yaml.Unmarshal(data, &CurrentKdkEnvConfig.ConfigFile)
 		if err != nil {
 			logrus.WithField("err", err).Error("Corrupted or deprecated kdk config file format")
 			logrus.Fatal("Please rebuild config file with `kdk init`")

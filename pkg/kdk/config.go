@@ -27,8 +27,18 @@ import (
 
 // Struct of all configs to be saved directly as ~/.kdk/<NAME>/config.yaml
 type KdkEnvConfig struct {
-	DockerClient    *client.Client
-	Ctx             context.Context
+	DockerClient *client.Client
+	Ctx          context.Context
+	ConfigFile   configFile
+}
+
+type configFile struct {
+	AppConfig       AppConfig
+	ContainerConfig *container.Config     `json:",omitempty"`
+	HostConfig      *container.HostConfig `json:",omitempty"`
+}
+
+type AppConfig struct {
 	Name            string
 	Port            string
 	ImageRepository string
@@ -36,7 +46,6 @@ type KdkEnvConfig struct {
 	DotfilesRepo    string
 	Shell           string
 	Debug           bool
-	KdkCfg          *kdkConfig
 }
 
 // Struct of configs from the docker lib, to be saved directly as ~/.kdk/config.yaml
@@ -100,7 +109,7 @@ func (c *KdkEnvConfig) PublicKeyPath() (out string) {
 
 // kdk container config dir (~/.kdk/<KDK_NAME>)
 func (c *KdkEnvConfig) ConfigDir() (out string) {
-	return filepath.Join(c.ConfigRootDir(), c.Name)
+	return filepath.Join(c.ConfigRootDir(), c.ConfigFile.AppConfig.Name)
 }
 
 // kdk container config path (~/.kdk/<KDK_NAME>/config.yaml)
@@ -110,5 +119,5 @@ func (c *KdkEnvConfig) ConfigPath() (out string) {
 
 // kdk image coordinates (ciscosso/kdk:debian-latest)
 func (c *KdkEnvConfig) ImageCoordinates() (out string) {
-	return c.ImageRepository + ":" + c.ImageTag
+	return c.ConfigFile.AppConfig.ImageRepository + ":" + c.ConfigFile.AppConfig.ImageTag
 }

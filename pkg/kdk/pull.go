@@ -25,7 +25,7 @@ import (
 func Pull(cfg KdkEnvConfig) error {
 	out, err := cfg.DockerClient.ImagePull(cfg.Ctx, cfg.ImageCoordinates(), types.ImagePullOptions{})
 	defer out.Close()
-	if cfg.Debug {
+	if cfg.ConfigFile.AppConfig.Debug {
 		io.Copy(os.Stdout, out)
 	} else {
 		io.Copy(ioutil.Discard, out)

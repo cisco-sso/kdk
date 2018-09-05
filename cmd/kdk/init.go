@@ -34,12 +34,12 @@ var initCmd = &cobra.Command{
 }
 
 func init() {
-	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.Name, "name", "n", "kdk", "KDK Name")
-	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.Port, "port", "p", "2022", "KDK Port")
-	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ImageRepository, "image-repository", "r", "ciscosso/kdk", "KDK Image Repository")
-	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ImageTag, "image-tag", "t", "debian-latest", "KDK Image Tag")
-	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.DotfilesRepo, "dotfiles-repo", "", "https://github.com/cisco-sso/yadm-dotfiles.git", "KDK Dotfiles Repo")
-	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.Shell, "shell", "s", "/bin/bash", "KDK shell")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Name, "name", "n", "kdk", "KDK Name")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Port, "port", "p", "2022", "KDK Port")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.ImageRepository, "image-repository", "r", "ciscosso/kdk", "KDK Image Repository")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.ImageTag, "image-tag", "t", "debian-latest", "KDK Image Tag")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.DotfilesRepo, "dotfiles-repo", "", "https://github.com/cisco-sso/yadm-dotfiles.git", "KDK Dotfiles Repo")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Shell, "shell", "s", "/bin/bash", "KDK shell")
 
 	rootCmd.AddCommand(initCmd)
 }

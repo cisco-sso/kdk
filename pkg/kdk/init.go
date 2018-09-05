@@ -90,34 +90,32 @@ func InitKdkConfig(cfg KdkEnvConfig, logger logrus.Entry) error {
 	}
 
 	// Create the Default configuration struct that will be written as the config file
-	cfg.KdkCfg = &kdkConfig{
-		ContainerConfig: container.Config{
-			Hostname: cfg.Name,
-			Image:    cfg.ImageCoordinates(),
-			Tty:      true,
-			Env: []string{
-				"KDK_USERNAME=" + cfg.User(),
-				"KDK_SHELL=" + cfg.Shell,
-				"KDK_DOTFILES_REPO=" + cfg.DotfilesRepo,
-			},
-			ExposedPorts: nat.PortSet{
-				"2022/tcp": struct{}{},
-			},
-			Volumes: volumes,
-			Labels:  labels,
+	cfg.ConfigFile.ContainerConfig = &container.Config{
+		Hostname: cfg.ConfigFile.AppConfig.Name,
+		Image:    cfg.ImageCoordinates(),
+		Tty:      true,
+		Env: []string{
+			"KDK_USERNAME=" + cfg.User(),
+			"KDK_SHELL=" + cfg.ConfigFile.AppConfig.Shell,
+			"KDK_DOTFILES_REPO=" + cfg.ConfigFile.AppConfig.DotfilesRepo,
 		},
-		HostConfig: container.HostConfig{
-			// TODO (rluckie): shouldn't default to privileged -- issue with ssh cmd
-			Privileged: true,
-			PortBindings: nat.PortMap{
-				"2022/tcp": []nat.PortBinding{
-					{
-						HostPort: cfg.Port,
-					},
+		ExposedPorts: nat.PortSet{
+			"2022/tcp": struct{}{},
+		},
+		Volumes: volumes,
+		Labels:  labels,
+	}
+	cfg.ConfigFile.HostConfig = &container.HostConfig{
+		// TODO (rluckie): shouldn't default to privileged -- issue with ssh cmd
+		Privileged: true,
+		PortBindings: nat.PortMap{
+			"2022/tcp": []nat.PortBinding{
+				{
+					HostPort: cfg.ConfigFile.AppConfig.Port,
 				},
 			},
-			Mounts: mounts,
 		},
+		Mounts: mounts,
 	}
 
 	// Ensure that the ~/.kdk directory exists
@@ -137,7 +135,7 @@ func InitKdkConfig(cfg KdkEnvConfig, logger logrus.Entry) error {
 	}
 
 	// Create the ~/.kdk/<kdkName>/config.yaml file if it doesn't exist
-	y, err := yaml.Marshal(&cfg)
+	y, err := yaml.Marshal(&cfg.ConfigFile)
 	if err != nil {
 		logger.Fatal("Failed to create YAML string of configuration", err)
 	}
