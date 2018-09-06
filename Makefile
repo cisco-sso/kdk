@@ -3,6 +3,7 @@ IMAGE_PREFIX      ?= ciscosso
 SHORT_NAME        ?= kdk
 TARGETS           ?= darwin/amd64 linux/amd64 linux/386 linux/arm linux/arm64 linux/ppc64le linux/s390x windows/amd64
 DIST_DIRS         = find * -type d -exec
+VERSION           ?= $(shell git describe --tags --long --dirty | sed 's/-0-........$$//; s/-/+/2')
 
 # go option
 GO        ?= go
@@ -10,9 +11,11 @@ PKG       := $(shell dep ensure)
 TAGS      :=
 TESTS     := .
 TESTFLAGS :=
-LDFLAGS   := -w -s -X pkg.kdk.version.Version=$(shell git describe --tags --long --dirty | sed 's/-0-........$$//; s/-/+/2')
+LDFLAGS := -w -s
 GOFLAGS   :=
 BINDIR    := $(CURDIR)/bin
+
+LDFLAGS += -X main.Version=${VERSION}
 
 # Required for globs to work correctly
 SHELL=/bin/bash

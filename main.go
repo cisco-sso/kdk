@@ -16,8 +16,12 @@ package main
 
 import (
 	"github.com/cisco-sso/kdk/cmd/kdk"
+	"github.com/cisco-sso/kdk/pkg/kdk"
 )
 
+var Version = "undefined"
+
 func main() {
+	kdk.Version = Version
 	cmd.Execute()
 }
