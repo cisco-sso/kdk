@@ -123,6 +123,9 @@ RUN echo "Install/build apps that are not provided by the OS packages." && \
         chmod +x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.10.0 && \
         rm -fr linux-amd64 && \
         ln -s /usr/local/bin/helm-2.10.0 /usr/local/bin/helm && \
+    # hugo && \
+        cd /tmp && curl -sSL https://github.com/gohugoio/hugo/releases/download/v0.48/hugo_0.48_Linux-ARM64.tar.gz | tar xz && \
+        chmod +x hugo && mv hugo /usr/local/bin/hugo && \
     # jq && \
         curl -sSLo jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 && \
         chmod +x jq && mv jq /usr/local/bin/ && \
