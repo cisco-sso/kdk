@@ -61,18 +61,26 @@ gofmt:
 clean:
 	@rm -rf $(BINDIR) ./_dist ./bin vendor
 
-HAS_DEP := $(shell command -v dep;)
+.PHONY: release
+release:
+	goreleaser --debug
+
 HAS_GIT := $(shell command -v git;)
+HAS_DEP := $(shell command -v dep;)
+HAS_GORELEASER := $(shell command -v goreleaser;)
 
 .PHONY: bootstrap
 bootstrap:
+ifndef HAS_GIT
+	$(error You must install Git)
+endif
 ifndef HAS_DEP
 	go get -u github.com/golang/dep/cmd/dep
 endif
 ifndef HAS_GOX
 	go get -u github.com/mitchellh/gox
 endif
-ifndef HAS_GIT
-	$(error You must install Git)
+ifndef HAS_GORELEASER
+	go get -u github.com/goreleaser/goreleaser
 endif
 	dep ensure

@@ -48,12 +48,6 @@ type AppConfig struct {
 	Debug           bool
 }
 
-// Struct of configs from the docker lib, to be saved directly as ~/.kdk/config.yaml
-type kdkConfig struct {
-	ContainerConfig container.Config     `json:",omitempty"`
-	HostConfig      container.HostConfig `json:",omitempty"`
-}
-
 // create docker client and context for easy reuse
 func (c *KdkEnvConfig) Init() {
 	c.Ctx = context.Background()
