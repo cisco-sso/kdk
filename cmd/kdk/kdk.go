@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"io/ioutil"
 	"os"
 
 	"github.com/Sirupsen/logrus"
@@ -22,7 +23,6 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io/ioutil"
 )
 
 var CurrentKdkEnvConfig = kdk.KdkEnvConfig{}
