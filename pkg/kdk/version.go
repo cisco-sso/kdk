@@ -15,5 +15,5 @@
 package kdk
 
 var (
-	Version       = "undefined"
+	Version = "undefined"
 )

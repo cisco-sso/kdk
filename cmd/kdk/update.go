@@ -12,12 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cmd
 
 import (
-	"github.com/cisco-sso/kdk/cmd/kdk"
+	"github.com/Sirupsen/logrus"
+	"github.com/cisco-sso/kdk/pkg/kdk"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	cmd.Execute()
+var updateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update KDK image and binary",
+	Long:  `Update KDK image and binary`,
+	Run: func(cmd *cobra.Command, args []string) {
+		logger := logrus.New().WithField("command", "update")
+		kdk.Update(CurrentKdkEnvConfig, *logger)
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(updateCmd)
 }

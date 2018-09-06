@@ -37,7 +37,7 @@ func init() {
 	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Name, "name", "n", "kdk", "KDK Name")
 	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Port, "port", "p", "2022", "KDK Port")
 	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.ImageRepository, "image-repository", "r", "ciscosso/kdk", "KDK Image Repository")
-	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.ImageTag, "image-tag", "t", "debian-latest", "KDK Image Tag")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.ImageTag, "image-tag", "t", "latest", "KDK Image Tag")
 	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.DotfilesRepo, "dotfiles-repo", "", "https://github.com/cisco-sso/yadm-dotfiles.git", "KDK Dotfiles Repo")
 	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Shell, "shell", "s", "/bin/bash", "KDK shell")
 
