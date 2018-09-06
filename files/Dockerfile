@@ -6,8 +6,8 @@ LABEL maintainer="rluckie@cisco.com" \
 
 #######################################
 # Copy local files
-COPY files/tmp/python-requirements/** /tmp/python-requirements/
-COPY files/usr/local/bin/** /usr/local/bin/
+COPY tmp/python-requirements/** /tmp/python-requirements/
+COPY usr/local/bin/** /usr/local/bin/
 
 #######################################
 # Install OS packages
