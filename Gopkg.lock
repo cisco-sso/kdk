@@ -74,6 +74,19 @@
   version = "v0.3.3"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/dsnet/compress"
+  packages = [
+    ".",
+    "bzip2",
+    "bzip2/internal/sais",
+    "internal",
+    "internal/errors",
+    "internal/prefix"
+  ]
+  revision = "cc9eb1d7ad760af14e8f918698f745e80377af4f"
+
+[[projects]]
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
@@ -86,7 +99,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/hashicorp/hcl"
   packages = [
     ".",
@@ -100,7 +112,8 @@
     "json/scanner",
     "json/token"
   ]
-  revision = "ef8a98b0bbce4a65b5aa4c368430a80ddc533168"
+  revision = "8cb6e5b959231cc1119e43259c4a608f9c51a241"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -115,16 +128,28 @@
   version = "v1.8.0"
 
 [[projects]]
-  branch = "master"
+  name = "github.com/mholt/archiver"
+  packages = ["."]
+  revision = "cdc68dd1f170b8dfc1a0d2231b5bb0967ed67006"
+  version = "v2.0"
+
+[[projects]]
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
   revision = "ae18d6b8b3205b561c79e8e5f69bff09736185f4"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
   revision = "fa473d140ef3c6adf42d6b391fe76707f1f243c8"
   version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/nwaples/rardecode"
+  packages = ["."]
+  revision = "e06696f847aeda6f39a8f0b7cdff193b7690aef6"
 
 [[projects]]
   name = "github.com/pelletier/go-toml"
@@ -187,6 +212,17 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/ulikunitz/xz"
+  packages = [
+    ".",
+    "internal/hash",
+    "internal/xlog",
+    "lzma"
+  ]
+  revision = "0c6b41e72360850ca4f98dc341fd999726ea007f"
+  version = "v0.5.4"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
@@ -199,7 +235,7 @@
     "ssh",
     "ssh/terminal"
   ]
-  revision = "614d502a4dac94afa3a6ce146bd1736da82514c6"
+  revision = "0709b304e793a5edb4a2c0145f281ecdc20838a4"
 
 [[projects]]
   branch = "master"
@@ -210,7 +246,7 @@
     "internal/socks",
     "proxy"
   ]
-  revision = "4bcd98cce591d8c7061bf313d7a3cbad05b58549"
+  revision = "8a410e7b638dca158bf9e766925842f6651ff828"
 
 [[projects]]
   branch = "master"
@@ -219,7 +255,7 @@
     "unix",
     "windows"
   ]
-  revision = "4910a1d54f876d7b22162a85f4d066d3ee649450"
+  revision = "8cf3aee429924738c56c34bb819c4ea8273fc434"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -243,6 +279,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "39d075cc87fb60bdce695c1b39fa173a18c06d680038023ea13ea304c1a754da"
+  inputs-digest = "86072ab72f9d12aef78426950e4e737602a5ca15b54926dcd5381f94a888e233"
   solver-name = "gps-cdcl"
   solver-version = 1

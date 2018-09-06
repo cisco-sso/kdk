@@ -19,11 +19,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/prompt"
+	"github.com/mholt/archiver"
 	"github.com/savaki/jq"
 )
 
@@ -49,7 +51,12 @@ func updateImage(cfg KdkEnvConfig, logger logrus.Entry) {
 	}
 }
 func updateBin(logger logrus.Entry) {
-	kdkBinPath := "/usr/local/bin/kdk"
+	kdkBinDir := "/usr/local/bin"
+	kdkBinName := "kdk"
+	if runtime.GOOS == "windows" {
+		kdkBinName = kdkBinName + ".exe"
+	}
+	kdkBinPath := filepath.Join(kdkBinDir, kdkBinName)
 	logger.Infof("Update KDK binary?")
 	p := prompt.Prompt{
 		Text:     "Continue? [y/n] ",
@@ -59,6 +66,7 @@ func updateBin(logger logrus.Entry) {
 	if result, err := p.Run(); err != nil || result == "n" {
 		logger.Error("KDK binary update canceled or invalid input.")
 	} else {
+		// get latest release
 		resp, err := http.Get("https://api.github.com/repos/cisco-sso/kdk/releases/latest")
 		if err != nil {
 			logger.WithField("error", err).Fatal("Failed to update KDK binary")
@@ -66,26 +74,33 @@ func updateBin(logger logrus.Entry) {
 		defer resp.Body.Close()
 
 		body, err := ioutil.ReadAll(resp.Body)
+		// get latest tag name
 		op, _ := jq.Parse(".tag_name")
 		version, _ := op.Apply([]byte(string(body)))
 		versionStr := strings.Replace(string(version), "\"", "", -1)
 
+		downloadBaseName := "kdk-" + versionStr + "-" + runtime.GOOS + "-" + runtime.GOARCH
 		baseUrl := "https://github.com/cisco-sso/kdk/releases/download/"
-		downloadLink := baseUrl + versionStr + "/kdk-" + versionStr + "-" + runtime.GOOS + "-" + runtime.GOARCH + ".tar.gz"
+		downloadLink := baseUrl + versionStr + "/" + downloadBaseName + ".tar.gz"
+		downloadDir := filepath.Join("/tmp", downloadBaseName)
+		downloadPath := filepath.Join(downloadDir, downloadBaseName+".tar.gz")
 
-		if runtime.GOOS == "windows" {
-			kdkBinPath = kdkBinPath + ".exe"
+		// create downloadDir if it doesn't exist
+		if _, err := os.Stat(downloadDir); os.IsNotExist(err) {
+			os.Mkdir(downloadDir, 0700)
 		}
 
-		output, err := os.Create(kdkBinPath)
+		// create downloadPath file
+		output, err := os.Create(downloadPath)
 		if err != nil {
-			logger.WithField("error", err).Fatalf("Failed create KDK bin @ %s", kdkBinPath)
+			logger.WithField("error", err).Fatal("Failed to download KDK tgz")
 		}
 		defer output.Close()
 
+		// download latest release for arch/os to temp dir
 		resp, err = http.Get(downloadLink)
 		if err != nil {
-			logger.WithField("error", err).Fatalf("Failed to download KDK binary from %s", downloadLink)
+			logger.WithField("error", err).Fatalf("Failed to download KDK tgz from %s", downloadLink)
 		}
 		defer resp.Body.Close()
 
@@ -95,5 +110,36 @@ func updateBin(logger logrus.Entry) {
 			logger.WithField("error", err).Fatalf("Failed to write KDK binary to %s", kdkBinPath)
 		}
 
+		// extract tgz
+		err = archiver.TarGz.Open(downloadPath, downloadDir)
+		if err != nil {
+			logger.WithField("error", err).Fatal("Failed to extract KDK tgz")
+		}
+
+		binSrcPath := filepath.Join(downloadDir, kdkBinName)
+
+		binDestPath := filepath.Join("/usr/local/bin", kdkBinName)
+
+		src, err := os.Open(binSrcPath)
+		if err != nil {
+			logger.WithField("error", err).Fatalf("Failed to read KDK binary @", binSrcPath)
+		}
+		defer src.Close()
+
+		// copy bin to appropriate location
+		dest, err := os.OpenFile(binDestPath, os.O_RDWR|os.O_CREATE, 0700)
+		if err != nil {
+			logger.WithField("error", err).Fatalf("Failed to write KDK binary @", binDestPath)
+		}
+		defer dest.Close()
+
+		_, err = io.Copy(dest, src)
+		if err != nil {
+			logger.WithField("error", err).Fatalf("Failed to write KDK binary @", binDestPath)
+		}
+
+		// remove temp dir
+		os.RemoveAll(downloadDir)
 	}
+
 }
