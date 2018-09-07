@@ -11,11 +11,11 @@ PKG       := $(shell dep ensure)
 TAGS      :=
 TESTS     := .
 TESTFLAGS :=
-LDFLAGS := -w -s
+LDFLAGS   := -w -s
 GOFLAGS   :=
 BINDIR    := $(CURDIR)/bin
 
-LDFLAGS += -X main.Version=${VERSION}
+LDFLAGS += -X github.com/cisco-sso/kdk/pkg/kdk.Version=${VERSION}
 
 # Required for globs to work correctly
 SHELL=/bin/bash

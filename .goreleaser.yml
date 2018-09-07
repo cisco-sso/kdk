@@ -6,7 +6,7 @@ archive:
 builds:
   -
     ldflags:
-      - -s -w -X main.Version={{.Version}}
+      - -s -w -X github.com/cisco-sso/kdk/pkg/kdk.Version={{.Version}}
     env:
       - CGO_ENABLED=0
     goos:
