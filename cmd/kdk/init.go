@@ -34,9 +34,8 @@ var initCmd = &cobra.Command{
 }
 
 func init() {
-	CurrentKdkEnvConfig.ConfigFile.AppConfig.Port = kdk.Port
-
 	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Name, "name", "n", "kdk", "KDK Name")
+	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Port, "port", "p", kdk.Port, "KDK Port")
 	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.ImageRepository, "image-repository", "r", "ciscosso/kdk", "KDK Image Repository")
 	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.ImageTag, "image-tag", "t", kdk.Version, "KDK Image Tag")
 	initCmd.Flags().StringVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.DotfilesRepo, "dotfiles-repo", "", "https://github.com/cisco-sso/yadm-dotfiles.git", "KDK Dotfiles Repo")

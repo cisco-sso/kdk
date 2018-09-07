@@ -4,7 +4,7 @@ Kubernetes Development Kit (KDK)
 ## Quickstart (`TL;DR`)
 
 ```console
-curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/files/install | bash && kdk init && kdk ssh
+curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/files/install | bash && kdk init && kdk pull && kdk ssh
 ```
 
 ## Background
@@ -283,7 +283,7 @@ TODO: Finish this section
 * [x] (Ryan) Windows 10 instructions and testing
 * [x] (Dave) Refactor kdk config.yaml file to directly use Docker lib structs
 * [x] (Dave) KDK init: Prompt the user and ask if they want to mount additional directories with explanation
-* [ ] (Ryan) Windows 10 keybase mounts
+* [x] (Ryan) Windows 10 keybase mounts
 * [x] (Ryan) KDK init: Enable starting of more than one kdk (Needed for development)
 * [x] (Ryan) Curl installation/upgrade script
 * [ ] (???) KDK doctor (like brew doctor)  Verifies current dependencies
