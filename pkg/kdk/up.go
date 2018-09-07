@@ -19,10 +19,37 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/keybase"
+	"github.com/cisco-sso/kdk/pkg/prompt"
 	"github.com/docker/docker/api/types"
 )
 
 func Up(cfg KdkEnvConfig, logger logrus.Entry) error {
+	containers, err := cfg.DockerClient.ContainerList(cfg.Ctx, types.ContainerListOptions{All: true})
+	if err != nil {
+		logger.WithField("error", err).Fatal("Failed to list docker containers")
+	}
+	for _, container := range containers {
+		for _, name := range container.Names {
+			if name == "/"+cfg.ConfigFile.AppConfig.Name {
+				if container.State == "exited" {
+					logger.Infof("An exited KDK container exists")
+					p := prompt.Prompt{
+						Text:     "Delete exited KDK container? [y/n] ",
+						Loop:     true,
+						Validate: prompt.ValidateYorN,
+					}
+					if result, err := p.Run(); err != nil || result == "n" {
+						logger.Fatal("KDK exited image deletion canceled or invalid input.")
+					}
+					logger.Info("Removing exited KDK container")
+					if err := cfg.DockerClient.ContainerRemove(cfg.Ctx, container.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
+						logger.WithField("error", err).Fatalf("Failed to remove exited KDK container [%s]", container.ImageID)
+					}
+				}
+			}
+		}
+	}
+
 	if runtime.GOOS == "windows" {
 		if err := keybase.StartMirror(cfg.ConfigRootDir(), cfg.ConfigFile.AppConfig.Debug, logger); err != nil {
 			logger.WithField("error", err).Fatal("Failed to start keybase mirror")
