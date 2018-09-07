@@ -30,16 +30,19 @@ func Ssh(cfg KdkEnvConfig, logger logrus.Entry) {
 	// Check if KDK container is running
 	kdkRunning := false
 
-	containers, err := cfg.DockerClient.ContainerList(cfg.Ctx, types.ContainerListOptions{})
+	containers, err := cfg.DockerClient.ContainerList(cfg.Ctx, types.ContainerListOptions{All: true})
 
 	if err != nil {
 		logger.WithField("error", err).Fatal("Failed to list docker containers")
 	}
+
 	for _, container := range containers {
 		for _, name := range container.Names {
 			if name == "/"+cfg.ConfigFile.AppConfig.Name {
-				kdkRunning = true
-				break
+				if container.State == "running" {
+					kdkRunning = true
+					break
+				}
 			}
 		}
 	}
