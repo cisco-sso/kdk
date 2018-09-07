@@ -16,12 +16,12 @@ package kdk
 
 import (
 	"context"
-	"github.com/cisco-sso/kdk/pkg/utils"
 	"os/user"
 	"path/filepath"
 	"strconv"
 	"strings"
 
+	"github.com/cisco-sso/kdk/pkg/utils"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/mitchellh/go-homedir"
