@@ -14,7 +14,10 @@
 
 package utils
 
-import "reflect"
+import (
+	"net"
+	"reflect"
+)
 
 func Contains(input interface{}, target interface{}) bool {
 	rValue := reflect.ValueOf(input)
@@ -30,4 +33,19 @@ func Contains(input interface{}, target interface{}) bool {
 		}
 	}
 	return false
+}
+
+// Ask kernel for a free port
+func GetPort() int {
+	if out, err := net.ResolveTCPAddr("tcp", "localhost:0"); err != nil {
+		return 0
+	} else {
+		if listen, err := net.ListenTCP("tcp", out); err != nil {
+			defer listen.Close()
+			return 0
+		} else {
+			defer listen.Close()
+			return listen.Addr().(*net.TCPAddr).Port
+		}
+	}
 }
