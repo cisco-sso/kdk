@@ -25,6 +25,8 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
+var Version = "undefined"
+
 // Struct of all configs to be saved directly as ~/.kdk/<NAME>/config.yaml
 type KdkEnvConfig struct {
 	DockerClient *client.Client

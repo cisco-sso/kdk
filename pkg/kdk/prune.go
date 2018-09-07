@@ -50,10 +50,10 @@ func Prune(cfg KdkEnvConfig, logger logrus.Entry) error {
 		}
 	}
 
-	// Iterate through images and track images that have a `main` label key
+	// Iterate through images and track images that have a `kdk` label key
 	for _, image := range images {
 		for key := range image.Labels {
-			if key == "main" {
+			if key == "kdk" {
 				imageIds = append(imageIds, image.ID)
 				break
 			}
