@@ -16,8 +16,10 @@ package kdk
 
 import (
 	"context"
+	"github.com/cisco-sso/kdk/pkg/utils"
 	"os/user"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
@@ -25,7 +27,10 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-var Version = "undefined"
+var (
+	Version = "undefined"
+	Port    = strconv.Itoa(utils.GetPort())
+)
 
 // Struct of all configs to be saved directly as ~/.kdk/<NAME>/config.yaml
 type KdkEnvConfig struct {

@@ -4,7 +4,7 @@ Kubernetes Development Kit (KDK)
 ## Quickstart (`TL;DR`)
 
 ```console
-curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/files/install | bash && kdk init && kdk pull && kdk up && kdk ssh
+curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/files/install | bash && kdk init && kdk ssh
 ```
 
 ## Background
@@ -252,18 +252,12 @@ You might have a need to run multiple KDK containers.  The KDK CLI can do that!
 
 1. Create a new KDK config
 
-  - **NOTE:** port and name arguments must be unique (no other container can have this name or port assignment) 
+  - **NOTE:** name parameter must be unique (no other container can have this name)
 ```console
-kdk init --name kdk1 --port 2023
+kdk init --name kdk1
 ```
 
-2. Start `kdk1` container
-
-```console
-kdk up --name kdk1
-```
-
-3. Connect to `kdk1` container
+2. Connect to `kdk1` container
 
 ```console
 kdk ssh --name kdk1
