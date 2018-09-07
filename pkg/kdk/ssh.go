@@ -27,13 +27,6 @@ import (
 func Ssh(cfg KdkEnvConfig, logger logrus.Entry) {
 	logger.Info("Connecting to KDK container")
 
-	// Pull KDK image
-
-	logger.Info("Pulling KDK image")
-	if err := Pull(cfg); err != nil {
-		logger.WithField("error", err).Fatal("Failed to pull KDK image")
-	}
-
 	// Check if KDK container is running
 	kdkRunning := false
 
