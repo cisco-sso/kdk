@@ -15,8 +15,8 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/Sirupsen/logrus"
+	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +25,9 @@ var restartCmd = &cobra.Command{
 	Short: "Restart the running KDK container (useful for config changes)",
 	Long:  `Restart the running KDK container (useful for config changes)`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("restart called")
+		logger := logrus.New().WithField("command", "restart")
+
+		kdk.restart(CurrentKdkEnvConfig, *logger)
 	},
 }
 
