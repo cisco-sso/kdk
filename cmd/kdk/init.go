@@ -27,8 +27,8 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "init")
 
-		kdk.InitKdkConfig(CurrentKdkEnvConfig, *logger)
-		kdk.InitKdkSshKeyPair(CurrentKdkEnvConfig, *logger)
+		CurrentKdkEnvConfig.CreateKdkConfig(*logger)
+		CurrentKdkEnvConfig.CreateKdkSshKeyPair(*logger)
 		logger.Infof("KDK config written to %s. Modify this file to suit your needs.", CurrentKdkEnvConfig.ConfigPath())
 	},
 }

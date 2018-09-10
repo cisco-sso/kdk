@@ -30,7 +30,7 @@ build:
 # usage: make clean build-cross dist VERSION=1.0.0
 .PHONY: build-cross
 build-cross: LDFLAGS += -extldflags "-static"
-build-cross:
+build-cross: clean bootstrap
 	CGO_ENABLED=0 gox -parallel=3 -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" -osarch='$(TARGETS)' $(GOFLAGS) $(if $(TAGS),-tags '$(TAGS)',) -ldflags '$(LDFLAGS)' ./
 
 .PHONY: dist

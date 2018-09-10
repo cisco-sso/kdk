@@ -51,7 +51,7 @@ if [[ ! -d /usr/local/bin ]]; then
 fi
 
 # Echo the command so the user may view what was executed
-(set -x; sudo install -m 0755 ${kdk_bin} ${kdk_destination})
+(set -x; sudo install -m 0755 -o ${USER} ${kdk_bin} ${kdk_destination})
 # Handle a windows-ism where the above may not take effect until
 #   later despite the subshell.
 while [[ ! -f ${kdk_destination} ]]; do
