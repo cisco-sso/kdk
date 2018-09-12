@@ -41,9 +41,9 @@ func Update(cfg KdkEnvConfig, debug bool, skipUpdate bool, logger logrus.Entry) 
 	if !skipUpdate {
 		doUpdateConfig := updateConfigCheck(cfg)
 		if doUpdateConfig {
-			logger.Info("A newer version of the kdk binary or image is available")
+			logger.Info("A newer version of the kdk binary executable and/or docker image is available")
 			logger.Infof("Update will move from version %s -> %s", cfg.ConfigFile.AppConfig.ImageTag, latestReleaseVersion)
-			logger.Info("If you would like to skip update, please use --skip-update flag")
+			logger.Info("If you would like to skip update, hit CTRL-C and re-run command with --skip-update flag")
 			updateConfig(&cfg, debug, logger)
 		} else {
 			logger.Info("Config has not changed")
