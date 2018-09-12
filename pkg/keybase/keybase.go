@@ -39,6 +39,7 @@ if "%1"=="" (
 
 if "%1"=="start" (
   echo "Starting"
+  echo "  Please IGNORE THE BENIGN ERROR below regarding the failure to add security privilege"
   start "KDK Keybase Mirror" /B "C:\Program Files\Dokan\Dokan Library-1.1.0\sample\mirror\mirror.exe" /r K:\ /l C:\Users\%USERNAME%\.kdk\keybase
   break
 )

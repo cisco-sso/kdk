@@ -19,6 +19,8 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
   os="darwin"
 elif [[ "$OSTYPE" =~ ^(cygwin|msys)$ ]]; then
   os="windows"
+  # Windows does not have a USER variable but it does have USERNAME
+  USER=${USERNAME}
 else
   echo "Unsupported OS"
   exit 1
@@ -40,20 +42,22 @@ mkdir -p ${tmpdir}
 curl -sSL ${download_uri} | tar -xz -C ${tmpdir}
 
 if [[ ! -d /usr/local/bin ]]; then
-    # Echo the command so the user may view what was executed
+    # Create the empty parent directory where the kdk binary will live
+    #   Echo the command so the user may view what was executed
     (set -x; sudo install -m 0755 -d $(dirname ${kdk_destination}))
 
     # Handle a windows-ism where the above may not take effect until
-    #   later despite the subshell.
+    #   later with or without the subshell.
     while [[ ! -d /usr/local/bin ]]; do
 	sleep 1
     done
 fi
 
-# Echo the command so the user may view what was executed
+# Create the kdk binary executable file
+#   Echo the command so the user may view what was executed
 (set -x; sudo install -m 0755 -o ${USER} ${kdk_bin} ${kdk_destination})
 # Handle a windows-ism where the above may not take effect until
-#   later despite the subshell.
+#   later with or without the subshell.
 while [[ ! -f ${kdk_destination} ]]; do
   sleep 1
 done
