@@ -22,7 +22,7 @@ import (
 	"github.com/docker/docker/api/types"
 )
 
-func Destroy(cfg KdkEnvConfig, logger logrus.Entry) error {
+func Destroy(cfg KdkEnvConfig, debug bool, logger logrus.Entry) error {
 
 	var containerIds []string
 

@@ -23,7 +23,15 @@ import (
 	"github.com/docker/docker/api/types"
 )
 
-func Up(cfg KdkEnvConfig, logger logrus.Entry) error {
+func Up(
+	cfg KdkEnvConfig,
+	debug bool,
+	skipUpdate bool,
+	logger logrus.Entry,
+) (err error) {
+	if err := Update(cfg, debug, skipUpdate, logger); err != nil {
+		logger.Fatal("Failed to update KDK")
+	}
 	containers, err := cfg.DockerClient.ContainerList(cfg.Ctx, types.ContainerListOptions{All: true})
 	if err != nil {
 		logger.WithField("error", err).Fatal("Failed to list docker containers")
@@ -51,7 +59,7 @@ func Up(cfg KdkEnvConfig, logger logrus.Entry) error {
 	}
 
 	if runtime.GOOS == "windows" {
-		if err := keybase.StartMirror(cfg.ConfigRootDir(), cfg.ConfigFile.AppConfig.Debug, logger); err != nil {
+		if err := keybase.StartMirror(cfg.ConfigRootDir(), debug, logger); err != nil {
 			logger.WithField("error", err).Fatal("Failed to start keybase mirror")
 			return err
 		}

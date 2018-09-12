@@ -16,16 +16,16 @@ package kdk
 
 import (
 	"io"
+	"io/ioutil"
 	"os"
 
 	"github.com/docker/docker/api/types"
-	"io/ioutil"
 )
 
-func Pull(cfg KdkEnvConfig) error {
+func Pull(cfg KdkEnvConfig, debug bool) error {
 	out, err := cfg.DockerClient.ImagePull(cfg.Ctx, cfg.ImageCoordinates(), types.ImagePullOptions{})
 	defer out.Close()
-	if cfg.ConfigFile.AppConfig.Debug {
+	if debug {
 		io.Copy(os.Stdout, out)
 	} else {
 		io.Copy(ioutil.Discard, out)

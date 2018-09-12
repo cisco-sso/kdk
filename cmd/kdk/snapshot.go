@@ -27,7 +27,7 @@ var snapshotCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "snapshot")
 
-		kdk.Snapshot(CurrentKdkEnvConfig, *logger)
+		kdk.Snapshot(CurrentKdkEnvConfig, Debug, *logger)
 	},
 }
 

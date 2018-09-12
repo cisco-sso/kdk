@@ -25,7 +25,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-var CurrentKdkEnvConfig = kdk.KdkEnvConfig{}
+var (
+	CurrentKdkEnvConfig = kdk.KdkEnvConfig{}
+	SkipUpdate          = false
+	Debug               = false
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -54,7 +58,8 @@ func init() {
 	CurrentKdkEnvConfig.Init()
 
 	rootCmd.PersistentFlags().StringVar(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Name, "name", "kdk", "KDK name")
-	rootCmd.PersistentFlags().BoolVarP(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Debug, "debug", "d", false, "Debug Mode")
+	rootCmd.PersistentFlags().BoolVarP(&SkipUpdate, "skip-update", "", false, "Skip update")
+	rootCmd.PersistentFlags().BoolVarP(&Debug, "debug", "d", false, "Debug Mode")
 }
 
 func initConfig() {

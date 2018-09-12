@@ -27,7 +27,7 @@ var provisionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "provision")
 
-		kdk.Provision(CurrentKdkEnvConfig, *logger)
+		kdk.Provision(CurrentKdkEnvConfig, Debug, *logger)
 	},
 }
 
