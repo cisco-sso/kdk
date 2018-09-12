@@ -61,7 +61,6 @@ type AppConfig struct {
 	ImageTag        string
 	DotfilesRepo    string
 	Shell           string
-	Debug           bool
 }
 
 // create docker client and context for easy reuse
@@ -132,7 +131,7 @@ func (c *KdkEnvConfig) ImageCoordinates() (out string) {
 	return c.ConfigFile.AppConfig.ImageRepository + ":" + c.ConfigFile.AppConfig.ImageTag
 }
 
-func (c *KdkEnvConfig) CreateKdkConfig(logger logrus.Entry) (err error) {
+func (c *KdkEnvConfig) CreateKdkConfig(debug bool, logger logrus.Entry) (err error) {
 
 	// Initialize storage mounts/volumes
 	var mounts []mount.Mount         // hostConfig
@@ -265,7 +264,7 @@ func (c *KdkEnvConfig) CreateKdkConfig(logger logrus.Entry) (err error) {
 }
 
 // Creates KDK ssh keypair
-func (c *KdkEnvConfig) CreateKdkSshKeyPair(logger logrus.Entry) (err error) {
+func (c *KdkEnvConfig) CreateKdkSshKeyPair(debug bool, logger logrus.Entry) (err error) {
 
 	if _, err := os.Stat(c.ConfigRootDir()); os.IsNotExist(err) {
 		if err := os.Mkdir(c.ConfigRootDir(), 0700); err != nil {

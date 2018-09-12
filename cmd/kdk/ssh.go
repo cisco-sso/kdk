@@ -27,7 +27,7 @@ var sshCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "ssh")
 
-		kdk.Ssh(CurrentKdkEnvConfig, *logger)
+		kdk.Ssh(CurrentKdkEnvConfig, Debug, SkipUpdate, *logger)
 
 	},
 }

@@ -23,7 +23,7 @@ import (
 	"github.com/docker/docker/api/types"
 )
 
-func Prune(cfg KdkEnvConfig, logger logrus.Entry) error {
+func Prune(cfg KdkEnvConfig, debug bool, logger logrus.Entry) error {
 	logger.Info("Starting Prune...")
 
 	var (

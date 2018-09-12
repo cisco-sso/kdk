@@ -27,7 +27,7 @@ var destroyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "destroy")
 
-		kdk.Destroy(CurrentKdkEnvConfig, *logger)
+		kdk.Destroy(CurrentKdkEnvConfig, Debug, *logger)
 	},
 }
 

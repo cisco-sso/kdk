@@ -26,7 +26,8 @@ var updateCmd = &cobra.Command{
 	Long:  `Update KDK image and binary`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "update")
-		kdk.Update(CurrentKdkEnvConfig, *logger)
+
+		kdk.Update(CurrentKdkEnvConfig, Debug, SkipUpdate, *logger)
 	},
 }
 

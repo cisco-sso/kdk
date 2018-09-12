@@ -19,7 +19,7 @@ import (
 	"github.com/codeskyblue/go-sh"
 )
 
-func Provision(cfg KdkEnvConfig, logger logrus.Entry) error {
+func Provision(cfg KdkEnvConfig, debug bool, logger logrus.Entry) error {
 	// TODO (rluckie): replace sh docker sdk
 	logger.Info("Starting KDK user provisioning. This may take a moment.  Hang tight...")
 	if _, err := sh.Command("docker", "exec", cfg.ConfigFile.AppConfig.Name, "/usr/local/bin/provision-user").Output(); err != nil {
