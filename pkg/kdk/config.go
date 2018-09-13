@@ -68,8 +68,10 @@ func (c *KdkEnvConfig) Init() {
 	c.Ctx = context.Background()
 	dockerClient, err := client.NewEnvClient()
 	if err != nil {
-		panic(err)
+		logrus.Warn("Failed to create docker client.")
+		logrus.Fatal("Ensure that docker is running.")
 	}
+
 	c.DockerClient = dockerClient
 }
 
