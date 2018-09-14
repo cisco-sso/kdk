@@ -1,13 +1,16 @@
+.DEFAULT_GOAL=help
+
 DOCKER_REGISTRY   ?=
 IMAGE_PREFIX      ?= ciscosso
 SHORT_NAME        ?= kdk
 TARGETS           ?= darwin/amd64 linux/amd64 linux/386 linux/arm linux/arm64 linux/ppc64le linux/s390x windows/amd64
-DIST_DIRS         = find * -type d -exec
-VERSION           ?= $(shell git describe --tags --long --dirty | sed 's/-0-........$$//; s/-/+/2')
+VERSION           := $(shell ./scripts/cicd.sh version)
+BASE_IMAGE        ?= $(IMAGE_PREFIX)/$(SHORT_NAME)
+NEW_IMAGE_TAG     ?= $(BASE_IMAGE):$(VERSION)
 
 # go option
 GO        ?= go
-PKG       := $(shell dep ensure)
+PKG       :=
 TAGS      :=
 TESTS     := .
 TESTFLAGS :=
@@ -16,71 +19,74 @@ GOFLAGS   :=
 BINDIR    := $(CURDIR)/bin
 
 LDFLAGS += -X github.com/cisco-sso/kdk/pkg/kdk.Version=${VERSION}
+LDFLAGS += -extldflags "-static"
 
 # Required for globs to work correctly
 SHELL=/bin/bash
 
-.PHONY: all
-all: build
+PUBLISH := $(shell ./scripts/cicd.sh publish?)
 
-.PHONY: build
-build:
-	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./
+#####################################################################
 
-# usage: make clean build-cross dist VERSION=1.0.0
-.PHONY: build-cross
-build-cross: LDFLAGS += -extldflags "-static"
-build-cross: clean bootstrap
-	CGO_ENABLED=0 gox -parallel=3 -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" -osarch='$(TARGETS)' $(GOFLAGS) $(if $(TAGS),-tags '$(TAGS)',) -ldflags '$(LDFLAGS)' ./
+.PHONY: checks deps gofmt \
+	ci build build-cross \
+	docker-build docker-push \
+	bin-build bin-push \
+	clean help
 
-.PHONY: dist
-dist:
-	( \
-		cd _dist && \
-		$(DIST_DIRS) cp ../LICENSE {} \; && \
-		$(DIST_DIRS) cp ../README.md {} \; && \
-		$(DIST_DIRS) tar -zcf $(SHORT_NAME)-${VERSION}-{}.tar.gz {} \; \
-	)
+checks:  ## Check the system before building
+	./scripts/cicd.sh checks
 
-.PHONY: check-docker
-check-docker:
-	@if [ -z $$(which docker) ]; then \
-	  echo "Missing \`docker\` client which is required for development"; \
-	  exit 2; \
-	fi
+deps:    ## Ensure dependencies are installed
+	./scripts/cicd.sh deps
 
-.PHONY: docker-build
-docker-build: check-docker
-	docker build --rm -t ${IMAGE} -t ${MUTABLE_IMAGE} files
-
-.PHONY: gofmt
-gofmt:
+gofmt:   ## Format all golang code
 	gofmt -w -s $$(find ./cmd ./pkg -type f -name '*.go')
 
-.PHONY: clean
-clean:
-	@rm -rf $(BINDIR) ./_dist ./bin vendor
+ci: docker-build bin-build docker-push bin-push  ## Run the CICD build, and publish depending on circumstances
 
-.PHONY: release
-release:
-	goreleaser --debug
+build: checks deps  ## Build locally for local os/arch creating bin in ./
+	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./
 
-HAS_GIT := $(shell command -v git;)
-HAS_DEP := $(shell command -v dep;)
-HAS_GORELEASER := $(shell command -v goreleaser;)
+build-cross: checks deps  ## Build locally for all os/arch combinations in ./_dist
+	@# # usage: make clean build-cross dist VERSION=1.0.0
+	CGO_ENABLED=0 gox -parallel=3 \
+	  -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" \
+	  -osarch='$(TARGETS)' $(GOFLAGS) $(if $(TAGS),-tags '$(TAGS)',) \
+	  -ldflags '$(LDFLAGS)' ./
 
-.PHONY: bootstrap
-bootstrap:
-ifndef HAS_GIT
-	$(error You must install Git)
+docker-build: checks  ## Build the docker image
+	docker pull $(BASE_IMAGE):latest
+	docker build -t $(NEW_IMAGE_TAG) --cache-from $(BASE_IMAGE):latest -f files/Dockerfile files
+
+docker-push: checks  ## Publish the docker image
+ifeq ($(PUBLISH),true)
+	@echo "Executing docker push for build"
+	echo "$${DOCKER_PASSWORD}" | docker login -u "$${DOCKER_USERNAME}" --password-stdin
+	docker push $(NEW_IMAGE_TAG)
+	docker tag $(NEW_IMAGE_TAG) $(BASE_IMAGE):latest
+	docker push $(BASE_IMAGE):latest
+else
+	@echo "Skipping docker push"
 endif
-ifndef HAS_DEP
-	go get -u github.com/golang/dep/cmd/dep
+
+bin-build: build-cross  ## Build the binary executable
+
+bin-push: checks deps  # Publish the binary executable
+ifeq ($(PUBLISH),true)
+	@echo "Executing bin push for build"
+	git status
+	git reset --hard HEAD
+	goreleaser release --rm-dist --debug
+else
+	@echo "Skipping bin push"
 endif
-ifndef HAS_GOX
-	go get -u github.com/mitchellh/gox
-endif
-ifndef HAS_GORELEASER
-	go get -u github.com/goreleaser/goreleaser
-endif
-	dep ensure
+
+clean:  ## Clean up the build dirs
+	@rm -rf $(BINDIR) ./_dist ./bin vendor .vendor-new .venv
+
+help:  ## Print list of Makefile targets
+	@# Taken from https://github.com/spf13/hugo/blob/master/Makefile
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+	  cut -d ":" -f1- | \
+	  awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
