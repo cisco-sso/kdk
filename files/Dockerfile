@@ -34,6 +34,7 @@ RUN echo "Install OS packages" && \
         libcurl4-openssl-dev \
         libevent-2.0-5 \
         locales \
+        make \
         man \
         moreutils \
         nmap \
@@ -187,6 +188,9 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
     # golang && \
         curl -sSL https://dl.google.com/go/go1.10.4.linux-amd64.tar.gz | tar -C /usr/local -xz && \
         mkdir -p /go && chmod a+rw /go && \
+    # goreleaser && \
+        curl -sSLO https://github.com/goreleaser/goreleaser/releases/download/v0.86.0/goreleaser_Linux_arm64.tar.gz && \
+        tar -C /usr/local/bin -xzf goreleaser*.tar.gz goreleaser && rm goreleaser*.tar.gz && \
     # helm && \
         curl -sSL https://storage.googleapis.com/kubernetes-helm/helm-v2.9.1-linux-amd64.tar.gz | tar xz && \
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.9.1 && rm -fr linux-amd64 && \
