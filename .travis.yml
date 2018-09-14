@@ -1,0 +1,13 @@
+sudo: required
+language: go
+go: '1.10.3'
+services:
+  - docker
+script:
+  - make ci
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: make ci
+    on:
+      tags: true

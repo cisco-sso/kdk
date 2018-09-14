@@ -1,9 +1,13 @@
-DOCKER_REGISTRY   ?=
-IMAGE_PREFIX      ?= ciscosso
-SHORT_NAME        ?= kdk
-TARGETS           ?= darwin/amd64 linux/amd64 linux/386 linux/arm linux/arm64 linux/ppc64le linux/s390x windows/amd64
-DIST_DIRS         = find * -type d -exec
-VERSION           ?= $(shell git describe --tags --long --dirty | sed 's/-0-........$$//; s/-/+/2')
+DOCKER_REGISTRY           ?=
+IMAGE_PREFIX              ?= ciscosso
+SHORT_NAME                ?= kdk
+TARGETS                   ?= darwin/amd64 linux/amd64 linux/386 linux/arm linux/arm64 linux/ppc64le linux/s390x windows/amd64
+DIST_DIRS                 = find * -type d -exec
+VERSION                   ?= $(shell git describe --tags --long --dirty | sed 's/-0-........$$//; s/-/+/2')
+LATEST_RELEASE            ?= $(shell curl -sSL "https://api.github.com/repos/cisco-sso/kdk/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+BASE_IMAGE_TAG            ?= $(IMAGE_PREFIX)/$(SHORT_NAME)
+LATEST_RELEASE_IMAGE_TAG  ?= $(BASE_IMAGE_TAG):$(LATEST_RELEASE)
+NEW_IMAGE_TAG             ?= $(BASE_IMAGE_TAG):$(VERSION)
 
 # go option
 GO        ?= go
@@ -49,9 +53,24 @@ check-docker:
 	  exit 2; \
 	fi
 
+.PHONY: docker-login
+docker-login: check-docker
+	echo "$DOCKER_PASSWORD" | docker login -u "DOCKER_USERNAME" --password-stdin
+
 .PHONY: docker-build
-docker-build: check-docker
-	docker build --rm -t ${IMAGE} -t ${MUTABLE_IMAGE} files
+docker-build: check-docker docker-pull-latest-release-image
+	docker build -t ${NEW_IMAGE_TAG} --cache-from ${LATEST_RELEASE_IMAGE_TAG} -f files/Dockerfile files
+
+.PHONY: docker-build-clean
+docker-build-clean: check-docker
+	docker build --rm -t ${NEW_IMAGE_TAG} -f files/Dockerfile files
+
+.PHONY: docker-push
+docker-push: docker-login
+	docker push ${NEW_IMAGE_TAG}
+
+.PHONY: ci
+ci: bootstrap build-cross dist docker-build release docker-push
 
 .PHONY: gofmt
 gofmt:

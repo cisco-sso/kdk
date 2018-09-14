@@ -232,7 +232,6 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         curl -sSL https://github.com/TheLocehiliosan/yadm/archive/1.12.0.tar.gz | tar xz && \
         mv yadm* /usr/local/share/yadm && ln -s /usr/local/share/yadm/yadm /usr/local/bin/yadm && chmod a+x /usr/local/bin/yadm
 
-
 #######################################
 # Install apps (without pinned version) that are not provided by the OS packages.
 
@@ -255,59 +254,59 @@ RUN echo "Install OS BUILD packages" && \
         libz-dev && \
    apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
 
-RUN echo "Build apps that are not provided by the OS packages." && \
-    rm -rf /usr/local/* && \
-    # emacs && \
-        curl -sSL http://mirrors.ibiblio.org/gnu/ftp/gnu/emacs/emacs-26.1.tar.gz | tar xz && \
-        cd emacs-* && \
-        CANNOT_DUMP=yes ./configure --prefix=/usr/local --disable-build-details \
-          --without-all --without-x --without-x-toolkit --without-sound \
-          --with-xml2 --with-zlib --with-modules --with-file-notification --with-gnutls --with-compress-install && \
-        make && make install && \
-        cd .. && rm -fr emacs-* && \
-    # git (needs to build first as a dependency) && \
-        curl -sSL https://github.com/git/git/archive/v2.19.0.tar.gz | tar xz && \
-        cd git-* && make configure && ./configure --prefix=/usr/local && make && make install && \
-        cd .. && rm -fr git-* && \
-    # redis-benchmark, redis-cli && \
-        curl -sSLO http://download.redis.io/releases/redis-4.0.10.tar.gz && \
-        mkdir -p redis && \
-        tar --strip-components=1 -C redis -xzf redis-4.0.10.tar.gz && \
-        make -C redis && \
-        cp redis/src/redis-cli redis/src/redis-benchmark /usr/local/bin && \
-        rm -rf redis && \
-    # tmux && \
-        curl -sSL https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz | tar xz && \
-        cd libevent-* && \
-        ./configure && make &&  make install && \
-        cd .. && rm -fr libevent-* && \
-        cd /tmp && curl -sSL https://github.com/tmux/tmux/releases/download/2.7/tmux-2.7.tar.gz | tar xz && \
-        cd tmux-* && \
-        ./configure --prefix=/usr/local && \
-        make &&  make install && \
-        cd .. && rm -fr tmux-* && \
-    # vim && \
-       curl -sSL https://github.com/vim/vim/archive/v8.1.0290.tar.gz | tar xz && cd vim-* && \
-       ./configure \
-           --with-features=huge \
-           --enable-multibyte \
-           --enable-rubyinterp=yes \
-           --enable-pythoninterp=yes \
-           --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu \
-           --enable-python3interp=yes \
-           --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu \
-           --enable-perlinterp=yes \
-           --enable-luainterp=yes \
-           --enable-cscope \
-          --prefix=/usr/local && \
-       make VIMRUNTIMEDIR=/usr/local/share/vim/vim81 && make install && cd .. && rm -fr vim-* && \
-    # zsh && \
-        curl -sSL https://sourceforge.net/projects/zsh/files/zsh/5.5.1/zsh-5.5.1.tar.gz/download | tar xz && \
-        cd zsh-* && \
-        ./configure --with-tcsetpgrp --prefix=/usr/local && make && make install && \
-         echo "/usr/local/bin/zsh" >> /etc/shells && \
-        cd .. && rm -fr zsh-*
+RUN echo "Clean out /usr/local" && \
+    rm -rf /usr/local/*
 
+RUN echo "Install git (needs to build first as a dependency)." && \
+    curl -sSL https://github.com/git/git/archive/v2.19.0.tar.gz | tar xz && cd git-* && \
+    make configure && ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr git-*
+
+RUN echo "Install emacs." && \
+    curl -sSL http://mirrors.ibiblio.org/gnu/ftp/gnu/emacs/emacs-26.1.tar.gz | tar xz && cd emacs-* && \
+    CANNOT_DUMP=yes ./configure \
+        --prefix=/usr/local \
+        --disable-build-details \
+        --without-all \
+        --without-x \
+        --without-x-toolkit \
+        --without-sound \
+        --with-xml2 \
+        --with-zlib \
+        --with-modules \
+        --with-file-notification \
+        --with-gnutls \
+        --with-compress-install && \
+    make && make install && cd .. && rm -fr emacs-*
+
+RUN echo "Install vim." && \
+    curl -sSL https://github.com/vim/vim/archive/v8.1.0290.tar.gz | tar xz && cd vim-* && \
+    ./configure \
+       --with-features=huge \
+       --enable-multibyte \
+       --enable-rubyinterp=yes \
+       --enable-pythoninterp=yes \
+       --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu \
+       --enable-python3interp=yes \
+       --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu \
+       --enable-perlinterp=yes \
+       --enable-luainterp=yes \
+       --enable-cscope \
+      --prefix=/usr/local && \
+    make VIMRUNTIMEDIR=/usr/local/share/vim/vim81 && make install && cd .. && rm -fr vim-*
+
+RUN echo "Install tmux." && \
+    curl -sSL https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz | tar xz && cd libevent-* && \
+    ./configure && make &&  make install && cd .. && rm -fr libevent-* && \
+    curl -sSL https://github.com/tmux/tmux/releases/download/2.7/tmux-2.7.tar.gz | tar xz && cd tmux-* && \
+    ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr tmux-*
+
+RUN echo "Install zsh." && \
+    curl -sSL https://sourceforge.net/projects/zsh/files/zsh/5.5.1/zsh-5.5.1.tar.gz/download | tar xz && cd zsh-* && \
+    ./configure --with-tcsetpgrp --prefix=/usr/local && make && make install && echo "/usr/local/bin/zsh" >> /etc/shells && cd .. && rm -fr zsh-*
+
+RUN echo "Install redis-cli tools." && \
+    curl -sSL http://download.redis.io/releases/redis-4.0.10.tar.gz | tar xz && cd redis-* && \
+    make && cp src/redis-cli src/redis-benchmark /usr/local/bin && cd .. && rm -fr redis-*
 
 #######################################
 # go get installs
@@ -328,12 +327,10 @@ RUN echo "go get installs" && \
     /usr/local/go/bin/go get github.com/mikefarah/yq && \
     rm -rf /root/.cache/go-build
 
-
 FROM base AS stage-final
 COPY --from=stage-compiler /usr/local/ /usr/local/
 COPY --from=stage-compiler /etc/shells /etc/shells
 COPY --from=stage-golang   /go/bin/     /go/bin/
-
 
 #######################################
 # Copy local files
