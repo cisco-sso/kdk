@@ -1,0 +1,14 @@
+sudo: required
+language: go
+go: '1.10.3'
+go_import_path: github.com/cisco-sso/kdk
+services:
+  - docker
+script:
+  - make ci
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: make ci
+    on:
+      tags: true
