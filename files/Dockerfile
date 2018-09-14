@@ -32,6 +32,7 @@ RUN echo "Install OS packages" && \
         htop \
         less \
         libcurl4-openssl-dev \
+        libevent-2.0-5 \
         locales \
         man \
         moreutils \
@@ -245,7 +246,6 @@ RUN echo "Install OS BUILD packages" && \
     apt-get -y update && apt-get --no-install-recommends -y install \
         autoconf \
         build-essential \
-        libevent-2.0-5 \
         libgnutls28-dev \
         libncurses5-dev \
         libz-dev && \
