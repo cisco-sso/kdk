@@ -3,11 +3,17 @@ IMAGE_PREFIX              ?= ciscosso
 SHORT_NAME                ?= kdk
 TARGETS                   ?= darwin/amd64 linux/amd64 linux/386 linux/arm linux/arm64 linux/ppc64le linux/s390x windows/amd64
 DIST_DIRS                 = find * -type d -exec
-VERSION                   ?= $(shell git describe --tags --long --dirty)
-LATEST_RELEASE            ?= $(shell curl -sSL "https://api.github.com/repos/cisco-sso/kdk/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 BASE_IMAGE_TAG            ?= $(IMAGE_PREFIX)/$(SHORT_NAME)
+VERSION                   ?= $(shell git describe --tags --long --dirty)
+LATEST_RELEASE            := $(shell curl -sSL "https://api.github.com/repos/cisco-sso/kdk/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 LATEST_RELEASE_IMAGE_TAG  ?= $(BASE_IMAGE_TAG):$(LATEST_RELEASE)
 NEW_IMAGE_TAG             ?= $(BASE_IMAGE_TAG):$(VERSION)
+
+#ifdef LATEST_RELEASE
+#	echo $(LATEST_RELEASE)
+#else
+#	$(error latest release note defined)
+#endif
 
 # go option
 GO        ?= go
@@ -74,7 +80,7 @@ docker-push: docker-login
 	docker push ${NEW_IMAGE_TAG}
 
 .PHONY: ci
-ci: bootstrap build-cross dist docker-build
+ci: docker-build
 
 .PHONY: gofmt
 gofmt:
