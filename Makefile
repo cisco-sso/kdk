@@ -3,7 +3,7 @@ IMAGE_PREFIX              ?= ciscosso
 SHORT_NAME                ?= kdk
 TARGETS                   ?= darwin/amd64 linux/amd64 linux/386 linux/arm linux/arm64 linux/ppc64le linux/s390x windows/amd64
 DIST_DIRS                 = find * -type d -exec
-VERSION                   ?= $(shell git describe --tags --long --dirty | sed 's/-0-........$$//; s/-/+/2')
+VERSION                   ?= $(shell git describe --tags --long --dirty)
 LATEST_RELEASE            ?= $(shell curl -sSL "https://api.github.com/repos/cisco-sso/kdk/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 BASE_IMAGE_TAG            ?= $(IMAGE_PREFIX)/$(SHORT_NAME)
 LATEST_RELEASE_IMAGE_TAG  ?= $(BASE_IMAGE_TAG):$(LATEST_RELEASE)
@@ -34,7 +34,7 @@ build:
 # usage: make clean build-cross dist VERSION=1.0.0
 .PHONY: build-cross
 build-cross: LDFLAGS += -extldflags "-static"
-build-cross: clean bootstrap
+build-cross:
 	CGO_ENABLED=0 gox -parallel=3 -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" -osarch='$(TARGETS)' $(GOFLAGS) $(if $(TAGS),-tags '$(TAGS)',) -ldflags '$(LDFLAGS)' ./
 
 .PHONY: dist
@@ -53,6 +53,10 @@ check-docker:
 	  exit 2; \
 	fi
 
+.PHONY: docker-pull-latest-release-image
+docker-pull-latest-release-image:
+	docker pull ${LATEST_RELEASE_IMAGE_TAG}
+
 .PHONY: docker-login
 docker-login: check-docker
 	echo "$DOCKER_PASSWORD" | docker login -u "DOCKER_USERNAME" --password-stdin
@@ -70,7 +74,7 @@ docker-push: docker-login
 	docker push ${NEW_IMAGE_TAG}
 
 .PHONY: ci
-ci: bootstrap build-cross dist docker-build release docker-push
+ci: bootstrap build-cross dist docker-build
 
 .PHONY: gofmt
 gofmt:
