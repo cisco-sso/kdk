@@ -72,7 +72,7 @@ publish?() {
 }
 
 version() {
-    echo $(git describe --tags --long --dirty | sed 's/-0-........$$//;')
+    echo $(git describe --tags --long --dirty | sed 's/-0-........$//;')
 }
 
 case "$1" in
