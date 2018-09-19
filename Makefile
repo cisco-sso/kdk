@@ -34,7 +34,7 @@ PUBLISH := $(shell ./scripts/cicd.sh publish?)
 	bin-build bin-push \
 	clean help
 
-checks: check-go check-docker ## Check the system before building
+checks: check-go check-docker  ## Check the entire system before building
 
 check-go:  ## Check the system for go builds
 	./scripts/cicd.sh check-go

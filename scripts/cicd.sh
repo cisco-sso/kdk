@@ -38,7 +38,7 @@ publish?() {
     # Figure out whether to release the docker image and executable binary
     #   The lack of setting PUBLISH to anything means its undefined
 
-    tag_of_current_commit="$(git describe --exact-match --tags HEAD &>/dev/null || true)"
+    tag_of_current_commit="$(git describe --exact-match --tags HEAD 2>/dev/null || true)"
     latest_tag_in_repo="$(git describe --tags | cut -d '-' -f1)"
     if [ "$tag_of_current_commit" != "$latest_tag_in_repo" ]; then
         echo "Not publishing because current HEAD is not equal to the latest tag" >&2
