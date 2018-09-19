@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-checks() {
+check-go() {
     if ! which git &>/dev/null; then
         echo "You must install Git"
         return 1
@@ -10,6 +10,9 @@ checks() {
         echo "You must install Go"
         return 1
     fi
+}
+
+check-docker() {
     if ! which docker &>/dev/null; then
         echo "You must install Docker"
         return 1
@@ -35,7 +38,7 @@ publish?() {
     # Figure out whether to release the docker image and executable binary
     #   The lack of setting PUBLISH to anything means its undefined
 
-    tag_of_current_commit="$(git describe --exact-match --tags HEAD || true)"
+    tag_of_current_commit="$(git describe --exact-match --tags HEAD &>/dev/null || true)"
     latest_tag_in_repo="$(git describe --tags | cut -d '-' -f1)"
     if [ "$tag_of_current_commit" != "$latest_tag_in_repo" ]; then
         echo "Not publishing because current HEAD is not equal to the latest tag" >&2
@@ -74,7 +77,14 @@ version() {
 
 case "$1" in
         checks)
-            checks
+            check-go
+            check-docker
+            ;;
+        check-go)
+            check-go
+            ;;
+        check-docker)
+            check-docker
             ;;
         deps)
             deps
@@ -86,6 +96,6 @@ case "$1" in
             version
             ;;
         *)
-            echo $"Usage: $0 {checks|deps|publish?|version}"
+            echo $"Usage: $0 {checks|check-go|check-docker|deps|publish?|version}"
             exit 1
 esac

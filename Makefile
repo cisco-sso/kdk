@@ -28,14 +28,19 @@ PUBLISH := $(shell ./scripts/cicd.sh publish?)
 
 #####################################################################
 
-.PHONY: checks deps gofmt \
+.PHONY: checks check-go check-docker deps gofmt \
 	ci build build-cross \
 	docker-build docker-push \
 	bin-build bin-push \
 	clean help
 
-checks:  ## Check the system before building
-	./scripts/cicd.sh checks
+checks: check-go check-docker ## Check the system before building
+
+check-go:  ## Check the system for go builds
+	./scripts/cicd.sh check-go
+
+check-docker:  ## Check the system for docker builds
+	./scripts/cicd.sh check-docker
 
 deps:    ## Ensure dependencies are installed
 	./scripts/cicd.sh deps
@@ -43,23 +48,23 @@ deps:    ## Ensure dependencies are installed
 gofmt:   ## Format all golang code
 	gofmt -w -s $$(find ./cmd ./pkg -type f -name '*.go')
 
-ci: docker-build bin-build docker-push bin-push  ## Run the CICD build, and publish depending on circumstances
+ci: checks docker-build bin-build docker-push bin-push  ## Run the CICD build, and publish depending on circumstances
 
-build: checks deps  ## Build locally for local os/arch creating bin in ./
+build: check-go deps  ## Build locally for local os/arch creating bin in ./
 	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./
 
-build-cross: checks deps  ## Build locally for all os/arch combinations in ./_dist
+build-cross: check-go deps  ## Build locally for all os/arch combinations in ./_dist
 	@# # usage: make clean build-cross dist VERSION=1.0.0
 	CGO_ENABLED=0 gox -parallel=3 \
 	  -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" \
 	  -osarch='$(TARGETS)' $(GOFLAGS) $(if $(TAGS),-tags '$(TAGS)',) \
 	  -ldflags '$(LDFLAGS)' ./
 
-docker-build: checks  ## Build the docker image
+docker-build: check-docker  ## Build the docker image
 	docker pull $(BASE_IMAGE):latest
 	docker build -t $(NEW_IMAGE_TAG) --cache-from $(BASE_IMAGE):latest -f files/Dockerfile files
 
-docker-push: checks  ## Publish the docker image
+docker-push: check-docker  ## Publish the docker image
 ifeq ($(PUBLISH),true)
 	@echo "Executing docker push for build"
 	echo "$${DOCKER_PASSWORD}" | docker login -u "$${DOCKER_USERNAME}" --password-stdin
@@ -72,7 +77,7 @@ endif
 
 bin-build: build-cross  ## Build the binary executable
 
-bin-push: checks deps  # Publish the binary executable
+bin-push: check-go deps  # Publish the binary executable
 ifeq ($(PUBLISH),true)
 	@echo "Executing bin push for build"
 	git status
