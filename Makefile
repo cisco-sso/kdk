@@ -48,7 +48,7 @@ deps:    ## Ensure dependencies are installed
 gofmt:   ## Format all golang code
 	gofmt -w -s $$(find ./cmd ./pkg -type f -name '*.go')
 
-ci: checks docker-build bin-build docker-push bin-push  ## Run the CICD build, and publish depending on circumstances
+ci: checks bin-build docker-build docker-push bin-push  ## Run the CICD build, and publish depending on circumstances
 
 build: check-go deps  ## Build locally for local os/arch creating bin in ./
 	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./
