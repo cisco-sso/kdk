@@ -26,11 +26,22 @@ SHELL=/bin/bash
 
 #####################################################################
 
-.PHONY: checks check-go check-docker check-publish deps gofmt \
-	ci build build-cross \
-	docker-build docker-push \
-	bin-build bin-push \
-	clean help
+ifeq ($(shell ./scripts/cicd.sh needs-build? master ./files),true)
+NEEDS_BUILD_DOCKER=true
+else
+$(info Will skip *Docker* build since no files changed)
+endif
+
+ifeq ($(shell ./scripts/cicd.sh needs-build? master $(shell find main.go ./cmd ./pkg -type f -name '*.go')),true)
+NEEDS_BUILD_BIN=true
+else
+$(info Will skip *bin* build since no files changed)
+endif
+
+#####################################################################
+
+.PHONY: checks check-go check-docker check-publish deps gofmt ci build \
+	build-cross docker-build docker-push bin-build bin-push clean help
 
 checks: check-go check-docker  ## Check the entire system before building
 
@@ -62,6 +73,7 @@ build-cross: check-go deps  ## Build locally for all os/arch combinations in ./_
 	  -ldflags '$(LDFLAGS)' ./
 
 docker-build: check-docker  ## Build the docker image
+ifdef NEEDS_BUILD_DOCKER
 	@# Work around the fact that multistage builds do not implicitly cache
 	@#   https://github.com/moby/moby/issues/34715
 	@#   Once the above issue is resolved, then the below condenses to a single docker build command line on the Dockerfile
@@ -102,10 +114,10 @@ docker-build: check-docker  ## Build the docker image
 
 	@# Then retag as the new version
 	docker tag $(BASE_IMAGE):latest $(NEW_IMAGE_TAG)
-
-
+endif
 
 docker-push: check-publish check-docker  ## Publish the docker image
+ifdef NEEDS_BUILD_DOCKER
 	@echo "Executing docker push for build"
 	echo "$${DOCKER_PASSWORD}" | docker login -u "$${DOCKER_USERNAME}" --password-stdin
 
@@ -115,14 +127,20 @@ docker-push: check-publish check-docker  ## Publish the docker image
 	docker push $(BASE_IMAGE):build-cache-multistage-goinstall
 	docker push $(BASE_IMAGE):latest
 	docker push $(NEW_IMAGE_TAG)
+endif
 
-bin-build: build-cross  ## Build the binary executable
+bin-build: check-go deps  ## Build the binary executable
+ifdef NEEDS_BUILD_BIN
+	$(MAKE) build-cross
+endif
 
 bin-push: check-publish check-go deps  # Publish the binary executable
+ifdef NEEDS_BUILD_BIN
 	@echo "Executing bin push for build"
 	git status
 	git reset --hard HEAD
 	goreleaser --rm-dist --debug
+endif
 
 clean:  ## Clean up the build dirs
 	@rm -rf $(BINDIR) ./_dist ./bin vendor .vendor-new .venv
