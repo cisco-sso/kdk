@@ -20,21 +20,7 @@ check-docker() {
     return 0
 }
 
-deps() {
-    if ! which dep &>/dev/null; then
-        go get -u github.com/golang/dep/cmd/dep
-    fi
-    if ! which gox &>/dev/null; then
-        go get -u github.com/mitchellh/gox
-    fi
-    if ! which goreleaser &>/dev/null; then
-        go get -u github.com/goreleaser/goreleaser
-    fi
-
-    dep ensure
-}
-
-publish?() {
+check-publish() {
     # Figure out whether to release the docker image and executable binary
     #   The lack of setting PUBLISH to anything means its undefined
 
@@ -71,6 +57,20 @@ publish?() {
     return 1
 }
 
+deps() {
+    if ! which dep &>/dev/null; then
+        go get -u github.com/golang/dep/cmd/dep
+    fi
+    if ! which gox &>/dev/null; then
+        go get -u github.com/mitchellh/gox
+    fi
+    if ! which goreleaser &>/dev/null; then
+        go get -u github.com/goreleaser/goreleaser
+    fi
+
+    dep ensure
+}
+
 version() {
     echo $(git describe --tags --long --dirty | sed 's/-0-........$//;')
 }
@@ -86,16 +86,16 @@ case "$1" in
         check-docker)
             check-docker
             ;;
+        check-publish)
+            check-publish
+            ;;
         deps)
             deps
-            ;;
-        publish?)
-            publish?
             ;;
         version)
             version
             ;;
         *)
-            echo $"Usage: $0 {checks|check-go|check-docker|deps|publish?|version}"
+            echo $"Usage: $0 {checks|check-go|check-docker|check-publish|deps|version}"
             exit 1
 esac
