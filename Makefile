@@ -24,11 +24,9 @@ LDFLAGS += -extldflags "-static"
 # Required for globs to work correctly
 SHELL=/bin/bash
 
-PUBLISH := $(shell ./scripts/cicd.sh publish?)
-
 #####################################################################
 
-.PHONY: checks check-go check-docker deps gofmt \
+.PHONY: checks check-go check-docker check-publish deps gofmt \
 	ci build build-cross \
 	docker-build docker-push \
 	bin-build bin-push \
@@ -41,6 +39,9 @@ check-go:  ## Check the system for go builds
 
 check-docker:  ## Check the system for docker builds
 	./scripts/cicd.sh check-docker
+
+check-publish:  ## Check ENV vars set for push to docker and github
+	./scripts/cicd.sh check-publish
 
 deps:    ## Ensure dependencies are installed
 	./scripts/cicd.sh deps
@@ -104,8 +105,7 @@ docker-build: check-docker  ## Build the docker image
 
 
 
-docker-push: check-docker  ## Publish the docker image
-ifeq ($(PUBLISH),true)
+docker-push: check-publish check-docker  ## Publish the docker image
 	@echo "Executing docker push for build"
 	echo "$${DOCKER_PASSWORD}" | docker login -u "$${DOCKER_USERNAME}" --password-stdin
 
@@ -115,21 +115,14 @@ ifeq ($(PUBLISH),true)
 	docker push $(BASE_IMAGE):build-cache-multistage-goinstall
 	docker push $(BASE_IMAGE):latest
 	docker push $(NEW_IMAGE_TAG)
-else
-	@echo "Skipping docker push"
-endif
 
 bin-build: build-cross  ## Build the binary executable
 
-bin-push: check-go deps  # Publish the binary executable
-ifeq ($(PUBLISH),true)
+bin-push: check-publish check-go deps  # Publish the binary executable
 	@echo "Executing bin push for build"
 	git status
 	git reset --hard HEAD
 	goreleaser --rm-dist --debug
-else
-	@echo "Skipping bin push"
-endif
 
 clean:  ## Clean up the build dirs
 	@rm -rf $(BINDIR) ./_dist ./bin vendor .vendor-new .venv
