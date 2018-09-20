@@ -27,27 +27,27 @@ check-publish() {
     tag_of_current_commit="$(git describe --exact-match --tags HEAD 2>/dev/null || true)"
     latest_tag_in_repo="$(git describe --tags | cut -d '-' -f1)"
     if [ "$tag_of_current_commit" != "$latest_tag_in_repo" ]; then
-        echo "Not publishing because current HEAD is not equal to the latest tag" >&2
+        echo "Check-Publish: Not publishing because current HEAD is not equal to the latest tag" >&2
         echo false
         return 1
     fi
     if [[ -z ${DOCKER_USERNAME+x} ]]; then
-        echo "Not publishing because DOCKER_USERNAME is unset" >&2
+        echo "Check-Publish: Not publishing because DOCKER_USERNAME is unset" >&2
         echo false
         return 1
     fi
     if [[ -z ${DOCKER_PASSWORD+x} ]]; then
-        echo "Not publishing because DOCKER_USERNAME is unset" >&2
+        echo "Check-Publish: Not publishing because DOCKER_USERNAME is unset" >&2
         echo false
         return 1
     fi
     if [[ ! -z ${TRAVIS_TAG+x} ]]; then
-        echo "Publish because we are building a Tag on TravisCI" >&2
+        echo "Check-Publish: Publish because we are building a Tag on TravisCI" >&2
         echo true
         return 0
     fi
     if [[ -z ${CI+x} ]]; then
-        echo "Publish because we are building on a local machine" >&2
+        echo "Check-Publish: Publish because we are building on a local machine" >&2
         echo true
         return 0
     fi
@@ -64,22 +64,26 @@ needs-build?() {
 
     # Always need build on local non-ci machine
     if [[ -z ${CI+x} ]]; then
+        echo "Needs-Build: Should build because we are on a local machine" >&2
         echo true
         return 0
     fi
 
     # Always build for Travis Tags
     if [[ ! -z ${TRAVIS_TAG+x} ]]; then
+        echo "Needs-Build: Should build because TRAVIS_TAG is set" >&2
         echo true
         return 0
     fi
 
     # Otherwise, we are on CI, and should only build if there are differences
     if [[ $(git diff "$@") !=  "" ]]; then
+        echo "Needs-Build: Should build because we are on CI with code differences" >&2
 	echo true
 	return 0
     fi
 
+    echo "Needs-Build: Should Not build because no build conditions were met" >&2
     echo false
     return 0
 }
