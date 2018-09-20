@@ -61,16 +61,60 @@ build-cross: check-go deps  ## Build locally for all os/arch combinations in ./_
 	  -ldflags '$(LDFLAGS)' ./
 
 docker-build: check-docker  ## Build the docker image
-	docker pull $(BASE_IMAGE):latest
-	docker build -t $(NEW_IMAGE_TAG) --cache-from $(BASE_IMAGE):latest -f files/Dockerfile files
+	@# Work around the fact that multistage builds do not implicitly cache
+	@#   https://github.com/moby/moby/issues/34715
+	@#   Once the above issue is resolved, then the below condenses to a single docker build command line on the Dockerfile
+	@#   docker build -t $(NEW_IMAGE_TAG) --cache-from $(BASE_IMAGE):latest -f files/Dockerfile files
+
+	@# Populate the build cache
+	docker pull $(BASE_IMAGE):build-cache-base || true
+	docker pull $(BASE_IMAGE):build-cache-multistage-goinstall || true
+	docker pull $(BASE_IMAGE):build-cache-multistage-compiler || true
+	docker pull $(BASE_IMAGE):latest || true
+
+	@# The option '--cache-from' order is significant
+	docker build \
+	  --target build-cache-base \
+	  --tag $(BASE_IMAGE):build-cache-base \
+	  --cache-from $(BASE_IMAGE):build-cache-base \
+	  files/
+	docker build \
+	  --target build-cache-multistage-goinstall \
+	  --tag $(BASE_IMAGE):build-cache-multistage-goinstall \
+	  --cache-from $(BASE_IMAGE):build-cache-multistage-goinstall \
+	  --cache-from $(BASE_IMAGE):build-cache-base \
+	  files/
+	docker build \
+	  --target build-cache-multistage-compiler \
+	  --tag $(BASE_IMAGE):build-cache-multistage-compiler \
+	  --cache-from $(BASE_IMAGE):build-cache-multistage-compiler \
+	  --cache-from $(BASE_IMAGE):build-cache-multistage-goinstall \
+	  --cache-from $(BASE_IMAGE):build-cache-base \
+	  files/
+	docker build \
+	  --tag $(BASE_IMAGE):latest \
+	  --cache-from $(BASE_IMAGE):latest \
+	  --cache-from $(BASE_IMAGE):build-cache-multistage-compiler \
+	  --cache-from $(BASE_IMAGE):build-cache-multistage-goinstall \
+	  --cache-from $(BASE_IMAGE):build-cache-base \
+	  files/
+
+	@# Then retag as the new version
+	docker tag $(BASE_IMAGE):latest $(NEW_IMAGE_TAG)
+
+
 
 docker-push: check-docker  ## Publish the docker image
 ifeq ($(PUBLISH),true)
 	@echo "Executing docker push for build"
 	echo "$${DOCKER_PASSWORD}" | docker login -u "$${DOCKER_USERNAME}" --password-stdin
-	docker push $(NEW_IMAGE_TAG)
-	docker tag $(NEW_IMAGE_TAG) $(BASE_IMAGE):latest
+
+	@# Push cached build layers first
+	docker push $(BASE_IMAGE):build-cache-base
+	docker push $(BASE_IMAGE):build-cache-multistage-compiler
+	docker push $(BASE_IMAGE):build-cache-multistage-goinstall
 	docker push $(BASE_IMAGE):latest
+	docker push $(NEW_IMAGE_TAG)
 else
 	@echo "Skipping docker push"
 endif
@@ -82,7 +126,7 @@ ifeq ($(PUBLISH),true)
 	@echo "Executing bin push for build"
 	git status
 	git reset --hard HEAD
-	goreleaser release --rm-dist --debug
+	goreleaser --rm-dist --debug
 else
 	@echo "Skipping bin push"
 endif
