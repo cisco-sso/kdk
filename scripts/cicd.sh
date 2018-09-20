@@ -57,6 +57,33 @@ check-publish() {
     return 1
 }
 
+needs-build?() {
+    # Input: branch name, along with list of files or dirs
+    # On local build or tag or code differences, returns true
+    # Otherwise, returns false
+
+    # Always need build on local non-ci machine
+    if [[ -z ${CI+x} ]]; then
+        echo true
+        return 0
+    fi
+
+    # Always build for Travis Tags
+    if [[ ! -z ${TRAVIS_TAG+x} ]]; then
+        echo true
+        return 0
+    fi
+
+    # Otherwise, we are on CI, and should only build if there are differences
+    if [[ $(git diff "$@") !=  "" ]]; then
+	echo true
+	return 0
+    fi
+
+    echo false
+    return 0
+}
+
 deps() {
     if ! which dep &>/dev/null; then
         go get -u github.com/golang/dep/cmd/dep
@@ -92,10 +119,14 @@ case "$1" in
         deps)
             deps
             ;;
+        needs-build?)
+            shift
+            needs-build? $@
+            ;;
         version)
             version
             ;;
         *)
-            echo $"Usage: $0 {checks|check-go|check-docker|check-publish|deps|version}"
+            echo $"Usage: $0 {checks|check-go|check-docker|check-publish|deps|needs-build?|version}"
             exit 1
 esac
