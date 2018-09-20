@@ -27,7 +27,6 @@ import (
 
 var (
 	CurrentKdkEnvConfig = kdk.KdkEnvConfig{}
-	SkipUpdate          = false
 	Debug               = false
 )
 
@@ -58,7 +57,6 @@ func init() {
 	CurrentKdkEnvConfig.Init()
 
 	rootCmd.PersistentFlags().StringVar(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Name, "name", "kdk", "KDK name")
-	rootCmd.PersistentFlags().BoolVarP(&SkipUpdate, "skip-update", "", false, "Skip update")
 	rootCmd.PersistentFlags().BoolVarP(&Debug, "debug", "d", false, "Debug Mode")
 }
 

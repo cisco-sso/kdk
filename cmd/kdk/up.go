@@ -27,7 +27,7 @@ var upCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New().WithField("command", "up")
 
-		kdk.Up(CurrentKdkEnvConfig, Debug, SkipUpdate, *logger)
+		kdk.Up(CurrentKdkEnvConfig, Debug, *logger)
 		kdk.Provision(CurrentKdkEnvConfig, Debug, *logger)
 	},
 }

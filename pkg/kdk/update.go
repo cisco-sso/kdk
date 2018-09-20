@@ -37,13 +37,11 @@ var (
 	latestReleaseVersion = getLatestReleaseVersion()
 )
 
-func Update(cfg KdkEnvConfig, debug bool, skipUpdate bool, logger logrus.Entry) error {
-	if !skipUpdate {
+func Update(cfg KdkEnvConfig, debug bool, logger logrus.Entry) error {
 		doUpdateConfig := updateConfigCheck(cfg)
 		if doUpdateConfig {
 			logger.Info("A newer version of the kdk binary executable and/or docker image is available")
 			logger.Infof("Update will move from version %s -> %s", cfg.ConfigFile.AppConfig.ImageTag, latestReleaseVersion)
-			logger.Info("If you would like to skip update, hit CTRL-C and re-run command with --skip-update flag")
 			updateConfig(&cfg, debug, logger)
 		} else {
 			logger.Info("Config has not changed")
@@ -61,15 +59,14 @@ func Update(cfg KdkEnvConfig, debug bool, skipUpdate bool, logger logrus.Entry) 
 			logger.Infof("Using most recent version of KDK bin [%s]", latestReleaseVersion)
 		}
 		return nil
-	} else {
-		logger.Info("Skipped updated")
-	}
-	return nil
 }
 
 // get latest release version
 func getLatestReleaseVersion() (out string) {
-	resp, err := http.Get("https://api.github.com/repos/cisco-sso/kdk/releases/latest")
+	client := http.Client{
+		Timeout: time.Duration(2 * time.Second),
+	}
+	resp, err := client.Get("https://api.github.com/repos/cisco-sso/kdk/releases/latest")
 	if err != nil {
 		panic(err)
 	}
