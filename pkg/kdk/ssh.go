@@ -27,7 +27,6 @@ import (
 func Ssh(
 	cfg KdkEnvConfig,
 	debug bool,
-	skipUpdate bool,
 	logger logrus.Entry) {
 
 	logger.Info("Connecting to KDK container")
@@ -55,7 +54,7 @@ func Ssh(
 	// if KDK container is not running, start it and provision KDK user
 	if !kdkRunning {
 		logger.Info("KDK is not currently running.  Starting...")
-		Up(cfg, debug, skipUpdate, logger)
+		Up(cfg, debug, logger)
 		Provision(cfg, debug, logger)
 	}
 

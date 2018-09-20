@@ -26,12 +26,8 @@ import (
 func Up(
 	cfg KdkEnvConfig,
 	debug bool,
-	skipUpdate bool,
-	logger logrus.Entry,
-) (err error) {
-	if err := Update(cfg, debug, skipUpdate, logger); err != nil {
-		logger.Fatal("Failed to update KDK")
-	}
+	logger logrus.Entry) (err error) {
+
 	containers, err := cfg.DockerClient.ContainerList(cfg.Ctx, types.ContainerListOptions{All: true})
 	if err != nil {
 		logger.WithField("error", err).Fatal("Failed to list docker containers")
