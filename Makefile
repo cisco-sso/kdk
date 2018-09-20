@@ -16,6 +16,7 @@ TESTS     := .
 TESTFLAGS :=
 LDFLAGS   := -w -s
 GOFLAGS   :=
+GOSOURCES  = $(shell find main.go ./cmd ./pkg -type f -name '*.go')
 BINDIR    := $(CURDIR)/bin
 
 LDFLAGS += -X github.com/cisco-sso/kdk/pkg/kdk.Version=${VERSION}
@@ -32,7 +33,7 @@ else
 $(info Will skip *Docker* build since no files changed)
 endif
 
-ifeq ($(shell ./scripts/cicd.sh needs-build? master $(shell find main.go ./cmd ./pkg -type f -name '*.go')),true)
+ifeq ($(shell ./scripts/cicd.sh needs-build? master $(GOSOURCES)),true)
 NEEDS_BUILD_BIN=true
 else
 $(info Will skip *bin* build since no files changed)
@@ -58,7 +59,10 @@ deps:    ## Ensure dependencies are installed
 	./scripts/cicd.sh deps
 
 gofmt:   ## Format all golang code
-	gofmt -w -s $$(find ./cmd ./pkg -type f -name '*.go')
+	gofmt -w -s $(GOSOURCES)
+
+gosources:
+	echo "$(GOSOURCES)"
 
 ci: checks bin-build docker-build docker-push bin-push  ## Run the CICD build, and publish depending on circumstances
 
