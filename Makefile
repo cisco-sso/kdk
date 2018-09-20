@@ -129,7 +129,7 @@ ifdef NEEDS_BUILD_DOCKER
 	docker push $(NEW_IMAGE_TAG)
 endif
 
-bin-build: check-go deps  ## Build the binary executable
+bin-build: check-go  ## Build the binary executable
 ifdef NEEDS_BUILD_BIN
 	$(MAKE) build-cross
 endif
