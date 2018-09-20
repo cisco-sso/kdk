@@ -31,22 +31,22 @@ check-publish() {
         echo false
         return 1
     fi
-    if [[ -z ${DOCKER_USERNAME+x} ]]; then
+    if [[ -z ${DOCKER_USERNAME-} ]]; then
         echo "Check-Publish: Not publishing because DOCKER_USERNAME is unset" >&2
         echo false
         return 1
     fi
-    if [[ -z ${DOCKER_PASSWORD+x} ]]; then
+    if [[ -z ${DOCKER_PASSWORD-} ]]; then
         echo "Check-Publish: Not publishing because DOCKER_USERNAME is unset" >&2
         echo false
         return 1
     fi
-    if [[ ! -z ${TRAVIS_TAG+x} ]]; then
+    if [[ ! -z ${TRAVIS_TAG-} ]]; then
         echo "Check-Publish: Publish because we are building a Tag on TravisCI" >&2
         echo true
         return 0
     fi
-    if [[ -z ${CI+x} ]]; then
+    if [[ -z ${CI-} ]]; then
         echo "Check-Publish: Publish because we are building on a local machine" >&2
         echo true
         return 0
@@ -63,14 +63,14 @@ needs-build?() {
     # Otherwise, returns false
 
     # Always need build on local non-ci machine
-    if [[ -z ${CI+x} ]]; then
+    if [[ -z ${CI-} ]]; then
         echo "Needs-Build: Should build because we are on a local machine" >&2
         echo true
         return 0
     fi
 
     # Always build for Travis Tags
-    if [[ ! -z ${TRAVIS_TAG+x} ]]; then
+    if [[ ! -z ${TRAVIS_TAG-} ]]; then
         echo "Needs-Build: Should build because TRAVIS_TAG is set" >&2
         echo true
         return 0
