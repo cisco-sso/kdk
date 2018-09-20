@@ -1,4 +1,4 @@
-FROM debian:9.5 AS base
+FROM debian:9.5 AS build-cache-base
 
 LABEL maintainer="rluckie@cisco.com" \
       kdk=""
@@ -241,9 +241,28 @@ RUN echo "Install apps (without pinned version) that are not provided by the OS 
         chmod a+x mc && mv mc /usr/local/bin
 
 #######################################
+# go get installs
+
+FROM build-cache-base AS build-cache-multistage-goinstall
+
+ARG GOPATH=/go
+RUN echo "go get installs" && \
+   apt-get -y update && apt-get --no-install-recommends -y install git && \
+   apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
+RUN /usr/local/go/bin/go get github.com/spf13/cobra/cobra
+RUN /usr/local/go/bin/go get github.com/kubernetes-incubator/cri-tools/cmd/crictl
+RUN /usr/local/go/bin/go get github.com/golang/lint/golint
+RUN /usr/local/go/bin/go get github.com/gpmgo/gopm
+RUN /usr/local/go/bin/go get github.com/vmware/govmomi/govc
+RUN /usr/local/go/bin/go get github.com/github/hub
+RUN /usr/local/go/bin/go get github.com/cisco-sso/mh && ln -sf /go/bin/mh /go/bin/multihelm
+RUN /usr/local/go/bin/go get github.com/mikefarah/yq
+RUN rm -rf /root/.cache/go-build
+
+#######################################
 # Build apps that are not provided by the OS packages.
 
-FROM base AS stage-compiler
+FROM build-cache-multistage-goinstall AS build-cache-multistage-compiler
 
 RUN echo "Install OS BUILD packages" && \
     apt-get -y update && apt-get --no-install-recommends -y install \
@@ -308,29 +327,15 @@ RUN echo "Install redis-cli tools." && \
     curl -sSL http://download.redis.io/releases/redis-4.0.10.tar.gz | tar xz && cd redis-* && \
     make && cp src/redis-cli src/redis-benchmark /usr/local/bin && cd .. && rm -fr redis-*
 
+
 #######################################
-# go get installs
+# Piece together the final image
 
-FROM base as stage-golang
+FROM build-cache-base AS the-final-image
 
-ARG GOPATH=/go
-RUN echo "go get installs" && \
-    apt-get -y update && apt-get --no-install-recommends -y install git && \
-    apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/* && \
-    /usr/local/go/bin/go get github.com/spf13/cobra/cobra && \
-    /usr/local/go/bin/go get github.com/kubernetes-incubator/cri-tools/cmd/crictl && \
-    /usr/local/go/bin/go get github.com/golang/lint/golint && \
-    /usr/local/go/bin/go get github.com/gpmgo/gopm && \
-    /usr/local/go/bin/go get github.com/vmware/govmomi/govc && \
-    /usr/local/go/bin/go get github.com/github/hub && \
-    /usr/local/go/bin/go get github.com/cisco-sso/mh && ln -sf /go/bin/mh /go/bin/multihelm && \
-    /usr/local/go/bin/go get github.com/mikefarah/yq && \
-    rm -rf /root/.cache/go-build
-
-FROM base AS stage-final
-COPY --from=stage-compiler /usr/local/ /usr/local/
-COPY --from=stage-compiler /etc/shells /etc/shells
-COPY --from=stage-golang   /go/bin/     /go/bin/
+COPY --from=build-cache-multistage-goinstall /go/bin/    /go/bin/
+COPY --from=build-cache-multistage-compiler  /usr/local/ /usr/local/
+COPY --from=build-cache-multistage-compiler  /etc/shells /etc/shells
 
 #######################################
 # Copy local files
