@@ -63,7 +63,7 @@ func init() {
 
 func initConfig() {
 
-	if debug == false {
+	if debug == true {
 		log.SetLevel(log.DebugLevel)
 	}
 
