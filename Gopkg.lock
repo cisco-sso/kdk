@@ -18,21 +18,6 @@
   version = "v1.0.6"
 
 [[projects]]
-  digest = "1:dcaa4d6c1fd57b734f3091f7819e86e494e10d3b411a6ef3dd70a6fe909d6a0e"
-  name = "github.com/cisco-sso/kdk"
-  packages = [
-    "cmd/kdk",
-    "pkg/kdk",
-    "pkg/keybase",
-    "pkg/prompt",
-    "pkg/ssh",
-    "pkg/utils",
-  ]
-  pruneopts = "UT"
-  revision = "be62fc014fd99b2f8409f21d5bedbdee29e13856"
-  version = "0.9.4"
-
-[[projects]]
   digest = "1:63bd62f5b57c55f0e07c9f8a76d841c7fa74905cc3cb6b8a55e923450f4bee81"
   name = "github.com/codegangsta/inject"
   packages = ["."]
@@ -362,12 +347,6 @@
   analyzer-version = 1
   input-imports = [
     "github.com/Sirupsen/logrus",
-    "github.com/cisco-sso/kdk/cmd/kdk",
-    "github.com/cisco-sso/kdk/pkg/kdk",
-    "github.com/cisco-sso/kdk/pkg/keybase",
-    "github.com/cisco-sso/kdk/pkg/prompt",
-    "github.com/cisco-sso/kdk/pkg/ssh",
-    "github.com/cisco-sso/kdk/pkg/utils",
     "github.com/codeskyblue/go-sh",
     "github.com/docker/docker/api/types",
     "github.com/docker/docker/api/types/container",

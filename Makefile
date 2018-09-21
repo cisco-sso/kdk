@@ -41,8 +41,9 @@ endif
 
 #####################################################################
 
-.PHONY: checks check-go check-docker check-publish deps gofmt ci build \
-	build-cross docker-build docker-push bin-build bin-push clean help
+.PHONY: checks check-go check-docker check-publish deps gofmt gosources tags	\
+	ci build build-cross docker-build docker-push bin-build bin-push clean	\
+	help
 
 checks: check-go check-docker  ## Check the entire system before building
 
@@ -62,7 +63,10 @@ gofmt:   ## Format all golang code
 	gofmt -w -s $(GOSOURCES)
 
 gosources:
-	echo "$(GOSOURCES)"
+	@echo $(GOSOURCES)
+
+tags:
+	etags $(GOSOURCES)
 
 ci: checks bin-build docker-build docker-push bin-push  ## Run the CICD build, and publish depending on circumstances
 
