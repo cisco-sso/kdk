@@ -27,7 +27,7 @@ import (
 
 var (
 	CurrentKdkEnvConfig = kdk.KdkEnvConfig{}
-	debug = false
+	debug               = false
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -54,6 +54,8 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	CurrentKdkEnvConfig.Init()
+
+	kdk.WarnIfUpdateAvailable(&CurrentKdkEnvConfig)
 
 	rootCmd.PersistentFlags().StringVar(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Name, "name", "kdk", "KDK name")
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Debug Mode")

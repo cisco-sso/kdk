@@ -24,7 +24,7 @@ var updateCmd = &cobra.Command{
 	Short: "Update KDK image and binary",
 	Long:  `Update KDK image and binary`,
 	Run: func(cmd *cobra.Command, args []string) {
-		kdk.Update(CurrentKdkEnvConfig)
+		kdk.Update(&CurrentKdkEnvConfig)
 	},
 }
 

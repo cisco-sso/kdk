@@ -22,7 +22,7 @@ import (
 	"github.com/docker/docker/api/types"
 )
 
-func Pull(cfg KdkEnvConfig) error {
+func Pull(cfg *KdkEnvConfig) error {
 	out, err := cfg.DockerClient.ImagePull(cfg.Ctx, cfg.ImageCoordinates(), types.ImagePullOptions{})
 	if err != nil {
 		return err
