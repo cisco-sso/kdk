@@ -23,7 +23,7 @@ import (
 	"github.com/docker/docker/api/types"
 )
 
-func Prune(cfg KdkEnvConfig, debug bool) error {
+func Prune(cfg KdkEnvConfig) error {
 	log.Info("Starting Prune...")
 
 	var (

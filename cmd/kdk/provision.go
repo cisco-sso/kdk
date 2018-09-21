@@ -24,7 +24,7 @@ var provisionCmd = &cobra.Command{
 	Short: "Provision KDK user",
 	Long:  `Provision KDK user`,
 	Run: func(cmd *cobra.Command, args []string) {
-		kdk.Provision(CurrentKdkEnvConfig, Debug)
+		kdk.Provision(CurrentKdkEnvConfig)
 	},
 }
 

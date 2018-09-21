@@ -22,7 +22,7 @@ import (
 	"github.com/docker/docker/api/types"
 )
 
-func Snapshot(cfg KdkEnvConfig, debug bool) error {
+func Snapshot(cfg KdkEnvConfig) error {
 	snapshotName := cfg.ConfigFile.AppConfig.Name + "-" + strconv.Itoa(int(time.Now().UnixNano()))
 	_, err := cfg.DockerClient.ContainerCommit(cfg.Ctx, cfg.ConfigFile.AppConfig.Name, types.ContainerCommitOptions{Reference: snapshotName})
 	if err != nil {

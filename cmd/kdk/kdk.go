@@ -27,7 +27,7 @@ import (
 
 var (
 	CurrentKdkEnvConfig = kdk.KdkEnvConfig{}
-	Debug               = false
+	debug = false
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -56,10 +56,14 @@ func init() {
 	CurrentKdkEnvConfig.Init()
 
 	rootCmd.PersistentFlags().StringVar(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Name, "name", "kdk", "KDK name")
-	rootCmd.PersistentFlags().BoolVarP(&Debug, "debug", "d", false, "Debug Mode")
+	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Debug Mode")
 }
 
 func initConfig() {
+
+	if debug == false {
+		log.SetLevel(log.DebugLevel)
+	}
 
 	if _, err := os.Stat(CurrentKdkEnvConfig.ConfigRootDir()); os.IsNotExist(err) {
 		err = os.Mkdir(CurrentKdkEnvConfig.ConfigRootDir(), 0700)

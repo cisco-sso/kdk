@@ -24,7 +24,7 @@ var sshCmd = &cobra.Command{
 	Short: "Connect to running KDK container via ssh",
 	Long:  `Connect to running KDK container via ssh`,
 	Run: func(cmd *cobra.Command, args []string) {
-		kdk.Ssh(CurrentKdkEnvConfig, Debug)
+		kdk.Ssh(CurrentKdkEnvConfig)
 	},
 }
 

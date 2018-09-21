@@ -15,20 +15,23 @@
 package kdk
 
 import (
+	"bytes"
 	"io"
-	"io/ioutil"
-	"os"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
 )
 
-func Pull(cfg KdkEnvConfig, debug bool) error {
+func Pull(cfg KdkEnvConfig) error {
 	out, err := cfg.DockerClient.ImagePull(cfg.Ctx, cfg.ImageCoordinates(), types.ImagePullOptions{})
-	defer out.Close()
-	if debug {
-		io.Copy(os.Stdout, out)
-	} else {
-		io.Copy(ioutil.Discard, out)
+	if err != nil {
+		return err
 	}
+	defer out.Close()
+
+	var buf bytes.Buffer
+	io.Copy(&buf, out)
+	log.Debug(string(buf.Bytes()))
+
 	return err
 }

@@ -67,7 +67,7 @@ func writeMirrorScript(configDir string) (out string, err error) {
 }
 
 // Start keybase mirror [windows only]
-func StartMirror(configDir string, debug bool) error {
+func StartMirror(configDir string) error {
 
 	keybaseTestDir := filepath.Join(configDir, "keybase", "private")
 
@@ -82,9 +82,7 @@ func StartMirror(configDir string, debug bool) error {
 		return err
 	}
 	commandString := fmt.Sprintf("powershell %s %s", scriptPath, "start")
-	if debug {
-		log.Infof("Starting Keybase mirror with command; %s", commandString)
-	}
+	log.Debugf("Starting Keybase mirror with command; %s", commandString)
 	commandMap := strings.Split(commandString, " ")
 	if err := sh.Command(commandMap[0], commandMap[1:]).SetStdin(os.Stdin).Run(); err != nil {
 		return err
@@ -93,7 +91,7 @@ func StartMirror(configDir string, debug bool) error {
 }
 
 // Stop keybase mirror [windows only]
-func StopMirror(configDir string, debug bool) error {
+func StopMirror(configDir string) error {
 	// TODO(rluckie) Fix StopMirror to work with multiple KDK containers
 	// Use docker client to iterate though all running containers and ensure that no containers have mirror dir mounted
 	// If so, stop mirror
@@ -103,9 +101,7 @@ func StopMirror(configDir string, debug bool) error {
 		return err
 	}
 	commandString := fmt.Sprintf("powershell %s %s", scriptPath, "stop")
-	if debug {
-		log.Infof("Stopping Keybase mirror with command; %s", commandString)
-	}
+	log.Debugf("Stopping Keybase mirror with command; %s", commandString)
 	commandMap := strings.Split(commandString, " ")
 	if err := sh.Command(commandMap[0], commandMap[1:]).SetStdin(os.Stdin).Run(); err != nil {
 		return err

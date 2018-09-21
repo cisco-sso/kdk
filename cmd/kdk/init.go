@@ -25,8 +25,8 @@ var initCmd = &cobra.Command{
 	Short: "Initialize KDK",
 	Long:  `Initialize KDK: Create/recreate KDK configuration and pull latest image`,
 	Run: func(cmd *cobra.Command, args []string) {
-		CurrentKdkEnvConfig.CreateKdkConfig(Debug)
-		CurrentKdkEnvConfig.CreateKdkSshKeyPair(Debug)
+		CurrentKdkEnvConfig.CreateKdkConfig()
+		CurrentKdkEnvConfig.CreateKdkSshKeyPair()
 		log.Infof("KDK config written to %s. Modify this file to suit your needs.", CurrentKdkEnvConfig.ConfigPath())
 	},
 }

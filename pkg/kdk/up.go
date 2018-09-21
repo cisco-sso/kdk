@@ -23,7 +23,7 @@ import (
 	"github.com/docker/docker/api/types"
 )
 
-func Up(cfg KdkEnvConfig, debug bool) (err error) {
+func Up(cfg KdkEnvConfig) (err error) {
 
 	containers, err := cfg.DockerClient.ContainerList(cfg.Ctx, types.ContainerListOptions{All: true})
 	if err != nil {
@@ -52,7 +52,7 @@ func Up(cfg KdkEnvConfig, debug bool) (err error) {
 	}
 
 	if runtime.GOOS == "windows" {
-		if err := keybase.StartMirror(cfg.ConfigRootDir(), debug); err != nil {
+		if err := keybase.StartMirror(cfg.ConfigRootDir()); err != nil {
 			log.WithField("error", err).Fatal("Failed to start keybase mirror")
 			return err
 		}
