@@ -24,7 +24,7 @@ var snapshotCmd = &cobra.Command{
 	Short: "Create a snapshot of a running KDK container",
 	Long:  `Create a snapshot of a running KDK container`,
 	Run: func(cmd *cobra.Command, args []string) {
-		kdk.Snapshot(CurrentKdkEnvConfig, Debug)
+		kdk.Snapshot(CurrentKdkEnvConfig)
 	},
 }
 

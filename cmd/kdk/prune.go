@@ -24,7 +24,7 @@ var pruneCmd = &cobra.Command{
 	Short: "Prune unused KDK container images",
 	Long:  `Prune unused KDK container images`,
 	Run: func(cmd *cobra.Command, args []string) {
-		kdk.Prune(CurrentKdkEnvConfig, Debug)
+		kdk.Prune(CurrentKdkEnvConfig)
 	},
 }
 

@@ -38,18 +38,18 @@ var (
 	latestReleaseVersion = getLatestReleaseVersion()
 )
 
-func Update(cfg KdkEnvConfig, debug bool) error {
+func Update(cfg KdkEnvConfig) error {
 	doUpdateConfig := updateConfigCheck(cfg)
 	if doUpdateConfig {
 		log.Info("A newer version of the kdk binary executable and/or docker image is available")
 		log.Infof("Update will move from version %s -> %s", cfg.ConfigFile.AppConfig.ImageTag, latestReleaseVersion)
-		updateConfig(&cfg, debug)
+		updateConfig(&cfg)
 	} else {
 		log.Info("Config has not changed")
 	}
 	doImageUpdate := updateImageCheck(cfg)
 	if doImageUpdate {
-		updateImage(cfg, debug)
+		updateImage(cfg)
 	} else {
 		log.Infof("Most recent KDK image has already been pulled [%s]", latestReleaseVersion)
 	}
@@ -123,7 +123,7 @@ func updateImageCheck(cfg KdkEnvConfig) (out bool) {
 }
 
 // update kdk image
-func updateImage(cfg KdkEnvConfig, debug bool) {
+func updateImage(cfg KdkEnvConfig) {
 	log.Infof("Update KDK image?")
 	p := prompt.Prompt{
 		Text:     "Continue? [y/n] ",
@@ -133,7 +133,7 @@ func updateImage(cfg KdkEnvConfig, debug bool) {
 	if result, err := p.Run(); err != nil || result == "n" {
 		log.Error("KDK image update canceled or invalid input.")
 	} else {
-		Pull(cfg, debug)
+		Pull(cfg)
 	}
 }
 
@@ -239,7 +239,7 @@ func updateConfigCheck(cfg KdkEnvConfig) (out bool) {
 }
 
 // update kdk config
-func updateConfig(cfg *KdkEnvConfig, debug bool) (err error) {
+func updateConfig(cfg *KdkEnvConfig) (err error) {
 	cfg.ConfigFile.AppConfig.ImageTag = latestReleaseVersion
 	cfg.ConfigFile.ContainerConfig.Labels["kdk"] = latestReleaseVersion
 	cfg.ConfigFile.ContainerConfig.Image = cfg.ImageCoordinates()

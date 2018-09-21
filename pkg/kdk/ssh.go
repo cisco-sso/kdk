@@ -24,7 +24,7 @@ import (
 	"github.com/docker/docker/api/types"
 )
 
-func Ssh(cfg KdkEnvConfig, debug bool) {
+func Ssh(cfg KdkEnvConfig) {
 
 	log.Info("Connecting to KDK container")
 
@@ -51,16 +51,14 @@ func Ssh(cfg KdkEnvConfig, debug bool) {
 	// if KDK container is not running, start it and provision KDK user
 	if !kdkRunning {
 		log.Info("KDK is not currently running.  Starting...")
-		Up(cfg, debug)
-		Provision(cfg, debug)
+		Up(cfg)
+		Provision(cfg)
 	}
 
 	// connect to KDK container via ssh
 	connectionString := cfg.User() + "@localhost"
 	commandString := fmt.Sprintf("ssh %s -A -p %s -i %s -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null", connectionString, cfg.ConfigFile.AppConfig.Port, cfg.PrivateKeyPath())
-	if debug {
-		log.Infof("executing ssh command: %s", commandString)
-	}
+	log.Debugf("executing ssh command: %s", commandString)
 	commandMap := strings.Split(commandString, " ")
 	if err := sh.Command(commandMap[0], commandMap[1:]).SetStdin(os.Stdin).Run(); err != nil {
 		log.WithField("error", err).Fatal("Failed to ssh to KDK container.")

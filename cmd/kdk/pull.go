@@ -26,7 +26,7 @@ var pullCmd = &cobra.Command{
 	Long:  `Pull the latest/configured KDK docker image`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info("Pulling KDK image. This may take a moment...")
-		if err := kdk.Pull(CurrentKdkEnvConfig, Debug); err != nil {
+		if err := kdk.Pull(CurrentKdkEnvConfig); err != nil {
 			log.WithField("error", err).Fatal("Failed to pull KDK image")
 		}
 		log.Info("Successfully pulled KDK image.")

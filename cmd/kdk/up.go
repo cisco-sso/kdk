@@ -24,8 +24,8 @@ var upCmd = &cobra.Command{
 	Short: "Start KDK container",
 	Long:  `Start KDK container`,
 	Run: func(cmd *cobra.Command, args []string) {
-		kdk.Up(CurrentKdkEnvConfig, Debug)
-		kdk.Provision(CurrentKdkEnvConfig, Debug)
+		kdk.Up(CurrentKdkEnvConfig)
+		kdk.Provision(CurrentKdkEnvConfig)
 	},
 }
 
