@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
 )
@@ -25,9 +24,7 @@ var provisionCmd = &cobra.Command{
 	Short: "Provision KDK user",
 	Long:  `Provision KDK user`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "provision")
-
-		kdk.Provision(CurrentKdkEnvConfig, Debug, *logger)
+		kdk.Provision(CurrentKdkEnvConfig, Debug)
 	},
 }
 

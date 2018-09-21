@@ -23,8 +23,9 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/prompt"
 	"github.com/cisco-sso/kdk/pkg/utils"
 	"github.com/docker/docker/api/types"
@@ -37,55 +38,61 @@ var (
 	latestReleaseVersion = getLatestReleaseVersion()
 )
 
-func Update(cfg KdkEnvConfig, debug bool, logger logrus.Entry) error {
-		doUpdateConfig := updateConfigCheck(cfg)
-		if doUpdateConfig {
-			logger.Info("A newer version of the kdk binary executable and/or docker image is available")
-			logger.Infof("Update will move from version %s -> %s", cfg.ConfigFile.AppConfig.ImageTag, latestReleaseVersion)
-			updateConfig(&cfg, debug, logger)
-		} else {
-			logger.Info("Config has not changed")
-		}
-		doImageUpdate := updateImageCheck(cfg, logger)
-		if doImageUpdate {
-			updateImage(cfg, debug, logger)
-		} else {
-			logger.Infof("Most recent KDK image has already been pulled [%s]", latestReleaseVersion)
-		}
-		doBinUpdate := updateBinCheck()
-		if doBinUpdate {
-			updateBin(logger)
-		} else {
-			logger.Infof("Using most recent version of KDK bin [%s]", latestReleaseVersion)
-		}
-		return nil
+func Update(cfg KdkEnvConfig, debug bool) error {
+	doUpdateConfig := updateConfigCheck(cfg)
+	if doUpdateConfig {
+		log.Info("A newer version of the kdk binary executable and/or docker image is available")
+		log.Infof("Update will move from version %s -> %s", cfg.ConfigFile.AppConfig.ImageTag, latestReleaseVersion)
+		updateConfig(&cfg, debug)
+	} else {
+		log.Info("Config has not changed")
+	}
+	doImageUpdate := updateImageCheck(cfg)
+	if doImageUpdate {
+		updateImage(cfg, debug)
+	} else {
+		log.Infof("Most recent KDK image has already been pulled [%s]", latestReleaseVersion)
+	}
+	doBinUpdate := updateBinCheck()
+	if doBinUpdate {
+		updateBin()
+	} else {
+		log.Infof("Using most recent version of KDK bin [%s]", latestReleaseVersion)
+	}
+	return nil
 }
 
 // get latest release version
-func getLatestReleaseVersion() (out string) {
+func getLatestReleaseVersion() string {
 	client := http.Client{
 		Timeout: time.Duration(2 * time.Second),
 	}
+
 	resp, err := client.Get("https://api.github.com/repos/cisco-sso/kdk/releases/latest")
 	if err != nil {
-		panic(err)
+		log.Info("Failed to check latest release version", err)
+		return ""
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
-	// get latest tag name
-	op, _ := jq.Parse(".tag_name")
-	version, _ := op.Apply([]byte(string(body)))
+	op, _ := jq.Parse(".tag_name") // get latest tag name
+	version, err := op.Apply([]byte(string(body)))
+	if err != nil {
+		log.Info("Failed to check latest release version", err)
+		return ""
+	}
+
 	versionStr := strings.Replace(string(version), "\"", "", -1)
 	return versionStr
 }
 
 // get kdk docker image on host
-func getKdkImages(cfg KdkEnvConfig, logger logrus.Entry) (out []types.ImageSummary) {
+func getKdkImages(cfg KdkEnvConfig) (out []types.ImageSummary) {
 	var kdkImages []types.ImageSummary
 	images, err := cfg.DockerClient.ImageList(cfg.Ctx, types.ImageListOptions{All: true})
 	if err != nil {
-		logger.WithField("error", err).Fatal("Failed to list docker images")
+		log.WithField("error", err).Fatal("Failed to list docker images")
 	}
 	for _, image := range images {
 		for key := range image.Labels {
@@ -99,8 +106,8 @@ func getKdkImages(cfg KdkEnvConfig, logger logrus.Entry) (out []types.ImageSumma
 }
 
 // check if kdk image needs to be updated
-func updateImageCheck(cfg KdkEnvConfig, logger logrus.Entry) (out bool) {
-	kdkImages := getKdkImages(cfg, logger)
+func updateImageCheck(cfg KdkEnvConfig) (out bool) {
+	kdkImages := getKdkImages(cfg)
 
 	for _, image := range kdkImages {
 		var tags []string
@@ -116,15 +123,15 @@ func updateImageCheck(cfg KdkEnvConfig, logger logrus.Entry) (out bool) {
 }
 
 // update kdk image
-func updateImage(cfg KdkEnvConfig, debug bool, logger logrus.Entry) {
-	logger.Infof("Update KDK image?")
+func updateImage(cfg KdkEnvConfig, debug bool) {
+	log.Infof("Update KDK image?")
 	p := prompt.Prompt{
 		Text:     "Continue? [y/n] ",
 		Loop:     true,
 		Validate: prompt.ValidateYorN,
 	}
 	if result, err := p.Run(); err != nil || result == "n" {
-		logger.Error("KDK image update canceled or invalid input.")
+		log.Error("KDK image update canceled or invalid input.")
 	} else {
 		Pull(cfg, debug)
 	}
@@ -139,21 +146,21 @@ func updateBinCheck() (out bool) {
 }
 
 // update kdk bin
-func updateBin(logger logrus.Entry) {
+func updateBin() {
 	kdkBinDir := "/usr/local/bin"
 	kdkBinName := "kdk"
 	if runtime.GOOS == "windows" {
 		kdkBinName = kdkBinName + ".exe"
 	}
 	kdkBinPath := filepath.Join(kdkBinDir, kdkBinName)
-	logger.Infof("Update KDK binary?")
+	log.Infof("Update KDK binary?")
 	p := prompt.Prompt{
 		Text:     "Continue? [y/n] ",
 		Loop:     true,
 		Validate: prompt.ValidateYorN,
 	}
 	if result, err := p.Run(); err != nil || result == "n" {
-		logger.Error("KDK binary update canceled or invalid input.")
+		log.Error("KDK binary update canceled or invalid input.")
 	} else {
 
 		downloadBaseName := "kdk-" + latestReleaseVersion + "-" + runtime.GOOS + "-" + runtime.GOARCH
@@ -170,27 +177,27 @@ func updateBin(logger logrus.Entry) {
 		// create downloadPath file
 		output, err := os.Create(downloadPath)
 		if err != nil {
-			logger.WithField("error", err).Fatal("Failed to download KDK tgz")
+			log.WithField("error", err).Fatal("Failed to download KDK tgz")
 		}
 		defer output.Close()
 
 		// download latest release for arch/os to temp dir
 		resp, err := http.Get(downloadLink)
 		if err != nil {
-			logger.WithField("error", err).Fatalf("Failed to download KDK tgz from %s", downloadLink)
+			log.WithField("error", err).Fatalf("Failed to download KDK tgz from %s", downloadLink)
 		}
 		defer resp.Body.Close()
 
 		_, err = io.Copy(output, resp.Body)
 
 		if err != nil {
-			logger.WithField("error", err).Fatalf("Failed to write KDK binary to %s", kdkBinPath)
+			log.WithField("error", err).Fatalf("Failed to write KDK binary to %s", kdkBinPath)
 		}
 
 		// extract tgz
 		err = archiver.TarGz.Open(downloadPath, downloadDir)
 		if err != nil {
-			logger.WithField("error", err).Fatal("Failed to extract KDK tgz")
+			log.WithField("error", err).Fatal("Failed to extract KDK tgz")
 		}
 
 		binSrcPath := filepath.Join(downloadDir, kdkBinName)
@@ -199,20 +206,20 @@ func updateBin(logger logrus.Entry) {
 
 		src, err := os.Open(binSrcPath)
 		if err != nil {
-			logger.WithField("error", err).Fatalf("Failed to read KDK binary @", binSrcPath)
+			log.WithField("error", err).Fatalf("Failed to read KDK binary @", binSrcPath)
 		}
 		defer src.Close()
 
 		// copy bin to appropriate location
 		dest, err := os.OpenFile(binDestPath, os.O_RDWR|os.O_CREATE, 0700)
 		if err != nil {
-			logger.WithField("error", err).Fatalf("Failed to write KDK binary @", binDestPath)
+			log.WithField("error", err).Fatalf("Failed to write KDK binary @", binDestPath)
 		}
 		defer dest.Close()
 
 		_, err = io.Copy(dest, src)
 		if err != nil {
-			logger.WithField("error", err).Fatalf("Failed to write KDK binary @", binDestPath)
+			log.WithField("error", err).Fatalf("Failed to write KDK binary @", binDestPath)
 		}
 
 		// remove temp dir
@@ -232,14 +239,14 @@ func updateConfigCheck(cfg KdkEnvConfig) (out bool) {
 }
 
 // update kdk config
-func updateConfig(cfg *KdkEnvConfig, debug bool, logger logrus.Entry) (err error) {
+func updateConfig(cfg *KdkEnvConfig, debug bool) (err error) {
 	cfg.ConfigFile.AppConfig.ImageTag = latestReleaseVersion
 	cfg.ConfigFile.ContainerConfig.Labels["kdk"] = latestReleaseVersion
 	cfg.ConfigFile.ContainerConfig.Image = cfg.ImageCoordinates()
 
 	y, err := yaml.Marshal(cfg.ConfigFile)
 	if err != nil {
-		logger.Fatal("Failed to create YAML string of configuration", err)
+		log.Fatal("Failed to create YAML string of configuration", err)
 	}
 	p := prompt.Prompt{
 		Text:     fmt.Sprintf("Update config file [%s]? [y/n]", cfg.ConfigPath()),
@@ -247,10 +254,10 @@ func updateConfig(cfg *KdkEnvConfig, debug bool, logger logrus.Entry) (err error
 		Validate: prompt.ValidateYorN,
 	}
 	if result, err := p.Run(); err == nil && result == "y" {
-		logger.Info("Updating KDK config")
+		log.Info("Updating KDK config")
 		ioutil.WriteFile(cfg.ConfigPath(), y, 0600)
 	} else {
-		logger.Fatal("Existing KDK config not overwritten")
+		log.Fatal("Existing KDK config not overwritten")
 	}
 	return nil
 }

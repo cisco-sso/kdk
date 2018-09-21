@@ -19,17 +19,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/codeskyblue/go-sh"
 	"github.com/docker/docker/api/types"
 )
 
-func Ssh(
-	cfg KdkEnvConfig,
-	debug bool,
-	logger logrus.Entry) {
+func Ssh(cfg KdkEnvConfig, debug bool) {
 
-	logger.Info("Connecting to KDK container")
+	log.Info("Connecting to KDK container")
 
 	// Check if KDK container is running
 	kdkRunning := false
@@ -37,7 +34,7 @@ func Ssh(
 	containers, err := cfg.DockerClient.ContainerList(cfg.Ctx, types.ContainerListOptions{All: true})
 
 	if err != nil {
-		logger.WithField("error", err).Fatal("Failed to list docker containers")
+		log.WithField("error", err).Fatal("Failed to list docker containers")
 	}
 
 	for _, container := range containers {
@@ -53,21 +50,21 @@ func Ssh(
 
 	// if KDK container is not running, start it and provision KDK user
 	if !kdkRunning {
-		logger.Info("KDK is not currently running.  Starting...")
-		Up(cfg, debug, logger)
-		Provision(cfg, debug, logger)
+		log.Info("KDK is not currently running.  Starting...")
+		Up(cfg, debug)
+		Provision(cfg, debug)
 	}
 
 	// connect to KDK container via ssh
 	connectionString := cfg.User() + "@localhost"
 	commandString := fmt.Sprintf("ssh %s -A -p %s -i %s -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null", connectionString, cfg.ConfigFile.AppConfig.Port, cfg.PrivateKeyPath())
 	if debug {
-		logger.Infof("executing ssh command: %s", commandString)
+		log.Infof("executing ssh command: %s", commandString)
 	}
 	commandMap := strings.Split(commandString, " ")
 	if err := sh.Command(commandMap[0], commandMap[1:]).SetStdin(os.Stdin).Run(); err != nil {
-		logger.WithField("error", err).Fatal("Failed to ssh to KDK container.")
+		log.WithField("error", err).Fatal("Failed to ssh to KDK container.")
 	}
 
-	logger.Info("KDK session exited")
+	log.Info("KDK session exited")
 }

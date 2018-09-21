@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
 )
@@ -25,13 +25,11 @@ var pullCmd = &cobra.Command{
 	Short: "Pull KDK docker image",
 	Long:  `Pull the latest/configured KDK docker image`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "pull")
-
-		logger.Info("Pulling KDK image. This may take a moment...")
+		log.Info("Pulling KDK image. This may take a moment...")
 		if err := kdk.Pull(CurrentKdkEnvConfig, Debug); err != nil {
-			logger.WithField("error", err).Fatal("Failed to pull KDK image")
+			log.WithField("error", err).Fatal("Failed to pull KDK image")
 		}
-		logger.Info("Successfully pulled KDK image.")
+		log.Info("Successfully pulled KDK image.")
 	},
 }
 

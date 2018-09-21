@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
 )
@@ -25,9 +24,7 @@ var updateCmd = &cobra.Command{
 	Short: "Update KDK image and binary",
 	Long:  `Update KDK image and binary`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "update")
-
-		kdk.Update(CurrentKdkEnvConfig, Debug, *logger)
+		kdk.Update(CurrentKdkEnvConfig, Debug)
 	},
 }
 

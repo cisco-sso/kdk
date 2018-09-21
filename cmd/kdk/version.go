@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
 )
@@ -25,7 +25,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print version information.",
 	Long:  `Print version information.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logrus.WithFields(logrus.Fields{"command": "version", "version": kdk.Version}).Info("kdk")
+		log.WithFields(log.Fields{"command": "version", "version": kdk.Version}).Info("kdk")
 	},
 }
 

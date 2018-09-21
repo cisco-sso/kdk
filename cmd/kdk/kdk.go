@@ -18,7 +18,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
@@ -42,13 +42,12 @@ var rootCmd = &cobra.Command{
 |   \ | |_/||   \ 
 \_|\_\\____/\_|\_\
                   
-
 A full kubernetes development environment in a container`,
 }
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		logrus.WithFields(logrus.Fields{"err": err}).Fatal("Failed to execute RootCmd.")
+		log.WithFields(log.Fields{"err": err}).Fatal("Failed to execute RootCmd.")
 	}
 }
 
@@ -65,7 +64,7 @@ func initConfig() {
 	if _, err := os.Stat(CurrentKdkEnvConfig.ConfigRootDir()); os.IsNotExist(err) {
 		err = os.Mkdir(CurrentKdkEnvConfig.ConfigRootDir(), 0700)
 		if err != nil {
-			logrus.WithField("err", err).Fatal("Unable to create Config Directory")
+			log.WithField("err", err).Fatal("Unable to create Config Directory")
 		}
 	}
 
@@ -75,23 +74,23 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-		logrus.WithFields(logrus.Fields{"configFileUsed": viper.ConfigFileUsed(), "err": err}).Warnln("Failed to load KDK config.")
+		log.WithFields(log.Fields{"configFileUsed": viper.ConfigFileUsed(), "err": err}).Warnln("Failed to load KDK config.")
 	}
 
 	if viper.GetBool("json") {
-		logrus.SetFormatter(&logrus.JSONFormatter{})
+		log.SetFormatter(&log.JSONFormatter{})
 	}
 	if _, err := os.Stat(CurrentKdkEnvConfig.ConfigPath()); err == nil {
 		// read the config.yaml file
 		data, err := ioutil.ReadFile(CurrentKdkEnvConfig.ConfigPath())
 		if err != nil {
-			logrus.WithField("err", err).Fatalf("Failed to read configFile %v", CurrentKdkEnvConfig.ConfigPath())
+			log.WithField("err", err).Fatalf("Failed to read configFile %v", CurrentKdkEnvConfig.ConfigPath())
 		}
 
 		err = yaml.Unmarshal(data, &CurrentKdkEnvConfig.ConfigFile)
 		if err != nil {
-			logrus.WithField("err", err).Error("Corrupted or deprecated kdk config file format")
-			logrus.Fatal("Please rebuild config file with `kdk init`")
+			log.WithField("err", err).Error("Corrupted or deprecated kdk config file format")
+			log.Fatal("Please rebuild config file with `kdk init`")
 		}
 	}
 }

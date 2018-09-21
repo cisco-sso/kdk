@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
 )
@@ -25,10 +24,8 @@ var upCmd = &cobra.Command{
 	Short: "Start KDK container",
 	Long:  `Start KDK container`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "up")
-
-		kdk.Up(CurrentKdkEnvConfig, Debug, *logger)
-		kdk.Provision(CurrentKdkEnvConfig, Debug, *logger)
+		kdk.Up(CurrentKdkEnvConfig, Debug)
+		kdk.Provision(CurrentKdkEnvConfig, Debug)
 	},
 }
 
