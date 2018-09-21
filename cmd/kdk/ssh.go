@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
 )
@@ -25,10 +24,7 @@ var sshCmd = &cobra.Command{
 	Short: "Connect to running KDK container via ssh",
 	Long:  `Connect to running KDK container via ssh`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "ssh")
-
-		kdk.Ssh(CurrentKdkEnvConfig, Debug, *logger)
-
+		kdk.Ssh(CurrentKdkEnvConfig, Debug)
 	},
 }
 

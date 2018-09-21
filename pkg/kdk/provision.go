@@ -15,18 +15,18 @@
 package kdk
 
 import (
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/codeskyblue/go-sh"
 )
 
-func Provision(cfg KdkEnvConfig, debug bool, logger logrus.Entry) error {
+func Provision(cfg KdkEnvConfig, debug bool) error {
 	// TODO (rluckie): replace sh docker sdk
-	logger.Info("Starting KDK user provisioning. This may take a moment.  Hang tight...")
+	log.Info("Starting KDK user provisioning. This may take a moment.  Hang tight...")
 	if _, err := sh.Command("docker", "exec", cfg.ConfigFile.AppConfig.Name, "/usr/local/bin/provision-user").Output(); err != nil {
-		logger.WithField("error", err).Fatal("Failed to provision KDK user.")
+		log.WithField("error", err).Fatal("Failed to provision KDK user.")
 		return err
 	} else {
-		logger.Info("Completed KDK user provisioning.")
+		log.Info("Completed KDK user provisioning.")
 		return nil
 	}
 }

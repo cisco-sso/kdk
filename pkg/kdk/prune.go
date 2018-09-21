@@ -17,14 +17,14 @@ package kdk
 import (
 	"strings"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/prompt"
 	"github.com/cisco-sso/kdk/pkg/utils"
 	"github.com/docker/docker/api/types"
 )
 
-func Prune(cfg KdkEnvConfig, debug bool, logger logrus.Entry) error {
-	logger.Info("Starting Prune...")
+func Prune(cfg KdkEnvConfig, debug bool) error {
+	log.Info("Starting Prune...")
 
 	var (
 		imageIds                 []string
@@ -35,12 +35,12 @@ func Prune(cfg KdkEnvConfig, debug bool, logger logrus.Entry) error {
 	// Get containers
 	containers, err := cfg.DockerClient.ContainerList(cfg.Ctx, types.ContainerListOptions{})
 	if err != nil {
-		logger.WithField("error", err).Fatal("Failed to list docker containers")
+		log.WithField("error", err).Fatal("Failed to list docker containers")
 	}
 	// Get images
 	images, err := cfg.DockerClient.ImageList(cfg.Ctx, types.ImageListOptions{})
 	if err != nil {
-		logger.WithField("error", err).Fatal("Failed to list docker images")
+		log.WithField("error", err).Fatal("Failed to list docker images")
 	}
 
 	// Iterate through containers and track running container imageIds
@@ -72,25 +72,25 @@ func Prune(cfg KdkEnvConfig, debug bool, logger logrus.Entry) error {
 		// iterate through staleImageIds, prmpt user to confirm deletion
 		for staleImage := range staleImageIds {
 			targetImage := staleImageIds[staleImage]
-			logger.Infof("Delete stale KDK image [%s]?", targetImage)
+			log.Infof("Delete stale KDK image [%s]?", targetImage)
 			prmpt := prompt.Prompt{
 				Text:     "Continue? [y/n] ",
 				Loop:     true,
 				Validate: prompt.ValidateYorN,
 			}
 			if result, err := prmpt.Run(); err != nil || result == "n" {
-				logger.Error("KDK stale image deletion canceled or invalid input.")
+				log.Error("KDK stale image deletion canceled or invalid input.")
 				return err
 			}
 			if _, err := cfg.DockerClient.ImageRemove(cfg.Ctx, targetImage, types.ImageRemoveOptions{Force: true, PruneChildren: true}); err != nil {
-				logger.WithField("error", err).Fatalf("Failed to prune KDK image [%s]", targetImage)
+				log.WithField("error", err).Fatalf("Failed to prune KDK image [%s]", targetImage)
 				return err
 			} else {
-				logger.Infof("Deleted stale KDK image [%s]", targetImage)
+				log.Infof("Deleted stale KDK image [%s]", targetImage)
 			}
 		}
 	} else {
-		logger.Infof("No stale KDK images to delete")
+		log.Infof("No stale KDK images to delete")
 	}
 	return nil
 }

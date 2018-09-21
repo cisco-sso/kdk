@@ -18,17 +18,17 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
 )
 
-func Snapshot(cfg KdkEnvConfig, debug bool, logger logrus.Entry) error {
+func Snapshot(cfg KdkEnvConfig, debug bool) error {
 	snapshotName := cfg.ConfigFile.AppConfig.Name + "-" + strconv.Itoa(int(time.Now().UnixNano()))
 	_, err := cfg.DockerClient.ContainerCommit(cfg.Ctx, cfg.ConfigFile.AppConfig.Name, types.ContainerCommitOptions{Reference: snapshotName})
 	if err != nil {
-		logger.WithField("error", err).Fatal("Failed to create snapshot of KDK container")
+		log.WithField("error", err).Fatal("Failed to create snapshot of KDK container")
 		return err
 	}
-	logger.Info("Successfully created snapshot of KDK container.", snapshotName)
+	log.Info("Successfully created snapshot of KDK container.", snapshotName)
 	return nil
 }

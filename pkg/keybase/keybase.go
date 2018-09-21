@@ -23,7 +23,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/prompt"
 	"github.com/codeskyblue/go-sh"
 )
@@ -67,23 +67,23 @@ func writeMirrorScript(configDir string) (out string, err error) {
 }
 
 // Start keybase mirror [windows only]
-func StartMirror(configDir string, debug bool, logger logrus.Entry) error {
+func StartMirror(configDir string, debug bool) error {
 
 	keybaseTestDir := filepath.Join(configDir, "keybase", "private")
 
 	// keybase mirror already started.  Nothing to do
 	if _, err := os.Stat(keybaseTestDir); err == nil {
-		logger.Info("Keybase mirror already started")
+		log.Info("Keybase mirror already started")
 		return nil
 	}
-	logger.Info("Writing keybase mirror script")
+	log.Info("Writing keybase mirror script")
 	scriptPath, err := writeMirrorScript(configDir)
 	if err != nil {
 		return err
 	}
 	commandString := fmt.Sprintf("powershell %s %s", scriptPath, "start")
 	if debug {
-		logrus.Infof("Starting Keybase mirror with command; %s", commandString)
+		log.Infof("Starting Keybase mirror with command; %s", commandString)
 	}
 	commandMap := strings.Split(commandString, " ")
 	if err := sh.Command(commandMap[0], commandMap[1:]).SetStdin(os.Stdin).Run(); err != nil {
@@ -93,18 +93,18 @@ func StartMirror(configDir string, debug bool, logger logrus.Entry) error {
 }
 
 // Stop keybase mirror [windows only]
-func StopMirror(configDir string, debug bool, logger logrus.Entry) error {
+func StopMirror(configDir string, debug bool) error {
 	// TODO(rluckie) Fix StopMirror to work with multiple KDK containers
 	// Use docker client to iterate though all running containers and ensure that no containers have mirror dir mounted
 	// If so, stop mirror
-	logger.Info("Writing keybase mirror script")
+	log.Info("Writing keybase mirror script")
 	scriptPath, err := writeMirrorScript(configDir)
 	if err != nil {
 		return err
 	}
 	commandString := fmt.Sprintf("powershell %s %s", scriptPath, "stop")
 	if debug {
-		logrus.Infof("Stopping Keybase mirror with command; %s", commandString)
+		log.Infof("Stopping Keybase mirror with command; %s", commandString)
 	}
 	commandMap := strings.Split(commandString, " ")
 	if err := sh.Command(commandMap[0], commandMap[1:]).SetStdin(os.Stdin).Run(); err != nil {
@@ -116,7 +116,7 @@ func StopMirror(configDir string, debug bool, logger logrus.Entry) error {
 // Get keybase mounts
 // Linux & OSX: Detect /keybase
 // Windows10: Detect k: and /k
-func GetMounts(configRootDir string, logger logrus.Entry) (source string, target string, err error) {
+func GetMounts(configRootDir string) (source string, target string, err error) {
 
 	keybaseRoots := []string{"/keybase", "k:", "/k"}
 	keybaseTestSubdir := "/private"
@@ -126,7 +126,7 @@ func GetMounts(configRootDir string, logger logrus.Entry) (source string, target
 				source := filepath.Dir(path)
 				target := "/keybase"
 
-				logger.Infof("Detected keybase filesystem at: %v", source)
+				log.Infof("Detected keybase filesystem at: %v", source)
 
 				prmpt := prompt.Prompt{
 					Text:     "Mount your keybase directory within KDK? [y/n] ",
@@ -134,12 +134,12 @@ func GetMounts(configRootDir string, logger logrus.Entry) (source string, target
 					Validate: prompt.ValidateYorN,
 				}
 				if result, err := prmpt.Run(); err == nil && result == "y" {
-					logger.Info("Adding /keybase mount to configuration")
+					log.Info("Adding /keybase mount to configuration")
 					if runtime.GOOS == "windows" {
 						source = filepath.Join(configRootDir, "keybase")
 						if _, err := os.Stat(source); os.IsNotExist(err) {
 							if err := os.Mkdir(source, 0700); err != nil {
-								logger.WithField("error", err).Fatalf("Failed to create KDK keybase mirror directory [%s]", source)
+								log.WithField("error", err).Fatalf("Failed to create KDK keybase mirror directory [%s]", source)
 								return "", "", err
 							}
 						}

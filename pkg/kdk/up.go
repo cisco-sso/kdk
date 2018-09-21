@@ -17,37 +17,34 @@ package kdk
 import (
 	"runtime"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/keybase"
 	"github.com/cisco-sso/kdk/pkg/prompt"
 	"github.com/docker/docker/api/types"
 )
 
-func Up(
-	cfg KdkEnvConfig,
-	debug bool,
-	logger logrus.Entry) (err error) {
+func Up(cfg KdkEnvConfig, debug bool) (err error) {
 
 	containers, err := cfg.DockerClient.ContainerList(cfg.Ctx, types.ContainerListOptions{All: true})
 	if err != nil {
-		logger.WithField("error", err).Fatal("Failed to list docker containers")
+		log.WithField("error", err).Fatal("Failed to list docker containers")
 	}
 	for _, container := range containers {
 		for _, name := range container.Names {
 			if name == "/"+cfg.ConfigFile.AppConfig.Name {
 				if container.State == "exited" {
-					logger.Infof("An exited KDK container exists")
+					log.Infof("An exited KDK container exists")
 					p := prompt.Prompt{
 						Text:     "Delete exited KDK container? [y/n] ",
 						Loop:     true,
 						Validate: prompt.ValidateYorN,
 					}
 					if result, err := p.Run(); err != nil || result == "n" {
-						logger.Fatal("KDK exited image deletion canceled or invalid input.")
+						log.Fatal("KDK exited image deletion canceled or invalid input.")
 					}
-					logger.Info("Removing exited KDK container")
+					log.Info("Removing exited KDK container")
 					if err := cfg.DockerClient.ContainerRemove(cfg.Ctx, container.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
-						logger.WithField("error", err).Fatalf("Failed to remove exited KDK container [%s]", container.ImageID)
+						log.WithField("error", err).Fatalf("Failed to remove exited KDK container [%s]", container.ImageID)
 					}
 				}
 			}
@@ -55,8 +52,8 @@ func Up(
 	}
 
 	if runtime.GOOS == "windows" {
-		if err := keybase.StartMirror(cfg.ConfigRootDir(), debug, logger); err != nil {
-			logger.WithField("error", err).Fatal("Failed to start keybase mirror")
+		if err := keybase.StartMirror(cfg.ConfigRootDir(), debug); err != nil {
+			log.WithField("error", err).Fatal("Failed to start keybase mirror")
 			return err
 		}
 	}
@@ -68,13 +65,13 @@ func Up(
 		cfg.ConfigFile.AppConfig.Name,
 	)
 	if err != nil {
-		logger.WithField("error", err).Fatal("Failed to create KDK container")
+		log.WithField("error", err).Fatal("Failed to create KDK container")
 		return err
 	}
 	if err := cfg.DockerClient.ContainerStart(cfg.Ctx, containerCreateResp.ID, types.ContainerStartOptions{}); err != nil {
-		logger.WithField("error", err).Fatal("Failed to start KDK container")
+		log.WithField("error", err).Fatal("Failed to start KDK container")
 		return err
 	}
-	logger.Info("Successfully started KDK container")
+	log.Info("Successfully started KDK container")
 	return nil
 }

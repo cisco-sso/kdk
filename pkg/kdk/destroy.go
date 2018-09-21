@@ -17,19 +17,19 @@ package kdk
 import (
 	"fmt"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/prompt"
 	"github.com/docker/docker/api/types"
 )
 
-func Destroy(cfg KdkEnvConfig, debug bool, logger logrus.Entry) error {
+func Destroy(cfg KdkEnvConfig, debug bool) error {
 
 	var containerIds []string
 
 	containers, err := cfg.DockerClient.ContainerList(cfg.Ctx, types.ContainerListOptions{})
 
 	if err != nil {
-		logger.WithField("error", err).Fatal("Failed to list docker containers")
+		log.WithField("error", err).Fatal("Failed to list docker containers")
 	}
 	for _, container := range containers {
 		for _, name := range container.Names {
@@ -40,7 +40,7 @@ func Destroy(cfg KdkEnvConfig, debug bool, logger logrus.Entry) error {
 		}
 	}
 	if len(containerIds) > 0 {
-		logger.Info("Destroying KDK container(s)...")
+		log.Info("Destroying KDK container(s)...")
 		for _, containerId := range containerIds {
 			fmt.Printf("Delete KDK container [%s][%v]\n", cfg.ConfigFile.AppConfig.Name, containerId[:8])
 			prmpt := prompt.Prompt{
@@ -49,16 +49,16 @@ func Destroy(cfg KdkEnvConfig, debug bool, logger logrus.Entry) error {
 				Validate: prompt.ValidateYorN,
 			}
 			if result, err := prmpt.Run(); err != nil || result == "n" {
-				logger.Error("KDK container deletion canceled or invalid input.")
+				log.Error("KDK container deletion canceled or invalid input.")
 				return nil
 			}
 			if err := cfg.DockerClient.ContainerRemove(cfg.Ctx, containerId, types.ContainerRemoveOptions{Force: true}); err != nil {
-				logger.WithField("error", err).Fatal("Failed to remove KDK container")
+				log.WithField("error", err).Fatal("Failed to remove KDK container")
 			}
 		}
-		logger.Info("KDK destroy complete.")
+		log.Info("KDK destroy complete.")
 	} else {
-		logger.Info("No KDK containers found. Nothing to destroy...")
+		log.Info("No KDK containers found. Nothing to destroy...")
 	}
 	return nil
 }

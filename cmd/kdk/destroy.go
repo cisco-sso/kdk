@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"github.com/Sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/spf13/cobra"
 )
@@ -25,9 +24,7 @@ var destroyCmd = &cobra.Command{
 	Short: "Destroy the running KDK container",
 	Long:  `Destroy the running KDK container`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New().WithField("command", "destroy")
-
-		kdk.Destroy(CurrentKdkEnvConfig, Debug, *logger)
+		kdk.Destroy(CurrentKdkEnvConfig, Debug)
 	},
 }
 
