@@ -15,7 +15,6 @@
 package kdk
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -26,7 +25,6 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/cisco-sso/kdk/pkg/prompt"
 	"github.com/cisco-sso/kdk/pkg/utils"
 	"github.com/docker/docker/api/types"
 	"github.com/ghodss/yaml"
@@ -38,75 +36,34 @@ var (
 	latestReleaseVersion = getLatestReleaseVersion()
 )
 
-func Update(cfg KdkEnvConfig) error {
-	doUpdateConfig := updateConfigCheck(cfg)
-	if doUpdateConfig {
-		log.Info("A newer version of the kdk binary executable and/or docker image is available")
-		log.Infof("Update will move from version %s -> %s", cfg.ConfigFile.AppConfig.ImageTag, latestReleaseVersion)
-		updateConfig(&cfg)
-	} else {
-		log.Info("Config has not changed")
+func WarnIfUpdateAvailable(cfg *KdkEnvConfig) {
+	if latestReleaseVersion == "" {
+		return
 	}
-	doImageUpdate := updateImageCheck(cfg)
-	if doImageUpdate {
-		updateImage(cfg)
-	} else {
-		log.Infof("Most recent KDK image has already been pulled [%s]", latestReleaseVersion)
+
+	if needsUpdateBin() || needsUpdateImage(cfg) || needsUpdateConfig(cfg) {
+		log.Warn("Upgrade Available\n" + strings.Join([]string{
+			"***************************************",
+			"The installed KDK version is out of date",
+			"  Current: " + Version,
+			"  Latest : " + latestReleaseVersion,
+			"",
+			"Please upgrade the KDK with the commands:",
+			"  kdk update",
+			"  kdk destroy",
+			"  kdk ssh",
+			"***************************************"}, "\n"))
 	}
-	doBinUpdate := updateBinCheck()
-	if doBinUpdate {
-		updateBin()
-	} else {
-		log.Infof("Using most recent version of KDK bin [%s]", latestReleaseVersion)
-	}
-	return nil
+	return
 }
 
-// get latest release version
-func getLatestReleaseVersion() string {
-	client := http.Client{
-		Timeout: time.Duration(2 * time.Second),
-	}
-
-	resp, err := client.Get("https://api.github.com/repos/cisco-sso/kdk/releases/latest")
-	if err != nil {
-		log.Info("Failed to check latest release version", err)
-		return ""
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	op, _ := jq.Parse(".tag_name") // get latest tag name
-	version, err := op.Apply([]byte(string(body)))
-	if err != nil {
-		log.Info("Failed to check latest release version", err)
-		return ""
-	}
-
-	versionStr := strings.Replace(string(version), "\"", "", -1)
-	return versionStr
-}
-
-// get kdk docker image on host
-func getKdkImages(cfg KdkEnvConfig) (out []types.ImageSummary) {
-	var kdkImages []types.ImageSummary
-	images, err := cfg.DockerClient.ImageList(cfg.Ctx, types.ImageListOptions{All: true})
-	if err != nil {
-		log.WithField("error", err).Fatal("Failed to list docker images")
-	}
-	for _, image := range images {
-		for key := range image.Labels {
-			if key == "kdk" {
-				kdkImages = append(kdkImages, image)
-				break
-			}
-		}
-	}
-	return kdkImages
+// check if kdk bin needs to be updated
+func needsUpdateBin() bool {
+	return Version != latestReleaseVersion
 }
 
 // check if kdk image needs to be updated
-func updateImageCheck(cfg KdkEnvConfig) (out bool) {
+func needsUpdateImage(cfg *KdkEnvConfig) bool {
 	kdkImages := getKdkImages(cfg)
 
 	for _, image := range kdkImages {
@@ -122,142 +79,233 @@ func updateImageCheck(cfg KdkEnvConfig) (out bool) {
 	return true
 }
 
-// update kdk image
-func updateImage(cfg KdkEnvConfig) {
-	log.Infof("Update KDK image?")
-	p := prompt.Prompt{
-		Text:     "Continue? [y/n] ",
-		Loop:     true,
-		Validate: prompt.ValidateYorN,
-	}
-	if result, err := p.Run(); err != nil || result == "n" {
-		log.Error("KDK image update canceled or invalid input.")
-	} else {
-		Pull(cfg)
-	}
-}
-
-// check if kdk bin needs to be updated
-func updateBinCheck() (out bool) {
-	if Version == latestReleaseVersion {
-		return false
-	}
-	return true
-}
-
-// update kdk bin
-func updateBin() {
-	kdkBinDir := "/usr/local/bin"
-	kdkBinName := "kdk"
-	if runtime.GOOS == "windows" {
-		kdkBinName = kdkBinName + ".exe"
-	}
-	kdkBinPath := filepath.Join(kdkBinDir, kdkBinName)
-	log.Infof("Update KDK binary?")
-	p := prompt.Prompt{
-		Text:     "Continue? [y/n] ",
-		Loop:     true,
-		Validate: prompt.ValidateYorN,
-	}
-	if result, err := p.Run(); err != nil || result == "n" {
-		log.Error("KDK binary update canceled or invalid input.")
-	} else {
-
-		downloadBaseName := "kdk-" + latestReleaseVersion + "-" + runtime.GOOS + "-" + runtime.GOARCH
-		baseUrl := "https://github.com/cisco-sso/kdk/releases/download/"
-		downloadLink := baseUrl + latestReleaseVersion + "/" + downloadBaseName + ".tar.gz"
-		downloadDir := filepath.Join("/tmp", downloadBaseName)
-		downloadPath := filepath.Join(downloadDir, downloadBaseName+".tar.gz")
-
-		// create downloadDir if it doesn't exist
-		if _, err := os.Stat(downloadDir); os.IsNotExist(err) {
-			os.Mkdir(downloadDir, 0700)
-		}
-
-		// create downloadPath file
-		output, err := os.Create(downloadPath)
-		if err != nil {
-			log.WithField("error", err).Fatal("Failed to download KDK tgz")
-		}
-		defer output.Close()
-
-		// download latest release for arch/os to temp dir
-		resp, err := http.Get(downloadLink)
-		if err != nil {
-			log.WithField("error", err).Fatalf("Failed to download KDK tgz from %s", downloadLink)
-		}
-		defer resp.Body.Close()
-
-		_, err = io.Copy(output, resp.Body)
-
-		if err != nil {
-			log.WithField("error", err).Fatalf("Failed to write KDK binary to %s", kdkBinPath)
-		}
-
-		// extract tgz
-		err = archiver.TarGz.Open(downloadPath, downloadDir)
-		if err != nil {
-			log.WithField("error", err).Fatal("Failed to extract KDK tgz")
-		}
-
-		binSrcPath := filepath.Join(downloadDir, kdkBinName)
-
-		binDestPath := filepath.Join("/usr/local/bin", kdkBinName)
-
-		src, err := os.Open(binSrcPath)
-		if err != nil {
-			log.WithField("error", err).Fatalf("Failed to read KDK binary @", binSrcPath)
-		}
-		defer src.Close()
-
-		// copy bin to appropriate location
-		dest, err := os.OpenFile(binDestPath, os.O_RDWR|os.O_CREATE, 0700)
-		if err != nil {
-			log.WithField("error", err).Fatalf("Failed to write KDK binary @", binDestPath)
-		}
-		defer dest.Close()
-
-		_, err = io.Copy(dest, src)
-		if err != nil {
-			log.WithField("error", err).Fatalf("Failed to write KDK binary @", binDestPath)
-		}
-
-		// remove temp dir
-		os.RemoveAll(downloadDir)
-	}
-
-}
-
 // check if kdk config needs to be updated
-func updateConfigCheck(cfg KdkEnvConfig) (out bool) {
+func needsUpdateConfig(cfg *KdkEnvConfig) bool {
 	if cfg.ConfigFile.AppConfig.ImageTag != latestReleaseVersion ||
-		cfg.ConfigFile.ContainerConfig.Labels["kdk"] != latestReleaseVersion ||
-		cfg.ConfigFile.ContainerConfig.Image != cfg.ImageCoordinates() {
+		cfg.ConfigFile.ContainerConfig.Image != cfg.ImageCoordinates() ||
+		cfg.ConfigFile.ContainerConfig.Labels["kdk"] != latestReleaseVersion {
 		return true
 	}
 	return false
 }
 
+func Update(cfg *KdkEnvConfig) {
+	if latestReleaseVersion == "" {
+		log.Warn("Upgrade Unavailable.  Unable to fetch latest version")
+	}
+
+	if !(needsUpdateBin() || needsUpdateImage(cfg) || needsUpdateConfig(cfg)) {
+		log.Warn("Upgrade Unavailable.  Already at latest versions")
+	}
+	log.Info("Upgrade Available\n" + strings.Join([]string{
+		"***************************************",
+		"The installed KDK version is out of date",
+		"  Current: " + Version,
+		"  Latest : " + latestReleaseVersion,
+		"",
+		"Upgrading the KDK binary, image, and config to latest version",
+		"",
+		"After upgrade, restart the the kdk with the commands:",
+		"  kdk update",
+		"  kdk destroy",
+		"  kdk ssh",
+		"***************************************"}, "\n"))
+
+	if needsUpdateBin() {
+		log.Info("Updating KDK binary")
+		err := updateBin()
+		if err != nil {
+			log.WithField("error", err).Fatal("Failed to update KDK bin")
+		}
+	} else {
+		log.Info("Updating KDK binary skipped: Already at latest version")
+	}
+
+	if needsUpdateImage(cfg) {
+		log.Info("Updating KDK image")
+		err := updateImage(cfg)
+		if err != nil {
+			log.WithField("error", err).Fatal("Failed to update KDK image")
+		}
+	} else {
+		log.Info("Updating KDK image skipped: Already at latest version")
+	}
+
+	if needsUpdateConfig(cfg) {
+		log.Info("Updating KDK config")
+		err := updateConfig(cfg)
+		if err != nil {
+			log.WithField("error", err).Fatal("Failed to update KDK config")
+		}
+	} else {
+		log.Info("Updating KDK config skipped: Already at latest version")
+	}
+	return
+}
+
+// update kdk bin
+func updateBin() error {
+	// TODO: This must be fixed if the binary is ever to run in powershell instead of bash
+
+	// Figure out the binary path
+	//   TODO: Don't make assumptions on binary path, like /usr/local/bin
+	kdkBinName := "kdk"
+	if runtime.GOOS == "windows" {
+		kdkBinName = kdkBinName + ".exe"
+	}
+	kdkBinPath := filepath.Join("usr", "local", "bin", kdkBinName)
+
+	// Calculate the download urls and tmp locations
+	baseUrl := "https://github.com/cisco-sso/kdk/releases/download/"
+	downloadBaseName := "kdk-" + latestReleaseVersion + "-" + runtime.GOOS + "-" + runtime.GOARCH
+	downloadLink := baseUrl + latestReleaseVersion + "/" + downloadBaseName + ".tar.gz"
+	downloadDir := filepath.Join("/tmp", downloadBaseName)
+	downloadPath := filepath.Join(downloadDir, downloadBaseName+".tar.gz")
+
+	// create downloadDir if it doesn't exist
+	if _, err := os.Stat(downloadDir); os.IsNotExist(err) {
+		err = os.MkdirAll(downloadDir, 0700)
+		if err != nil {
+			log.WithField("error", err).Error("Failed to download dir")
+			return err
+		}
+	}
+
+	// create downloadPath file
+	output, err := os.Create(downloadPath)
+	if err != nil {
+		log.WithField("error", err).Error("Failed to download KDK tgz")
+		return err
+	}
+	defer output.Close()
+
+	// download latest release for arch/os to temp dir
+	resp, err := http.Get(downloadLink)
+	if err != nil {
+		log.WithField("error", err).Errorf("Failed to download KDK tgz from %s", downloadLink)
+		return err
+	}
+	defer resp.Body.Close()
+
+	// write the kdk binary
+	_, err = io.Copy(output, resp.Body)
+	if err != nil {
+		log.WithField("error", err).Errorf("Failed to write KDK binary to %s", kdkBinPath)
+		return err
+	}
+
+	// extract tgz
+	err = archiver.TarGz.Open(downloadPath, downloadDir)
+	if err != nil {
+		log.WithField("error", err).Fatal("Failed to extract KDK tgz")
+		return err
+	}
+
+	// copy bin to appropriate location
+	binSrcPath := filepath.Join(downloadDir, kdkBinName)
+	binDestPath := filepath.Join("/usr/local/bin", kdkBinName)
+
+	//   open the bin source
+	src, err := os.Open(binSrcPath)
+	if err != nil {
+		log.WithField("error", err).Errorf("Failed to read KDK binary @", binSrcPath)
+		return err
+	}
+	defer src.Close()
+
+	//   open the bin destination
+	dest, err := os.OpenFile(binDestPath, os.O_RDWR|os.O_CREATE, 0700)
+	if err != nil {
+		log.WithField("error", err).Errorf("Failed to write KDK binary @", binDestPath)
+		return err
+	}
+	defer dest.Close()
+
+	//   Do the copy
+	_, err = io.Copy(dest, src)
+	if err != nil {
+		log.WithField("error", err).Errorf("Failed to write KDK binary @", binDestPath)
+		return err
+	}
+
+	// remove temp dir
+	err = os.RemoveAll(downloadDir)
+	if err != nil {
+		log.WithField("error", err).Errorf("Failed to remove download directory @", downloadDir)
+		return err
+	}
+
+	return nil
+}
+
+// update kdk image
+func updateImage(cfg *KdkEnvConfig) error {
+	Pull(cfg)
+	return nil
+}
+
 // update kdk config
-func updateConfig(cfg *KdkEnvConfig) (err error) {
+func updateConfig(cfg *KdkEnvConfig) error {
 	cfg.ConfigFile.AppConfig.ImageTag = latestReleaseVersion
 	cfg.ConfigFile.ContainerConfig.Labels["kdk"] = latestReleaseVersion
 	cfg.ConfigFile.ContainerConfig.Image = cfg.ImageCoordinates()
 
 	y, err := yaml.Marshal(cfg.ConfigFile)
 	if err != nil {
-		log.Fatal("Failed to create YAML string of configuration", err)
+		log.WithField("error", err).Error("Failed to create YAML string of configuration")
+		return err
 	}
-	p := prompt.Prompt{
-		Text:     fmt.Sprintf("Update config file [%s]? [y/n]", cfg.ConfigPath()),
-		Loop:     true,
-		Validate: prompt.ValidateYorN,
+
+	err = ioutil.WriteFile(cfg.ConfigPath(), y, 0600)
+	if err != nil {
+		log.WithField("error", err).Error("Failed to write new config file")
+		return err
 	}
-	if result, err := p.Run(); err == nil && result == "y" {
-		log.Info("Updating KDK config")
-		ioutil.WriteFile(cfg.ConfigPath(), y, 0600)
-	} else {
-		log.Fatal("Existing KDK config not overwritten")
-	}
+
 	return nil
+}
+
+func getLatestReleaseVersion() string {
+	client := http.Client{
+		Timeout: time.Duration(1 * time.Second),
+	}
+
+	// Fetch the informational json blob
+	resp, err := client.Get("https://api.github.com/repos/cisco-sso/kdk/releases/latest")
+	if err != nil {
+		return ""
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	// Parse the latest tag name
+	op, _ := jq.Parse(".tag_name")
+	version, err := op.Apply([]byte(string(body)))
+	if err != nil {
+		log.WithField("error", err).Error("Failed to check latest release version", err)
+		return ""
+	}
+
+	// Remove the bookend quotes
+	versionStr := strings.Replace(string(version), "\"", "", -1)
+	return versionStr
+}
+
+// get kdk docker image on host
+func getKdkImages(cfg *KdkEnvConfig) (out []types.ImageSummary) {
+	var kdkImages []types.ImageSummary
+	images, err := cfg.DockerClient.ImageList(cfg.Ctx, types.ImageListOptions{All: true})
+	if err != nil {
+		log.WithField("error", err).Fatal("Failed to list docker images")
+	}
+	for _, image := range images {
+		for key := range image.Labels {
+			// The "kdk" label is set at the top of the Dockerfile
+			if key == "kdk" {
+				kdkImages = append(kdkImages, image)
+				break
+			}
+		}
+	}
+	return kdkImages
 }
