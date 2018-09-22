@@ -55,8 +55,6 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	CurrentKdkEnvConfig.Init()
 
-	kdk.WarnIfUpdateAvailable(&CurrentKdkEnvConfig)
-
 	rootCmd.PersistentFlags().StringVar(&CurrentKdkEnvConfig.ConfigFile.AppConfig.Name, "name", "kdk", "KDK name")
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Debug Mode")
 }
@@ -99,4 +97,6 @@ func initConfig() {
 			log.Fatal("Please rebuild config file with `kdk init`")
 		}
 	}
+
+	kdk.WarnIfUpdateAvailable(&CurrentKdkEnvConfig)
 }
