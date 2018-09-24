@@ -92,24 +92,14 @@ func needsUpdateConfig(cfg *KdkEnvConfig) bool {
 func Update(cfg *KdkEnvConfig) {
 	if latestReleaseVersion == "" {
 		log.Warn("Upgrade Unavailable.  Unable to fetch latest version")
+		return
 	}
 
 	if !(needsUpdateBin() || needsUpdateImage(cfg) || needsUpdateConfig(cfg)) {
 		log.Warn("Upgrade Unavailable.  Already at latest versions")
+		return
 	}
-	log.Info("Upgrade Available\n" + strings.Join([]string{
-		"***************************************",
-		"The installed KDK version is out of date",
-		"  Current: " + Version,
-		"  Latest : " + latestReleaseVersion,
-		"",
-		"Upgrading the KDK binary, image, and config to latest version",
-		"",
-		"After upgrade, restart the the kdk with the commands:",
-		"  kdk update",
-		"  kdk destroy",
-		"  kdk ssh",
-		"***************************************"}, "\n"))
+	log.Info("Upgrading KDK...\n")
 
 	if needsUpdateBin() {
 		log.Info("Updating KDK binary")
@@ -153,7 +143,8 @@ func updateBin() error {
 	if runtime.GOOS == "windows" {
 		kdkBinName = kdkBinName + ".exe"
 	}
-	kdkBinPath := filepath.Join("usr", "local", "bin", kdkBinName)
+	// TODO: Pass individual segments into Join
+	kdkBinPath := filepath.Join("/usr/local/bin", kdkBinName)
 
 	// Calculate the download urls and tmp locations
 	baseUrl := "https://github.com/cisco-sso/kdk/releases/download/"
@@ -203,6 +194,7 @@ func updateBin() error {
 
 	// copy bin to appropriate location
 	binSrcPath := filepath.Join(downloadDir, kdkBinName)
+	// TODO: Pass individual segments into Join
 	binDestPath := filepath.Join("/usr/local/bin", kdkBinName)
 
 	//   open the bin source
