@@ -15,8 +15,9 @@
 package kdk
 
 import (
-	"bytes"
 	"io"
+	"io/ioutil"
+	"os"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
@@ -29,9 +30,13 @@ func Pull(cfg *KdkEnvConfig) error {
 	}
 	defer out.Close()
 
-	var buf bytes.Buffer
-	io.Copy(&buf, out)
-	log.Debug(string(buf.Bytes()))
+	// Silence the output for Info loglevel, but allow it through all
+	//   others.  This is a cheap way to enable streaming output.
+	if log.GetLevel() == log.InfoLevel {
+		io.Copy(ioutil.Discard, out)
+	} else {
+		io.Copy(os.Stdout, out)
+	}
 
 	return err
 }
