@@ -113,7 +113,7 @@ func Update(cfg *KdkEnvConfig) {
 
 	if needsUpdateImage(cfg) {
 		log.Info("Updating KDK image")
-		err := updateImage(cfg)
+		err := pullImage(cfg, cfg.ConfigFile.AppConfig.ImageRepository + ":" + latestReleaseVersion)
 		if err != nil {
 			log.WithField("error", err).Fatal("Failed to update KDK image")
 		}
