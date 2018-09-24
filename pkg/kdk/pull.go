@@ -24,7 +24,12 @@ import (
 )
 
 func Pull(cfg *KdkEnvConfig) error {
-	out, err := cfg.DockerClient.ImagePull(cfg.Ctx, cfg.ImageCoordinates(), types.ImagePullOptions{})
+	return pullImage(cfg, cfg.ImageCoordinates())
+}
+
+func pullImage(cfg *KdkEnvConfig, imageCoordinates string) error {
+
+	out, err := cfg.DockerClient.ImagePull(cfg.Ctx, imageCoordinates, types.ImagePullOptions{})
 	if err != nil {
 		return err
 	}
