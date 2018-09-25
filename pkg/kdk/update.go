@@ -25,6 +25,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	kos "github.com/cisco-sso/kdk/pkg/os"
 	"github.com/cisco-sso/kdk/pkg/utils"
 	"github.com/docker/docker/api/types"
 	"github.com/ghodss/yaml"
@@ -41,6 +42,11 @@ func WarnIfUpdateAvailable(cfg *KdkEnvConfig) {
 		return
 	}
 
+	// Add a sudo hint for unix-based OS's
+	sudo := ""
+	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+		sudo = "sudo "
+	}
 	if needsUpdateBin() || needsUpdateImage(cfg) || needsUpdateConfig(cfg) {
 		log.Warn("Upgrade Available\n" + strings.Join([]string{
 			"***************************************",
@@ -49,7 +55,7 @@ func WarnIfUpdateAvailable(cfg *KdkEnvConfig) {
 			"  Latest : " + latestReleaseVersion,
 			"",
 			"Please upgrade the KDK with the commands:",
-			"  kdk update",
+			"  " + sudo + "kdk update",
 			"  kdk destroy",
 			"  kdk ssh",
 			"***************************************"}, "\n"))
@@ -102,6 +108,10 @@ func Update(cfg *KdkEnvConfig) {
 	log.Info("Upgrading KDK...\n")
 
 	if needsUpdateBin() {
+		if (runtime.GOOS == "linux" || runtime.GOOS == "darwin") && os.Geteuid() != 0 {
+			log.Fatal("Please execute the update command with `sudo` or as the `root` user")
+		}
+
 		log.Info("Updating KDK binary")
 		err := updateBin()
 		if err != nil {
@@ -112,13 +122,13 @@ func Update(cfg *KdkEnvConfig) {
 	}
 
 	if needsUpdateImage(cfg) {
-		log.Info("Updating KDK image")
+		log.Info("Updating KDK docker image")
 		err := pullImage(cfg, cfg.ConfigFile.AppConfig.ImageRepository + ":" + latestReleaseVersion)
 		if err != nil {
 			log.WithField("error", err).Fatal("Failed to update KDK image")
 		}
 	} else {
-		log.Info("Updating KDK image skipped: Already at latest version")
+		log.Info("Updating KDK docker image skipped: Already at latest version")
 	}
 
 	if needsUpdateConfig(cfg) {
@@ -135,97 +145,96 @@ func Update(cfg *KdkEnvConfig) {
 
 // update kdk bin
 func updateBin() error {
-	// TODO: This must be fixed if the binary is ever to run in powershell instead of bash
+	///////////////////////////////////////
+	// Construct all of the paths upfront
 
-	// Figure out the binary path
-	//   TODO: Don't make assumptions on binary path, like /usr/local/bin
-	kdkBinName := "kdk"
-	if runtime.GOOS == "windows" {
-		kdkBinName = kdkBinName + ".exe"
-	}
-	// TODO: Pass individual segments into Join
-	kdkBinPath := filepath.Join("/usr/local/bin", kdkBinName)
-
-	// Calculate the download urls and tmp locations
-	baseUrl := "https://github.com/cisco-sso/kdk/releases/download/"
+	// Calculate the download url
+	baseUrl := "https://github.com/cisco-sso/kdk/releases/download"
 	downloadBaseName := "kdk-" + latestReleaseVersion + "-" + runtime.GOOS + "-" + runtime.GOARCH
-	downloadLink := baseUrl + latestReleaseVersion + "/" + downloadBaseName + ".tar.gz"
-	downloadDir := filepath.Join("/tmp", downloadBaseName)
-	downloadPath := filepath.Join(downloadDir, downloadBaseName+".tar.gz")
+	downloadLink := baseUrl + "/" + latestReleaseVersion + "/" + downloadBaseName + ".tar.gz"
 
-	// create downloadDir if it doesn't exist
-	if _, err := os.Stat(downloadDir); os.IsNotExist(err) {
-		err = os.MkdirAll(downloadDir, 0700)
-		if err != nil {
-			log.WithField("error", err).Error("Failed to download dir")
-			return err
-		}
-	}
+	// Calculate the temporary download and unpacking location
+	tmpDir := filepath.Join(kos.TmpDir, "kdk-install")
+	tgzFile := filepath.Join(tmpDir, downloadBaseName+".tar.gz")
 
-	// create downloadPath file
-	output, err := os.Create(downloadPath)
+	kdkBinFile, _ := os.Executable()  // this currently running binary will be overwritten
+	kdkBinFileUnpacked := filepath.Join(tmpDir, filepath.Base(kdkBinFile))
+	kdkBinFileTrash := filepath.Join(kos.TmpDir, filepath.Base(kdkBinFile)+".old")
+	// ^ Some filesystems do not allow replacing or deleting a currently
+	//   running binary.  We'll move it out of the way instead of deletion
+
+	log.WithField("file", kdkBinFile).Info("Bin File Location")
+
+	///////////////////////////////////////
+
+	// download tgz file to the tmp dir
+	err := downloadFile(downloadLink, tmpDir, tgzFile)
 	if err != nil {
-		log.WithField("error", err).Error("Failed to download KDK tgz")
-		return err
+		log.WithField("error", err).WithField("file", tgzFile).WithField("url", downloadLink).Fatal("Failed to download file")
 	}
-	defer output.Close()
-
-	// download latest release for arch/os to temp dir
-	resp, err := http.Get(downloadLink)
-	if err != nil {
-		log.WithField("error", err).Errorf("Failed to download KDK tgz from %s", downloadLink)
-		return err
-	}
-	defer resp.Body.Close()
-
-	// write the kdk binary
-	_, err = io.Copy(output, resp.Body)
-	if err != nil {
-		log.WithField("error", err).Errorf("Failed to write KDK binary to %s", kdkBinPath)
-		return err
-	}
+	log.WithField("file", tgzFile).WithField("url", downloadLink).Info("Successfully downloaded file")
 
 	// extract tgz
-	err = archiver.TarGz.Open(downloadPath, downloadDir)
+	err = archiver.TarGz.Open(tgzFile, tmpDir)
 	if err != nil {
-		log.WithField("error", err).Fatal("Failed to extract KDK tgz")
+		log.WithField("error", err).WithField("file", tgzFile).Fatal("Failed to extract tgz")
 		return err
 	}
+	log.WithField("file", tgzFile).Info("Successfully extracted tgz file")
 
-	// copy bin to appropriate location
-	binSrcPath := filepath.Join(downloadDir, kdkBinName)
-	// TODO: Pass individual segments into Join
-	binDestPath := filepath.Join("/usr/local/bin", kdkBinName)
+	if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
+		// copy the new file next to the org binary, so it is on the same partition/filesystem so that moves work
+		err = copyFile(kdkBinFileUnpacked, kdkBinFile+".new")
+		if err != nil {
+			log.WithField("error", err).WithField("fileSrc", kdkBinFileUnpacked).WithField("fileDst", kdkBinFile+".new").Fatal("Failed to copy file")
+			return err
+		}
+		log.WithField("fileSrc", kdkBinFileUnpacked).WithField("fileDst", kdkBinFile+".new").Info("Successfully copied file")
 
-	//   open the bin source
-	src, err := os.Open(binSrcPath)
-	if err != nil {
-		log.WithField("error", err).Errorf("Failed to read KDK binary @", binSrcPath)
-		return err
-	}
-	defer src.Close()
+		// set the copy to be executable
+		err = os.Chmod(kdkBinFile+".new", 0755)
+		if err != nil {
+			log.WithField("error", err).WithField("file", kdkBinFile+".new").Fatal("Failed to chmod file")
+			return err
+		}
+		log.WithField("file", kdkBinFile+".new").Info("Successfuly chmod'd file")
 
-	//   open the bin destination
-	dest, err := os.OpenFile(binDestPath, os.O_RDWR|os.O_CREATE, 0700)
-	if err != nil {
-		log.WithField("error", err).Errorf("Failed to write KDK binary @", binDestPath)
-		return err
-	}
-	defer dest.Close()
+		// remove the original bin file
+		err = os.Remove(kdkBinFile)
+		if err != nil {
+			log.WithField("error", err).WithField("file", kdkBinFile).Fatal("Failed to delete file")
+		}
 
-	//   Do the copy
-	_, err = io.Copy(dest, src)
-	if err != nil {
-		log.WithField("error", err).Errorf("Failed to write KDK binary @", binDestPath)
-		return err
+		// rename the new file to be the the executable file
+		err = os.Rename(kdkBinFile+".new", kdkBinFile)
+		if err != nil {
+			log.WithField("error", err).WithField("fileSrc", kdkBinFile+".new").WithField("fileDst", kdkBinFile).Fatal("Failed to rename file")
+		}
+	} else if runtime.GOOS == "windows" {
+		// rename the bin file to a trash location out of the way
+		err = os.Rename(kdkBinFile, kdkBinFileTrash)
+		if err != nil {
+			log.WithField("error", err).WithField("fileSrc", kdkBinFile).WithField("fileDst", kdkBinFileTrash).Fatal("Failed to rename file")
+		}
+
+		// copy the new file next to the org binary, so it is on the same partition/filesystem
+		err = copyFile(kdkBinFileUnpacked, kdkBinFile)
+		if err != nil {
+			log.WithField("error", err).WithField("fileSrc", kdkBinFileUnpacked).WithField("fileDst", kdkBinFile).Fatal("Failed to copy file")
+			return err
+		}
+		log.WithField("fileSrc", kdkBinFileUnpacked).WithField("fileDst", kdkBinFile).Info("Successfully copied file")
+	} else {
+		log.Fatal("Unhandled code path")
 	}
 
 	// remove temp dir
-	err = os.RemoveAll(downloadDir)
+	err = os.RemoveAll(tmpDir)
 	if err != nil {
-		log.WithField("error", err).Errorf("Failed to remove download directory @", downloadDir)
+		log.WithField("error", err).WithField("dir", tmpDir).Error("Failed to remove directory")
 		return err
 	}
+	log.WithField("dir", tmpDir).Info("Successfully removed directory")
 
 	return nil
 }
@@ -259,7 +268,7 @@ func updateConfig(cfg *KdkEnvConfig) error {
 
 func getLatestReleaseVersion() string {
 	client := http.Client{
-		Timeout: time.Duration(1 * time.Second),
+		Timeout: time.Duration(3 * time.Second),
 	}
 
 	// Fetch the informational json blob
@@ -300,4 +309,62 @@ func getKdkImages(cfg *KdkEnvConfig) (out []types.ImageSummary) {
 		}
 	}
 	return kdkImages
+}
+
+func copyFile(src, dst string) error {
+	// Copy the src file to dst. Any existing file will be overwritten and will not
+	// copy file attributes.
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	if err != nil {
+		return err
+	}
+	return out.Close()
+}
+
+func downloadFile(url string, dir string, file string) error {
+	// Open the TCP stream for downloading download latest tgz release
+	resp, err := http.Get(url)
+	if err != nil {
+		log.WithField("error", err).WithField("url", url).Error("Failed to reach Url")
+		return err
+	}
+	defer resp.Body.Close()
+
+	// create dir if it doesn't exist
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.MkdirAll(dir, 0777)
+		if err != nil {
+			log.WithField("error", err).WithField("dir", dir).Error("Failed to create directory")
+			return err
+		}
+	}
+
+	// open file file for eventual writing
+	fd, err := os.Create(file)
+	if err != nil {
+		log.WithField("error", err).WithField("file", file).Error("Failed to open file for writing")
+		return err
+	}
+	defer fd.Close()
+
+	// write the TCP stream to the file
+	_, err = io.Copy(fd, resp.Body)
+	if err != nil {
+		log.WithField("error", err).WithField("file", file).Errorf("Failed to write to file")
+		return err
+	}
+
+	return nil
 }
