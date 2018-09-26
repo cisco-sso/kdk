@@ -51,6 +51,7 @@ func Ssh(cfg KdkEnvConfig) {
 	// if KDK container is not running, start it and provision KDK user
 	if !kdkRunning {
 		log.Info("KDK is not currently running.  Starting...")
+		Pull(&cfg, false)
 		Up(cfg)
 		Provision(cfg)
 	}

@@ -23,8 +23,19 @@ import (
 	"github.com/docker/docker/api/types"
 )
 
-func Pull(cfg *KdkEnvConfig) error {
-	return pullImage(cfg, cfg.ImageCoordinates())
+func Pull(cfg *KdkEnvConfig, force bool) error {
+	tag := cfg.ConfigFile.AppConfig.ImageTag
+	if hasKdkImageWithTag(cfg, tag) {
+		if force {
+			log.WithField("tag", tag).Info("Re-pulling existing KDK Image")
+			return pullImage(cfg, cfg.ImageCoordinates())
+		}
+	} else {
+		log.WithField("tag", tag).Info("Pulling missing KDK Image")
+		return pullImage(cfg, cfg.ImageCoordinates())
+	}
+	log.WithField("tag", tag).Debug("Not pulling already present KDK Image")
+	return nil
 }
 
 func pullImage(cfg *KdkEnvConfig, imageCoordinates string) error {

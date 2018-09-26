@@ -4,7 +4,7 @@ DOCKER_REGISTRY   ?=
 IMAGE_PREFIX      ?= ciscosso
 SHORT_NAME        ?= kdk
 TARGETS           ?= darwin/amd64 linux/amd64 windows/amd64
-VERSION           := $(shell ./scripts/cicd.sh version)
+VERSION           ?= $(shell ./scripts/cicd.sh version)
 BASE_IMAGE        ?= $(IMAGE_PREFIX)/$(SHORT_NAME)
 NEW_IMAGE_TAG     ?= $(BASE_IMAGE):$(VERSION)
 
