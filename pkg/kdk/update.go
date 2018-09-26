@@ -44,7 +44,7 @@ func WarnIfUpdateAvailable(cfg *KdkEnvConfig) {
 	// Add a sudo hint for unix-based OS's
 	sudo := ""
 	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-		sudo = "sudo "
+		sudo = "sudo " // trailing space is intentional
 	}
 	if needsUpdateBin() || needsUpdateImage(cfg) || needsUpdateConfig(cfg) {
 		log.Warn("Upgrade Available\n" + strings.Join([]string{
@@ -144,8 +144,7 @@ func Update(cfg *KdkEnvConfig) {
 
 // update kdk bin
 func updateBin() error {
-	///////////////////////////////////////
-	// Construct all of the paths upfront
+	//// Construct all of the paths upfront
 
 	// Calculate the download url
 	baseUrl := "https://github.com/cisco-sso/kdk/releases/download"
@@ -164,9 +163,7 @@ func updateBin() error {
 
 	log.WithField("file", kdkBinFile).Info("Bin File Location")
 
-	///////////////////////////////////////
-
-	// download tgz file to the tmp dir
+	//// download tgz file to the tmp dir
 	err := downloadFile(downloadLink, tmpDir, tgzFile)
 	if err != nil {
 		log.WithField("error", err).WithField("file", tgzFile).WithField("url", downloadLink).Fatal("Failed to download file")
