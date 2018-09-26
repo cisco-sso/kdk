@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -49,9 +50,11 @@ func WarnIfUpdateAvailable(cfg *KdkEnvConfig) {
 	if needsUpdateBin() || needsUpdateImage(cfg) || needsUpdateConfig(cfg) {
 		log.Warn("Upgrade Available\n" + strings.Join([]string{
 			"***************************************",
-			"The installed KDK version is out of date",
-			"  Current: " + Version,
-			"  Latest : " + latestReleaseVersion,
+			"Some KDK components are out of date",
+                        "  Latest Version:                      " + latestReleaseVersion,
+                        "  Binary Version:                      " + Version,
+                        "  Config Version:                      " + cfg.ConfigFile.AppConfig.ImageTag,
+                        "  Container Present at Config Version: " + strconv.FormatBool(!needsUpdateImage(cfg)),
 			"",
 			"Please upgrade the KDK with the commands:",
 			"  " + sudo + "kdk update",
@@ -69,19 +72,7 @@ func needsUpdateBin() bool {
 
 // check if kdk image needs to be updated
 func needsUpdateImage(cfg *KdkEnvConfig) bool {
-	kdkImages := getKdkImages(cfg)
-
-	for _, image := range kdkImages {
-		var tags []string
-		for _, tag := range image.RepoTags {
-			imageTag := strings.Split(tag, ":")[1]
-			tags = append(tags, imageTag)
-		}
-		if utils.Contains(tags, latestReleaseVersion) {
-			return false
-		}
-	}
-	return true
+	return !hasKdkImageWithTag(cfg, latestReleaseVersion)
 }
 
 // check if kdk config needs to be updated
@@ -104,7 +95,6 @@ func Update(cfg *KdkEnvConfig) {
 		log.Warn("Upgrade Unavailable.  Already at latest versions")
 		return
 	}
-	log.Info("Upgrading KDK...\n")
 
 	if needsUpdateBin() {
 		if (runtime.GOOS == "linux" || runtime.GOOS == "darwin") && os.Geteuid() != 0 {
@@ -121,13 +111,13 @@ func Update(cfg *KdkEnvConfig) {
 	}
 
 	if needsUpdateImage(cfg) {
-		log.Info("Updating KDK docker image")
+		log.Info("Updating KDK container image")
 		err := pullImage(cfg, cfg.ConfigFile.AppConfig.ImageRepository+":"+latestReleaseVersion)
 		if err != nil {
 			log.WithField("error", err).Fatal("Failed to update KDK image")
 		}
 	} else {
-		log.Info("Updating KDK docker image skipped: Already at latest version")
+		log.Info("Updating KDK container image skipped: Already at latest version")
 	}
 
 	if needsUpdateConfig(cfg) {
@@ -193,25 +183,28 @@ func updateBin() error {
 			log.WithField("error", err).WithField("file", kdkBinFile+".new").Fatal("Failed to chmod file")
 			return err
 		}
-		log.WithField("file", kdkBinFile+".new").Info("Successfuly chmod'd file")
+		log.WithField("file", kdkBinFile+".new").Info("Successfully chmod'd file")
 
 		// remove the original bin file
 		err = os.Remove(kdkBinFile)
 		if err != nil {
 			log.WithField("error", err).WithField("file", kdkBinFile).Fatal("Failed to delete file")
 		}
+		log.WithField("file", kdkBinFile).Info("Successfully deleted file")
 
 		// rename the new file to be the the executable file
 		err = os.Rename(kdkBinFile+".new", kdkBinFile)
 		if err != nil {
 			log.WithField("error", err).WithField("fileSrc", kdkBinFile+".new").WithField("fileDst", kdkBinFile).Fatal("Failed to rename file")
 		}
+		log.WithField("fileSrc", kdkBinFile+".new").WithField("fileDst", kdkBinFile).Info("Successfully renamed file")
 	} else if runtime.GOOS == "windows" {
 		// rename the bin file to a trash location out of the way
 		err = os.Rename(kdkBinFile, kdkBinFileTrash)
 		if err != nil {
 			log.WithField("error", err).WithField("fileSrc", kdkBinFile).WithField("fileDst", kdkBinFileTrash).Fatal("Failed to rename file")
 		}
+		log.WithField("fileSrc", kdkBinFile).WithField("fileDst", kdkBinFileTrash).Info("Successfully renamed file")
 
 		// copy the new file next to the org binary, so it is on the same partition/filesystem
 		err = copyFile(kdkBinFileUnpacked, kdkBinFile)
@@ -237,7 +230,7 @@ func updateBin() error {
 
 // update kdk image
 func updateImage(cfg *KdkEnvConfig) error {
-	Pull(cfg)
+	Pull(cfg, true)
 	return nil
 }
 
@@ -305,6 +298,22 @@ func getKdkImages(cfg *KdkEnvConfig) (out []types.ImageSummary) {
 		}
 	}
 	return kdkImages
+}
+
+func hasKdkImageWithTag(cfg *KdkEnvConfig, tagSearch string) bool {
+	kdkImages := getKdkImages(cfg)
+
+	for _, image := range kdkImages {
+		var tags []string
+		for _, tag := range image.RepoTags {
+			imageTag := strings.Split(tag, ":")[1]
+			tags = append(tags, imageTag)
+		}
+		if utils.Contains(tags, tagSearch) {
+			return true
+		}
+	}
+	return false
 }
 
 func copyFile(src, dst string) error {
