@@ -25,7 +25,6 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	kos "github.com/cisco-sso/kdk/pkg/os"
 	"github.com/cisco-sso/kdk/pkg/utils"
 	"github.com/docker/docker/api/types"
 	"github.com/ghodss/yaml"
@@ -123,7 +122,7 @@ func Update(cfg *KdkEnvConfig) {
 
 	if needsUpdateImage(cfg) {
 		log.Info("Updating KDK docker image")
-		err := pullImage(cfg, cfg.ConfigFile.AppConfig.ImageRepository + ":" + latestReleaseVersion)
+		err := pullImage(cfg, cfg.ConfigFile.AppConfig.ImageRepository+":"+latestReleaseVersion)
 		if err != nil {
 			log.WithField("error", err).Fatal("Failed to update KDK image")
 		}
@@ -154,12 +153,12 @@ func updateBin() error {
 	downloadLink := baseUrl + "/" + latestReleaseVersion + "/" + downloadBaseName + ".tar.gz"
 
 	// Calculate the temporary download and unpacking location
-	tmpDir := filepath.Join(kos.TmpDir, "kdk-install")
+	tmpDir := filepath.Join(os.TempDir(), "kdk-install")
 	tgzFile := filepath.Join(tmpDir, downloadBaseName+".tar.gz")
 
-	kdkBinFile, _ := os.Executable()  // this currently running binary will be overwritten
+	kdkBinFile, _ := os.Executable() // this currently running binary will be overwritten
 	kdkBinFileUnpacked := filepath.Join(tmpDir, filepath.Base(kdkBinFile))
-	kdkBinFileTrash := filepath.Join(kos.TmpDir, filepath.Base(kdkBinFile)+".old")
+	kdkBinFileTrash := filepath.Join(os.TempDir(), filepath.Base(kdkBinFile)+".old")
 	// ^ Some filesystems do not allow replacing or deleting a currently
 	//   running binary.  We'll move it out of the way instead of deletion
 
