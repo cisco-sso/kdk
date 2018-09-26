@@ -95,8 +95,8 @@ func initConfig() {
 		if err != nil {
 			log.WithField("err", err).Error("Corrupted or deprecated kdk config file format")
 			log.Fatal("Please rebuild config file with `kdk init`")
+		} else {
+			kdk.WarnIfUpdateAvailable(&CurrentKdkEnvConfig)
 		}
 	}
-
-	kdk.WarnIfUpdateAvailable(&CurrentKdkEnvConfig)
 }
