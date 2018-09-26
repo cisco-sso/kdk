@@ -17,23 +17,14 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
   os="linux"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   os="darwin"
-elif [[ "$OSTYPE" =~ ^(cygwin|msys)$ ]]; then
-  os="windows"
-  # Windows does not have a USER variable but it does have USERNAME
-  USER=${USERNAME}
 else
-  echo "Unsupported OS"
+  echo "Unsupported Operating System"
   exit 1
 fi
 
 tmpdir=/tmp/kdk-${os}-${arch}
-if [[ ${os} =~ ^(linux|darwin)$ ]]; then
-  kdk_bin=${tmpdir}/kdk
-  kdk_destination=/usr/local/bin/kdk
-elif [[ $os == "windows" ]]; then
-  kdk_bin=${tmpdir}/kdk.exe
-  kdk_destination=/usr/local/bin/kdk.exe
-fi
+kdk_bin=${tmpdir}/kdk
+kdk_destination=/usr/local/bin/kdk
 
 dist_tgz=kdk-${version}-${os}-${arch}.tar.gz
 download_uri=https://github.com/cisco-sso/kdk/releases/download/${version}/${dist_tgz}
@@ -45,21 +36,10 @@ if [[ ! -d /usr/local/bin ]]; then
     # Create the empty parent directory where the kdk binary will live
     #   Echo the command so the user may view what was executed
     (set -x; sudo install -m 0755 -d $(dirname ${kdk_destination}))
-
-    # Handle a windows-ism where the above may not take effect until
-    #   later with or without the subshell.
-    while [[ ! -d /usr/local/bin ]]; do
-	sleep 1
-    done
 fi
 
 # Create the kdk binary executable file
 #   Echo the command so the user may view what was executed
 (set -x; sudo install -m 0755 -o ${USER} ${kdk_bin} ${kdk_destination})
-# Handle a windows-ism where the above may not take effect until
-#   later with or without the subshell.
-while [[ ! -f ${kdk_destination} ]]; do
-  sleep 1
-done
 
 rm -fr ${tmpdir}
