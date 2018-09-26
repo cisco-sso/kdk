@@ -53,7 +53,7 @@ The KDK requires a few dependencies installed, like Docker.  Installation
 details for each platform are found here:
 
 * [Mac](https://kdf.csco.cloud/getting-started/mac/)
-* [Windows](https://kdf.csco.cloud/getting-started/mac/)
+* [Windows](https://kdf.csco.cloud/getting-started/windows/)
 * [Linux](https://kdf.csco.cloud/getting-started/linux/)
 
 ## Basic Usage
