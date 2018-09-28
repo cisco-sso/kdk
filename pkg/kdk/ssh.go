@@ -56,10 +56,16 @@ func Ssh(cfg KdkEnvConfig) {
 		Provision(cfg)
 	}
 
+	// Build socksString
+	var socksString string
+	if cfg.ConfigFile.AppConfig.SocksPort != "" {
+		socksString = "-D " + cfg.ConfigFile.AppConfig.SocksPort
+	}
+
 	// connect to KDK container via ssh
 	connectionString := cfg.User() + "@localhost"
-	commandString := fmt.Sprintf("ssh %s -A -p %s -i %s -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null", connectionString, cfg.ConfigFile.AppConfig.Port, cfg.PrivateKeyPath())
-	log.Debugf("executing ssh command: %s", commandString)
+	commandString := fmt.Sprintf("ssh %s -A -p %s -i %s -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null %s", connectionString, cfg.ConfigFile.AppConfig.Port, cfg.PrivateKeyPath(), socksString)
+	log.Infof("executing ssh command: %s", commandString)
 	commandMap := strings.Split(commandString, " ")
 	if err := sh.Command(commandMap[0], commandMap[1:]).SetStdin(os.Stdin).Run(); err != nil {
 		log.WithField("error", err).Fatal("Failed to ssh to KDK container.")
