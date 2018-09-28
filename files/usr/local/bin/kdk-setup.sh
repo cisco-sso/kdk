@@ -44,6 +44,17 @@ set -euo pipefail
 #     Availale ingress services may be found with this command
 #       kubectl get ing |grep -v HOSTS | awk '{print "  http://"$2}'
 
+
+# Repair a potentialy broken /etc/resolv.conf on Windows.  Docker for Windows
+#   will produce a broken /etc/resolv.conf if the machine does not have a
+#   search domain set.  The resolv.conf will have a line that looks like
+#   `search `, which is corrupt because it is missing an argument to search
+#   such as `search domain.com`.  This will prevent tools like `nslookup` and
+#   `host` from working.  Detect and fix this situation by removing the
+#   offending line.  Note, 'sed -i' doesn't work because the file is a mount.
+sed '/^search $/d' /etc/resolv.conf > /tmp/resolv.conf
+cat /tmp/resolv.conf | tee /etc/resolv.conf && rm -f /tmp/resolv.conf
+
 # Find the host IP from the perspective of *this* container
 export HOST_ACCESS_IP=$(host host.docker.internal | grep "has address" | cut -d' ' -f 4)
 export DOMAIN=docker-for-desktop.example.org
@@ -51,12 +62,6 @@ export DOMAIN=docker-for-desktop.example.org
 if [ -z "$HOST_ACCESS_IP" ]; then
     echo "Unable to find IP of ingress controller service"
     exit 1
-fi
-
-# Install DNSMASQ
-if ! which dnsmasq &>/dev/null; then
-    apt-get -y update
-    apt-get -y install dnsmasq
 fi
 
 # Configure Dnsmasq to forward the docker-for-desktop domain
