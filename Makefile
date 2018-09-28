@@ -114,6 +114,7 @@ ifdef NEEDS_BUILD_DOCKER
 	  files/
 	docker build \
 	  --tag $(BASE_IMAGE):latest \
+	  --cache-from $(BASE_IMAGE):latest \
 	  --cache-from $(BASE_IMAGE):build-cache-multistage-compiler \
 	  --cache-from $(BASE_IMAGE):build-cache-multistage-goinstall \
 	  --cache-from $(BASE_IMAGE):build-cache-base \
@@ -145,10 +146,7 @@ bin-push: check-publish check-go deps  # Publish the binary executable
 ifdef NEEDS_BUILD_BIN
 	@echo "Executing bin push for build"
 	git status
-	git reset --hard HEAD
-	git status
 	git clean -f -d
-	git status
 	goreleaser --rm-dist --debug
 endif
 
