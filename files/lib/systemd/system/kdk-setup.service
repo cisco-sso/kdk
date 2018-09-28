@@ -1,0 +1,8 @@
+[Unit]
+Description=KDK Setup and Configuration
+Before=dnsmasq.service
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "/usr/local/bin/kdk-setup.sh"
+[Install]
+WantedBy=multi-user.target

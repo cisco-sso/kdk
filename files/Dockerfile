@@ -22,6 +22,7 @@ RUN echo "Install OS packages" && \
         dc \
         dhcpdump \
         dialog \
+        dnsmasq \
         dnsutils \
         dos2unix \
         fonts-powerline \
@@ -186,7 +187,7 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         curl -sSL https://github.com/joelpurra/gitslave/archive/v2.0.2-joelpurra-51-g203467d.tar.gz | tar xz && \
         chmod a+x gitslave-*/gits && cp gitslave-*/gits /usr/local/bin && rm -rf gitslave-* && \
     # golang && \
-        curl -sSL https://dl.google.com/go/go1.10.4.linux-amd64.tar.gz | tar -C /usr/local -xz && \
+        curl -sSL https://dl.google.com/go/go1.11.linux-amd64.tar.gz | tar -C /usr/local -xz && \
         mkdir -p /go && chmod a+rw /go && \
     # goreleaser && \
         curl -sSLO https://github.com/goreleaser/goreleaser/releases/download/v0.86.0/goreleaser_Linux_arm64.tar.gz && \
@@ -341,6 +342,8 @@ COPY --from=build-cache-multistage-compiler  /etc/shells /etc/shells
 # Copy local files
 
 COPY usr/local/bin/ /usr/local/bin/
+COPY lib/systemd/system/ /lib/systemd/system/
+RUN systemctl enable kdk-setup.service
 
 #######################################
 # Ensure systemd starts, which subsequently starts ssh and docker
