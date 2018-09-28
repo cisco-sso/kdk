@@ -196,7 +196,7 @@ func (c *KdkEnvConfig) CreateKdkConfig() (err error) {
 
 	// Prompt for SOCKS proxy options.
 	if c.SocksPort == "" {
-		var socksPort string
+		socksPort := ""
 		prmpt := prompt.Prompt{
 			Text:     "Would you like to enable SOCKS proxy? [y/n] ",
 			Loop:     true,
