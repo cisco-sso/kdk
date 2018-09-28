@@ -146,6 +146,9 @@ ifdef NEEDS_BUILD_BIN
 	@echo "Executing bin push for build"
 	git status
 	git reset --hard HEAD
+	git status
+	git clean -f -d
+	git status
 	goreleaser --rm-dist --debug
 endif
 
