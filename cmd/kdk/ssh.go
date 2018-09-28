@@ -29,5 +29,7 @@ var sshCmd = &cobra.Command{
 }
 
 func init() {
+	sshCmd.Flags().StringVarP(&CurrentKdkEnvConfig.SocksPort, "socks-port", "k", "", "KDK SOCKS Port")
+
 	rootCmd.AddCommand(sshCmd)
 }
