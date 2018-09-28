@@ -205,15 +205,10 @@ func (c *KdkEnvConfig) CreateKdkConfig() (err error) {
 		if result, err := prmpt.Run(); err == nil && result == "y" {
 			prmpt = prompt.Prompt{
 				Text:     "Please enter SOCKS port number [8000] ",
-				Loop:     false,
-				Validate: nil,
-				// TODO: Validate string contains integer.
-				//       Can be empty or int as string.
+				Loop:     true,
+				Validate: prompt.ValidateIntOrEmptyString,
 			}
-			socksPort, err = prmpt.Run()
-			if err != nil {
-				log.WithField("err", err).Error("Failed to get SOCK port number")
-			}
+			socksPort, _ = prmpt.Run()
 		}
 		if socksPort == "" {
 			socksPort = "8000"

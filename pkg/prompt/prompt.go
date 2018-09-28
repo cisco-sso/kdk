@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 )
 
 type Prompt struct {
@@ -70,4 +71,14 @@ func ValidateDirExists(input string) error {
 		return nil
 	}
 	return errors.New("Input directory must exist")
+}
+
+func ValidateIntOrEmptyString(input string) error {
+	if input == "" {
+		return nil
+	}
+	if _, err := strconv.Atoi(input); err == nil {
+		return nil
+	}
+	return errors.New("Input must be an integer or empty string")
 }
