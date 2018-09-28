@@ -61,6 +61,7 @@ type AppConfig struct {
 	ImageTag        string
 	DotfilesRepo    string
 	Shell           string
+	SocksPort       string
 }
 
 // create docker client and context for easy reuse
