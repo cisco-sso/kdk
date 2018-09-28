@@ -57,7 +57,8 @@ cat /tmp/resolv.conf | tee /etc/resolv.conf && rm -f /tmp/resolv.conf
 
 # Find the host IP from the perspective of *this* container
 export HOST_ACCESS_IP=$(host host.docker.internal | grep "has address" | cut -d' ' -f 4)
-export DOMAIN=docker-for-desktop.example.org
+# List of wildcard domains, space separated
+export DOMAINS="kdk kube docker docker-for-desktop docker-for-desktop.example.org"
 
 if [ -z "$HOST_ACCESS_IP" ]; then
     echo "Unable to find IP of ingress controller service"
@@ -65,8 +66,10 @@ if [ -z "$HOST_ACCESS_IP" ]; then
 fi
 
 # Configure Dnsmasq to forward the docker-for-desktop domain
-echo "address=/${DOMAIN}/${HOST_ACCESS_IP}" | tee /etc/dnsmasq.d/docker-for-desktop
-echo 'listen-address=127.0.0.1' | tee -a /etc/dnsmasq.d/docker-for-desktop
+echo 'listen-address=127.0.0.1' | tee /etc/dnsmasq.d/docker-for-desktop
+for DOMAIN in $DOMAINS; do
+  echo "address=/${DOMAIN}/${HOST_ACCESS_IP}" | tee -a /etc/dnsmasq.d/docker-for-desktop
+done
 
 # Rewrite /etc/resolv.conf to use dnsmasq first
 if [[ ! -f /etc/resolv.conf.bak ]] && ! (grep 'nameserver 127.0.0.1' /etc/resolv.conf &>/dev/null); then
