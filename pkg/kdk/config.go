@@ -45,6 +45,7 @@ type KdkEnvConfig struct {
 	DockerClient *client.Client
 	Ctx          context.Context
 	ConfigFile   configFile
+	SocksPort    string
 }
 
 // Struct of all configs to be saved directly as ~/.kdk/<NAME>/config.yaml
@@ -61,6 +62,7 @@ type AppConfig struct {
 	ImageTag        string
 	DotfilesRepo    string
 	Shell           string
+	SocksPort       string
 }
 
 // create docker client and context for easy reuse
@@ -191,6 +193,36 @@ func (c *KdkEnvConfig) CreateKdkConfig() (err error) {
 			break
 		}
 	}
+
+	// Prompt for SOCKS proxy options.
+	if c.SocksPort == "" {
+		var socksPort string
+		prmpt := prompt.Prompt{
+			Text:     "Would you like to enable SOCKS proxy? [y/n] ",
+			Loop:     true,
+			Validate: prompt.ValidateYorN,
+		}
+		if result, err := prmpt.Run(); err == nil && result == "y" {
+			prmpt = prompt.Prompt{
+				Text:     "Please enter SOCKS port number [8000] ",
+				Loop:     false,
+				Validate: nil,
+				// TODO: Validate string contains integer.
+				//       Can be empty or int as string.
+			}
+			socksPort, err = prmpt.Run()
+			if err != nil {
+				log.WithField("err", err).Error("Failed to get SOCK port number")
+			}
+		}
+		if socksPort == "" {
+			socksPort = "8000"
+		}
+		c.ConfigFile.AppConfig.SocksPort = socksPort
+	} else {
+		c.ConfigFile.AppConfig.SocksPort = c.SocksPort
+	}
+	log.Infof("Set SOCKS port %v", c.ConfigFile.AppConfig.SocksPort)
 
 	// Create the Default configuration struct that will be written as the config file
 	c.ConfigFile.ContainerConfig = &container.Config{
