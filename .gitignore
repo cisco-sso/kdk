@@ -1,8 +1,8 @@
 .venv/
 .DS_Store
 .vscode/
-./_dist/
-./bin/
-./vendor/
-./.idea/
-./dist/
+_dist/
+bin/
+vendor/
+.idea/
+dist/
