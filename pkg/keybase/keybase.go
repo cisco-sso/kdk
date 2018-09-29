@@ -23,7 +23,7 @@ import (
 	"runtime"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/prompt"
 	"github.com/codeskyblue/go-sh"
 )

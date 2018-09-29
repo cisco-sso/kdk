@@ -10,14 +10,6 @@
   version = "v0.4.11"
 
 [[projects]]
-  digest = "1:d867dfa6751c8d7a435821ad3b736310c2ed68945d05b50fb9d23aee0540c8cc"
-  name = "github.com/Sirupsen/logrus"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
-  version = "v1.0.6"
-
-[[projects]]
   digest = "1:63bd62f5b57c55f0e07c9f8a76d841c7fa74905cc3cb6b8a55e923450f4bee81"
   name = "github.com/codegangsta/inject"
   packages = ["."]
@@ -215,6 +207,14 @@
   revision = "0e6baecebbf8a24a6590d3fc8232165008d6e5d8"
 
 [[projects]]
+  digest = "1:d867dfa6751c8d7a435821ad3b736310c2ed68945d05b50fb9d23aee0540c8cc"
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
+  version = "v1.0.6"
+
+[[projects]]
   digest = "1:bd1ae00087d17c5a748660b8e89e1043e1e5479d0fea743352cda2f8dd8c4f84"
   name = "github.com/spf13/afero"
   packages = [
@@ -346,7 +346,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/Sirupsen/logrus",
     "github.com/codeskyblue/go-sh",
     "github.com/docker/docker/api/types",
     "github.com/docker/docker/api/types/container",
@@ -357,6 +356,7 @@
     "github.com/mholt/archiver",
     "github.com/mitchellh/go-homedir",
     "github.com/savaki/jq",
+    "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
     "github.com/spf13/viper",
     "golang.org/x/crypto/ssh",
