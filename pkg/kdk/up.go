@@ -17,7 +17,7 @@ package kdk
 import (
 	"runtime"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/keybase"
 	"github.com/cisco-sso/kdk/pkg/prompt"
 	"github.com/docker/docker/api/types"
