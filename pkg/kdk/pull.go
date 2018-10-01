@@ -67,7 +67,7 @@ func pullImage(cfg *KdkEnvConfig, imageCoordinates string) error {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		log.WithField("err", err).Fatal("Failed to read output from docker client pull")
 	}
 
 	return err
