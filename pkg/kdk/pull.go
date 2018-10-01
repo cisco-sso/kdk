@@ -15,13 +15,25 @@
 package kdk
 
 import (
-	"io"
-	"io/ioutil"
-	"os"
+	"bufio"
+	"encoding/json"
+	"fmt"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/docker/docker/api/types"
+	log "github.com/sirupsen/logrus"
 )
+
+type ProgressDetail struct {
+	Current int `json:"current"`
+	Total   int `json:"total"`
+}
+
+type ProgressMessage struct {
+	ID             string         `json:"id"`
+	Progress       string         `json:"progress"`
+	ProgressDetail ProgressDetail `json:"progressDetail"`
+	Status         string         `json:"status"`
+}
 
 func Pull(cfg *KdkEnvConfig, force bool) error {
 	tag := cfg.ConfigFile.AppConfig.ImageTag
@@ -46,12 +58,16 @@ func pullImage(cfg *KdkEnvConfig, imageCoordinates string) error {
 	}
 	defer out.Close()
 
-	// Silence the output for Info loglevel, but allow it through all
-	//   others.  This is a cheap way to enable streaming output.
-	if log.GetLevel() == log.InfoLevel {
-		io.Copy(ioutil.Discard, out)
-	} else {
-		io.Copy(os.Stdout, out)
+	var message ProgressMessage
+	scanner := bufio.NewScanner(out)
+	for scanner.Scan() {
+		b := scanner.Bytes()
+		json.Unmarshal(b, &message)
+		fmt.Printf("%+v\n", message)
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
 	}
 
 	return err
