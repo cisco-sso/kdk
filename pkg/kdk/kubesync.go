@@ -20,10 +20,8 @@ import (
 
 func Kubesync(cfg KdkEnvConfig) {
 
-	// Confirm that KDK container is running.
-	if !cfg.IsRunning() {
-		log.Fatal("KDK is not currently running.")
-	}
+	// If KDK container is not running, start it and provision KDK user.
+	cfg.Start()
 
 	kubeconfigHostPath := cfg.Home() + "/.kube/config"
 	kubeconfigKDKPath := ".kube/docker-for-desktop.example.org"
