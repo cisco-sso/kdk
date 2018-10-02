@@ -396,3 +396,13 @@ func (c *KdkEnvConfig) IsRunning() bool {
 	}
 	return kdkRunning
 }
+
+// If KDK container is not running, start it and provision KDK user.
+func (c *KdkEnvConfig) Start() {
+	if !c.IsRunning() {
+		log.Info("KDK is not currently running.  Starting...")
+		Pull(c, false)
+		Up(*c)
+		Provision(*c)
+	}
+}
