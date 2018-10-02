@@ -16,6 +16,7 @@ package kdk
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -23,17 +24,18 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/keybase"
 	"github.com/cisco-sso/kdk/pkg/prompt"
 	"github.com/cisco-sso/kdk/pkg/ssh"
 	"github.com/cisco-sso/kdk/pkg/utils"
+	"github.com/codeskyblue/go-sh"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/ghodss/yaml"
 	"github.com/mitchellh/go-homedir"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -332,6 +334,45 @@ func (c *KdkEnvConfig) CreateKdkSshKeyPair() (err error) {
 
 	} else {
 		log.Info("KDK ssh key pair exists.")
+	}
+	return nil
+}
+
+// Returns SSH connection string
+func (c *KdkEnvConfig) SSHConnectionString() string {
+	return c.User() + "@localhost"
+}
+
+// Returns SSH command string
+func (c *KdkEnvConfig) SSHCommandString() string {
+	return fmt.Sprintf("ssh %s -A -p %s -i %s -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null",
+		c.SSHConnectionString(), c.ConfigFile.AppConfig.Port, c.PrivateKeyPath())
+}
+
+// Returns SCP command string
+func (c *KdkEnvConfig) SCPCommandString() string {
+	return fmt.Sprintf("scp -P %s -i %s -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null",
+		c.ConfigFile.AppConfig.Port, c.PrivateKeyPath())
+}
+
+// SCP's a file into the KDK container
+func (c *KdkEnvConfig) SCPTo(hostPath, kdkPath string) error {
+	commandString := fmt.Sprintf("%s %s %s:%s", c.SCPCommandString(), hostPath, c.SSHConnectionString(), kdkPath)
+	log.Infof("executing scp command: %s", commandString)
+	commandMap := strings.Split(commandString, " ")
+	if err := sh.Command(commandMap[0], commandMap[1:]).SetStdin(os.Stdin).Run(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Executes a command on the KDK container
+func (c *KdkEnvConfig) Exec(command string) error {
+	commandString := fmt.Sprintf("%s %s", c.SSHCommandString(), command)
+	log.Infof("executing ssh command: %s", commandString)
+	commandMap := strings.Split(commandString, " ")
+	if err := sh.Command(commandMap[0], commandMap[1:]).SetStdin(os.Stdin).Run(); err != nil {
+		return err
 	}
 	return nil
 }
