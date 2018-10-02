@@ -29,6 +29,7 @@ import (
 	"github.com/cisco-sso/kdk/pkg/ssh"
 	"github.com/cisco-sso/kdk/pkg/utils"
 	"github.com/codeskyblue/go-sh"
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
@@ -371,8 +372,27 @@ func (c *KdkEnvConfig) Exec(command string) error {
 	commandString := fmt.Sprintf("%s %s", c.SSHCommandString(), command)
 	log.Infof("executing ssh command: %s", commandString)
 	commandMap := strings.Split(commandString, " ")
-	if err := sh.Command(commandMap[0], commandMap[1:]).SetStdin(os.Stdin).Run(); err != nil {
-		return err
+	return sh.Command(commandMap[0], commandMap[1:]).SetStdin(os.Stdin).Run()
+}
+
+// Checks that KDK container is running
+func (c *KdkEnvConfig) IsRunning() bool {
+	kdkRunning := false
+
+	containers, err := c.DockerClient.ContainerList(c.Ctx, types.ContainerListOptions{All: true})
+	if err != nil {
+		log.WithField("error", err).Fatal("Failed to list docker containers")
 	}
-	return nil
+
+	for _, container := range containers {
+		for _, name := range container.Names {
+			if name == "/"+c.ConfigFile.AppConfig.Name {
+				if container.State == "running" {
+					kdkRunning = true
+					break
+				}
+			}
+		}
+	}
+	return kdkRunning
 }
