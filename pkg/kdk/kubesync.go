@@ -50,7 +50,7 @@ func Kubesync(cfg KdkEnvConfig) {
 	kubeconfigKDKPath := ".kube/docker-for-desktop.example.org"
 
 	// Create ~/.kube directory inside KDK if it doesn't already exist.
-	remoteCommand := "mkdir -p ~/.kubetest"
+	remoteCommand := "mkdir -p ~/.kube"
 	if err = cfg.Exec(remoteCommand); err != nil {
 		log.WithField("error", err).Fatal("Failed to mkdir in KDK container.")
 	}
