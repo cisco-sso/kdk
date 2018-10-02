@@ -15,35 +15,14 @@
 package kdk
 
 import (
-	"github.com/docker/docker/api/types"
 	log "github.com/sirupsen/logrus"
 )
 
 func Kubesync(cfg KdkEnvConfig) {
 
-	// Check if KDK container is running
-	kdkRunning := false
-
-	containers, err := cfg.DockerClient.ContainerList(cfg.Ctx, types.ContainerListOptions{All: true})
-
-	if err != nil {
-		log.WithField("error", err).Fatal("Failed to list docker containers")
-	}
-
-	for _, container := range containers {
-		for _, name := range container.Names {
-			if name == "/"+cfg.ConfigFile.AppConfig.Name {
-				if container.State == "running" {
-					kdkRunning = true
-					break
-				}
-			}
-		}
-	}
-
-	// if KDK container is not running, start it and provision KDK user
-	if !kdkRunning {
-		log.Error("KDK is not currently running.")
+	// Confirm that KDK container is running.
+	if !cfg.IsRunning() {
+		log.Fatal("KDK is not currently running.")
 	}
 
 	kubeconfigHostPath := cfg.Home() + "/.kube/config"
@@ -51,19 +30,20 @@ func Kubesync(cfg KdkEnvConfig) {
 
 	// Create ~/.kube directory inside KDK if it doesn't already exist.
 	remoteCommand := "mkdir -p ~/.kube"
-	if err = cfg.Exec(remoteCommand); err != nil {
+	if err := cfg.Exec(remoteCommand); err != nil {
 		log.WithField("error", err).Fatal("Failed to mkdir in KDK container.")
 	}
 
 	// Sync default KUBECONFIG to KDK
-	if err = cfg.SCPTo(kubeconfigHostPath, kubeconfigKDKPath); err != nil {
+	if err := cfg.SCPTo(kubeconfigHostPath, kubeconfigKDKPath); err != nil {
 		log.WithField("error", err).Fatal("Failed to scp to KDK container.")
 	}
 
 	// Tune Docker for Desktop's Kubernetes API hostname in KUBECONFIG
 	remoteCommand = "sed -i -e 's@localhost@host.docker.internal@g' -e 's@docker-for-desktop.*@docker-for-desktop.example.org@g' " + kubeconfigKDKPath
-	if err = cfg.Exec(remoteCommand); err != nil {
+	if err := cfg.Exec(remoteCommand); err != nil {
 		log.WithField("error", err).Fatal("Failed to transform KUBECONFIG in KDK container.")
 	}
 	log.Info("Docker for Desktop KUBECONFIG synchronized to KDK.")
+
 }
