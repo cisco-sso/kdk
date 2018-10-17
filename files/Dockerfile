@@ -168,78 +168,74 @@ RUN echo "Install python-based utils and libs" && \
 # Install apps (with pinned version) that are not provided by the OS packages.
 
 RUN echo "Install apps (with pinned version) that are not provided by the OS packages." && \
-    # dep && \
+    echo "Install dep." && \
         curl -sSLo dep https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 && \
         chmod a+x dep && mv dep /usr/local/bin && \
-    # direnv && \
+    echo "Install direnv." && \
         curl -sSLo direnv https://github.com/direnv/direnv/releases/download/v2.17.0/direnv.linux-amd64 && \
         chmod a+x direnv && mv direnv /usr/local/bin && \
-    # drone cli && \
+    echo "Install drone-cli." && \
         curl -sSL https://github.com/drone/drone-cli/releases/download/v0.8.6/drone_linux_amd64.tar.gz | tar xz && \
         chmod a+x drone && mv drone /usr/local/bin && \
-    # easy-rsa && \
-        curl -sSL https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.4/EasyRSA-3.0.4.tgz | tar xz && \
+    echo "Install easy-rsa." && \
+        curl -sSL https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.5/EasyRSA-nix-3.0.5.tgz | tar xz && \
         chmod a+x EasyRSA-* && mv EasyRSA-* /usr/local/bin/easyrsa && \
-    # gomplate && \
-        curl -sSLo gomplate https://github.com/hairyhenderson/gomplate/releases/download/v2.8.0/gomplate_linux-amd64 && \
+    echo "Install gomplate." && \
+        curl -sSLo gomplate https://github.com/hairyhenderson/gomplate/releases/download/v3.0.0/gomplate_linux-amd64 && \
         chmod a+x gomplate && mv gomplate /usr/local/bin && \
-    # gitslave && \
-        curl -sSL https://github.com/joelpurra/gitslave/archive/v2.0.2-joelpurra-51-g203467d.tar.gz | tar xz && \
-        chmod a+x gitslave-*/gits && cp gitslave-*/gits /usr/local/bin && rm -rf gitslave-* && \
-    # golang && \
-        curl -sSL https://dl.google.com/go/go1.11.linux-amd64.tar.gz | tar -C /usr/local -xz && \
+    echo "Install golang." && \
+        curl -sSL https://dl.google.com/go/go1.11.1.linux-amd64.tar.gz | tar -C /usr/local -xz && \
         mkdir -p /go && chmod a+rw /go && \
-    # goreleaser && \
-        curl -sSLO https://github.com/goreleaser/goreleaser/releases/download/v0.86.0/goreleaser_Linux_arm64.tar.gz && \
+    echo "Install goreleaser." && \
+        curl -sSLO https://github.com/goreleaser/goreleaser/releases/download/v0.88.0/goreleaser_Linux_x86_64.tar.gz && \
         tar -C /usr/local/bin -xzf goreleaser*.tar.gz goreleaser && rm goreleaser*.tar.gz && \
-    # helm && \
+    echo "Install helm." && \
         curl -sSL https://storage.googleapis.com/kubernetes-helm/helm-v2.9.1-linux-amd64.tar.gz | tar xz && \
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.9.1 && rm -fr linux-amd64 && \
         curl -sSL https://storage.googleapis.com/kubernetes-helm/helm-v2.10.0-linux-amd64.tar.gz | tar xz && \
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.10.0 && rm -fr linux-amd64 && \
-        ln -s /usr/local/bin/helm-2.10.0 /usr/local/bin/helm && \
-    # hugo && \
-        curl -sSL https://github.com/gohugoio/hugo/releases/download/v0.48/hugo_0.48_Linux-ARM64.tar.gz | tar xz && \
+        curl -sSL https://storage.googleapis.com/kubernetes-helm/helm-v2.11.0-linux-amd64.tar.gz | tar xz && \
+          chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.11.0 && rm -fr linux-amd64 && \
+        ln -s /usr/local/bin/helm-2.11.0 /usr/local/bin/helm && \
+    echo "Install hugo." && \
+        curl -sSL https://github.com/gohugoio/hugo/releases/download/v0.49.2/hugo_0.49.2_Linux-64bit.tar.gz | tar xz && \
         chmod a+x hugo && mv hugo /usr/local/bin/hugo && \
-    # jq && \
+    echo "Install jq." && \
         curl -sSLo jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 && \
         chmod a+x jq && mv jq /usr/local/bin/ && \
-    # kops && \
+    echo "Install kops." && \
         curl -sSLo kops-1.9.2 https://github.com/kubernetes/kops/releases/download/1.9.2/kops-linux-amd64 && \
         chmod a+x kops-1.9.2 && mv kops-1.9.2 /usr/local/bin/ && \
         curl -sSLo kops-1.10.0 https://github.com/kubernetes/kops/releases/download/1.10.0/kops-linux-amd64 && \
         chmod a+x kops-1.10.0 && mv kops-1.10.0 /usr/local/bin/ && \
         ln -s /usr/local/bin/kops-1.10.0 /usr/local/bin/kops && \
-    # kubectl && \
-        curl -sSLo /usr/local/bin/kubectl-1.10.6 https://storage.googleapis.com/kubernetes-release/release/v1.10.6/bin/linux/amd64/kubectl && \
-        chmod a+x /usr/local/bin/kubectl-1.10.6 && \
-        curl -sSLo /usr/local/bin/kubectl-1.11.2 https://storage.googleapis.com/kubernetes-release/release/v1.11.2/bin/linux/amd64/kubectl && \
-        chmod a+x /usr/local/bin/kubectl-1.11.2 && \
-        ln -s /usr/local/bin/kubectl-1.11.2 /usr/local/bin/kubectl && \
-    # kubetail && \
-        curl -sSLo kubetail.zip https://github.com/johanhaleby/kubetail/archive/1.6.1.zip && \
-        unzip -qq kubetail.zip && chmod a+x kubetail-1.6.1/kubetail && mv kubetail-1.6.1/kubetail /usr/local/bin && \
+    echo "Install kubectl." && \
+        curl -sSLo /usr/local/bin/kubectl-1.10.9 https://storage.googleapis.com/kubernetes-release/release/v1.10.9/bin/linux/amd64/kubectl && \
+          chmod a+x /usr/local/bin/kubectl-1.10.9 && \
+        curl -sSLo /usr/local/bin/kubectl-1.11.3 https://storage.googleapis.com/kubernetes-release/release/v1.11.3/bin/linux/amd64/kubectl && \
+          chmod a+x /usr/local/bin/kubectl-1.11.3 && \
+        curl -sSLo /usr/local/bin/kubectl-1.12.1 https://storage.googleapis.com/kubernetes-release/release/v1.12.1/bin/linux/amd64/kubectl && \
+          chmod a+x /usr/local/bin/kubectl-1.12.1 && \
+        ln -s /usr/local/bin/kubectl-1.12.1 /usr/local/bin/kubectl && \
+    echo "Install kubetail." && \
+        curl -sSLo kubetail.zip https://github.com/johanhaleby/kubetail/archive/1.6.4.zip && \
+        unzip -qq kubetail.zip && chmod a+x kubetail-1.6.4/kubetail && mv kubetail-1.6.4/kubetail /usr/local/bin && \
         rm -f kubetail.zip && \
-    # minikube && \
+    echo "Install mc." && \
+        curl -sSLo /usr/local/bin/mc https://dl.minio.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2018-10-16T23-25-25Z && \
+        chmod a+x /usr/local/bin/mc && \
+    echo "Install minikube." && \
         curl -sSLo minikube https://storage.googleapis.com/minikube/releases/v0.28.2/minikube-linux-amd64 && \
         chmod a+x minikube &&  mv minikube /usr/local/bin/ && \
-    # terraform && \
+    echo "Install terraform." && \
         curl -sSLo terraform.zip https://releases.hashicorp.com/terraform/0.11.8/terraform_0.11.8_linux_amd64.zip && \
         unzip -qq terraform.zip && chmod a+x terraform && mv terraform /usr/local/bin && rm -f terraform.zip && \
-    # testssl && \
+    echo "Install testssl." && \
         curl -sSL https://github.com/drwetter/testssl.sh/archive/v2.9.5-7.tar.gz | tar xz && \
         mv testssl* /usr/local/share/testssl && ln -s /usr/local/share/testssl/testssl.sh /usr/local/bin/testssl && chmod a+x /usr/local/bin/testssl && \
-    # yadm && \
+    echo "Install yadm." && \
         curl -sSL https://github.com/TheLocehiliosan/yadm/archive/1.12.0.tar.gz | tar xz && \
         mv yadm* /usr/local/share/yadm && ln -s /usr/local/share/yadm/yadm /usr/local/bin/yadm && chmod a+x /usr/local/bin/yadm
-
-#######################################
-# Install apps (without pinned version) that are not provided by the OS packages.
-
-RUN echo "Install apps (without pinned version) that are not provided by the OS packages." && \
-    # minio && \
-        curl -sSLO https://dl.minio.io/client/mc/release/linux-amd64/mc && \
-        chmod a+x mc && mv mc /usr/local/bin
 
 #######################################
 # go get installs
@@ -252,7 +248,7 @@ RUN echo "go get installs" && \
    apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
 RUN /usr/local/go/bin/go get github.com/spf13/cobra/cobra
 RUN /usr/local/go/bin/go get github.com/kubernetes-incubator/cri-tools/cmd/crictl
-RUN /usr/local/go/bin/go get github.com/golang/lint/golint
+RUN /usr/local/go/bin/go get golang.org/x/lint/golint
 RUN /usr/local/go/bin/go get github.com/gpmgo/gopm
 RUN /usr/local/go/bin/go get github.com/vmware/govmomi/govc
 RUN /usr/local/go/bin/go get github.com/github/hub
@@ -278,7 +274,7 @@ RUN echo "Clean out /usr/local" && \
     rm -rf /usr/local/*
 
 RUN echo "Install git (needs to build first as a dependency)." && \
-    curl -sSL https://github.com/git/git/archive/v2.19.0.tar.gz | tar xz && cd git-* && \
+    curl -sSL https://github.com/git/git/archive/v2.19.1.tar.gz | tar xz && cd git-* && \
     make configure && ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr git-*
 
 RUN echo "Install emacs." && \
@@ -299,7 +295,7 @@ RUN echo "Install emacs." && \
     make && make install && cd .. && rm -fr emacs-*
 
 RUN echo "Install vim." && \
-    curl -sSL https://github.com/vim/vim/archive/v8.1.0290.tar.gz | tar xz && cd vim-* && \
+    curl -sSL https://github.com/vim/vim/archive/v8.1.0481.tar.gz | tar xz && cd vim-* && \
     ./configure \
        --with-features=huge \
        --enable-multibyte \
@@ -321,11 +317,11 @@ RUN echo "Install tmux." && \
     ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr tmux-*
 
 RUN echo "Install zsh." && \
-    curl -sSL https://sourceforge.net/projects/zsh/files/zsh/5.5.1/zsh-5.5.1.tar.gz/download | tar xz && cd zsh-* && \
+    curl -sSL https://sourceforge.net/projects/zsh/files/zsh/5.6.2/zsh-5.6.2.tar.xz/download | tar Jx && cd zsh-* && \
     ./configure --with-tcsetpgrp --prefix=/usr/local && make && make install && echo "/usr/local/bin/zsh" >> /etc/shells && cd .. && rm -fr zsh-*
 
 RUN echo "Install redis-cli tools." && \
-    curl -sSL http://download.redis.io/releases/redis-4.0.10.tar.gz | tar xz && cd redis-* && \
+    curl -sSL http://download.redis.io/releases/redis-5.0.0.tar.gz | tar xz && cd redis-* && \
     make && cp src/redis-cli src/redis-benchmark /usr/local/bin && cd .. && rm -fr redis-*
 
 
