@@ -17,10 +17,10 @@ package kdk
 import (
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/prompt"
 	"github.com/cisco-sso/kdk/pkg/utils"
 	"github.com/docker/docker/api/types"
+	log "github.com/sirupsen/logrus"
 )
 
 func Prune(cfg KdkEnvConfig) error {

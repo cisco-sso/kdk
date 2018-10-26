@@ -25,12 +25,12 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/utils"
 	"github.com/docker/docker/api/types"
 	"github.com/ghodss/yaml"
 	"github.com/mholt/archiver"
 	"github.com/savaki/jq"
+	log "github.com/sirupsen/logrus"
 )
 
 var (

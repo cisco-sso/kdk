@@ -23,9 +23,9 @@ import (
 	"runtime"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/prompt"
 	"github.com/codeskyblue/go-sh"
+	log "github.com/sirupsen/logrus"
 )
 
 // Write keybase mirror script [windows only]
