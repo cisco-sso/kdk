@@ -18,8 +18,8 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/docker/docker/api/types"
+	log "github.com/sirupsen/logrus"
 )
 
 func Snapshot(cfg KdkEnvConfig) error {

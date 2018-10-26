@@ -15,8 +15,9 @@
 package cmd
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/kdk"
+
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 

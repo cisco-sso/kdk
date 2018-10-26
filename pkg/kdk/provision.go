@@ -15,8 +15,8 @@
 package kdk
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/codeskyblue/go-sh"
+	log "github.com/sirupsen/logrus"
 )
 
 func Provision(cfg KdkEnvConfig) error {

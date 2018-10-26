@@ -18,9 +18,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/cisco-sso/kdk/pkg/kdk"
 	"github.com/ghodss/yaml"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
