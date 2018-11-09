@@ -3,6 +3,10 @@ Kubernetes Development Kit (KDK)
 
 ## Quickstart (`TL;DR`)
 
+This Quickstart assumes that you have installed all of the
+[dependencies](https://github.com/cisco-sso/kdk#installation-instructions).
+
+
 ### Mac and Linux
 
 ```console
@@ -22,6 +26,14 @@ kdk init ; kdk ssh
 
 NOTE: After installation, Windows CMD prompt will work. The KDK has not been
 tested with Cygwin, Mingw, or Windows Subsystem for Linux.
+
+## Installation Instructions
+
+Detailed installation instructions of the KDK along with all of its dependencies are found here:
+
+* [Mac](https://kdf.csco.cloud/getting-started/mac/)
+* [Windows](https://kdf.csco.cloud/getting-started/windows/)
+* [Linux](https://kdf.csco.cloud/getting-started/linux/)
 
 ## Background
 
@@ -47,14 +59,6 @@ colordiff, nmap, screen, tmux, yadm, and many others.
   * Developing and applying Helm Charts and mh Apps.
   * Developing docker containers.
 
-## Installation and Dependencies
-
-The KDK requires a few dependencies installed, like Docker.  Installation
-details for each platform are found here:
-
-* [Mac](https://kdf.csco.cloud/getting-started/mac/)
-* [Windows](https://kdf.csco.cloud/getting-started/windows/)
-* [Linux](https://kdf.csco.cloud/getting-started/linux/)
 
 ## Basic Usage
 
