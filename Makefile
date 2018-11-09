@@ -71,7 +71,7 @@ tags:
 ci: checks bin-build docker-build docker-push bin-push  ## Run the CICD build, and publish depending on circumstances
 
 build: check-go deps  ## Build locally for local os/arch creating bin in ./
-	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./
+	CGO_ENABLED=0 GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./
 
 build-cross: check-go deps  ## Build locally for all os/arch combinations in ./_dist
 	@# # usage: make clean build-cross dist VERSION=1.0.0
