@@ -180,6 +180,8 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
     echo "Install easy-rsa." && \
         curl -sSL https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.5/EasyRSA-nix-3.0.5.tgz | tar xz && \
         chmod a+x EasyRSA-* && mv EasyRSA-* /usr/local/bin/easyrsa && \
+    echo "Install go-task." && \
+        curl -sSL https://github.com/go-task/task/releases/download/v2.2.0/task_linux_amd64.tar.gz | tar -C /usr/local/bin -xz task && chmod a+x /usr/local/bin/task && \
     echo "Install gomplate." && \
         curl -sSLo gomplate https://github.com/hairyhenderson/gomplate/releases/download/v3.0.0/gomplate_linux-amd64 && \
         chmod a+x gomplate && mv gomplate /usr/local/bin && \
