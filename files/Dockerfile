@@ -175,7 +175,7 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         curl -sSLo direnv https://github.com/direnv/direnv/releases/download/v2.17.0/direnv.linux-amd64 && \
         chmod a+x direnv && mv direnv /usr/local/bin && \
     echo "Install drone-cli." && \
-        curl -sSL https://github.com/drone/drone-cli/releases/download/v0.8.6/drone_linux_amd64.tar.gz | tar xz && \
+        curl -sSL https://github.com/drone/drone-cli/releases/download/v1.0.0/drone_linux_amd64.tar.gz | tar xz && \
         chmod a+x drone && mv drone /usr/local/bin && \
     echo "Install easy-rsa." && \
         curl -sSL https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.5/EasyRSA-nix-3.0.5.tgz | tar xz && \
