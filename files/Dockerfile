@@ -220,8 +220,8 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         chmod a+x /usr/local/bin/kubectl-* && \
         ln -s /usr/local/bin/kubectl-1.12.2 /usr/local/bin/kubectl && \
     echo "Install kubetail." && \
-        curl -sSLo kubetail.zip https://github.com/johanhaleby/kubetail/archive/1.6.4.zip && \
-        unzip -qq kubetail.zip && chmod a+x kubetail-1.6.4/kubetail && mv kubetail-1.6.4/kubetail /usr/local/bin && \
+        curl -sSLo kubetail.zip https://github.com/johanhaleby/kubetail/archive/1.6.5.zip && \
+        unzip -qq kubetail.zip && chmod a+x kubetail-1.6.5/kubetail && mv kubetail-1.6.5/kubetail /usr/local/bin && \
         rm -f kubetail.zip && \
     echo "Install mc." && \
         curl -sSLo /usr/local/bin/mc https://dl.minio.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2018-10-16T23-25-25Z && \
