@@ -230,7 +230,7 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         curl -sSLo minikube https://storage.googleapis.com/minikube/releases/v0.28.2/minikube-linux-amd64 && \
         chmod a+x minikube &&  mv minikube /usr/local/bin/ && \
     echo "Install terraform." && \
-        curl -sSLo terraform.zip https://releases.hashicorp.com/terraform/0.11.8/terraform_0.11.8_linux_amd64.zip && \
+        curl -sSLo terraform.zip https://releases.hashicorp.com/terraform/0.11.10/terraform_0.11.10_linux_amd64.zip && \
         unzip -qq terraform.zip && chmod a+x terraform && mv terraform /usr/local/bin && rm -f terraform.zip && \
     echo "Install testssl." && \
         curl -sSL https://github.com/drwetter/testssl.sh/archive/v2.9.5-7.tar.gz | tar xz && \
