@@ -214,13 +214,11 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         chmod a+x kops-1.10.0 && mv kops-1.10.0 /usr/local/bin/ && \
         ln -s /usr/local/bin/kops-1.10.0 /usr/local/bin/kops && \
     echo "Install kubectl." && \
-        curl -sSLo /usr/local/bin/kubectl-1.10.9 https://storage.googleapis.com/kubernetes-release/release/v1.10.9/bin/linux/amd64/kubectl && \
-          chmod a+x /usr/local/bin/kubectl-1.10.9 && \
-        curl -sSLo /usr/local/bin/kubectl-1.11.3 https://storage.googleapis.com/kubernetes-release/release/v1.11.3/bin/linux/amd64/kubectl && \
-          chmod a+x /usr/local/bin/kubectl-1.11.3 && \
-        curl -sSLo /usr/local/bin/kubectl-1.12.1 https://storage.googleapis.com/kubernetes-release/release/v1.12.1/bin/linux/amd64/kubectl && \
-          chmod a+x /usr/local/bin/kubectl-1.12.1 && \
-        ln -s /usr/local/bin/kubectl-1.12.1 /usr/local/bin/kubectl && \
+        curl -sSLo /usr/local/bin/kubectl-1.10.10 https://storage.googleapis.com/kubernetes-release/release/v1.10.10/bin/linux/amd64/kubectl && \
+        curl -sSLo /usr/local/bin/kubectl-1.11.4 https://storage.googleapis.com/kubernetes-release/release/v1.11.4/bin/linux/amd64/kubectl && \
+        curl -sSLo /usr/local/bin/kubectl-1.12.2 https://storage.googleapis.com/kubernetes-release/release/v1.12.2/bin/linux/amd64/kubectl && \
+        chmod a+x /usr/local/bin/kubectl-* && \
+        ln -s /usr/local/bin/kubectl-1.12.2 /usr/local/bin/kubectl && \
     echo "Install kubetail." && \
         curl -sSLo kubetail.zip https://github.com/johanhaleby/kubetail/archive/1.6.4.zip && \
         unzip -qq kubetail.zip && chmod a+x kubetail-1.6.4/kubetail && mv kubetail-1.6.4/kubetail /usr/local/bin && \
