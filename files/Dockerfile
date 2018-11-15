@@ -224,7 +224,7 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         unzip -qq kubetail.zip && chmod a+x kubetail-1.6.5/kubetail && mv kubetail-1.6.5/kubetail /usr/local/bin && \
         rm -f kubetail.zip && \
     echo "Install mc." && \
-        curl -sSLo /usr/local/bin/mc https://dl.minio.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2018-10-16T23-25-25Z && \
+        curl -sSLo /usr/local/bin/mc https://dl.minio.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2018-11-06T01-12-20Z && \
         chmod a+x /usr/local/bin/mc && \
     echo "Install minikube." && \
         curl -sSLo minikube https://storage.googleapis.com/minikube/releases/v0.28.2/minikube-linux-amd64 && \
