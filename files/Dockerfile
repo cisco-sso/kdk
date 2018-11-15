@@ -205,7 +205,7 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         curl -sSL https://github.com/gohugoio/hugo/releases/download/v0.51/hugo_0.51_Linux-64bit.tar.gz | tar xz && \
         chmod a+x hugo && mv hugo /usr/local/bin/hugo && \
     echo "Install jq." && \
-        curl -sSLo jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 && \
+        curl -sSLo jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
         chmod a+x jq && mv jq /usr/local/bin/ && \
     echo "Install kops." && \
         curl -sSLo kops-1.9.2 https://github.com/kubernetes/kops/releases/download/1.9.2/kops-linux-amd64 && \
