@@ -75,10 +75,15 @@ RUN echo "Install OS packages" && \
     export POSTGRESQL_REPO="$(lsb_release -c -s)-pgdg" && \
         echo "deb https://apt.postgresql.org/pub/repos/apt $POSTGRESQL_REPO main" | tee -a /etc/apt/sources.list.d/pgdg.list && \
         curl -sSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
+    curl -sL https://deb.nodesource.com/setup_11.x | bash - && \
+        curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+        echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee -a /etc/apt/sources.list.d/yarn.list && \
     apt-get update -y && apt-get --no-install-recommends -y install \
         docker-ce \
         google-cloud-sdk \
-        postgresql-client-10 && \
+        nodejs \
+        postgresql-client-10 \
+        yarn && \
     apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
 
 
