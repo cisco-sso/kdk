@@ -69,13 +69,17 @@ RUN echo "Install OS packages" && \
          "deb [arch=amd64] https://download.docker.com/linux/debian \
          $(lsb_release -cs) \
          stable" && \
-     export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" && \
-         echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
-         curl -sSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
-         apt-get update -y && apt-get --no-install-recommends -y install \
-           docker-ce \
-           google-cloud-sdk && \
-   apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
+    export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" && \
+        echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+        curl -sSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
+    export POSTGRESQL_REPO="$(lsb_release -c -s)-pgdg" && \
+        echo "deb https://apt.postgresql.org/pub/repos/apt $POSTGRESQL_REPO main" | tee -a /etc/apt/sources.list.d/pgdg.list && \
+        curl -sSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
+    apt-get update -y && apt-get --no-install-recommends -y install \
+        docker-ce \
+        google-cloud-sdk \
+        postgresql-client-10 && \
+    apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
 
 
 #######################################
