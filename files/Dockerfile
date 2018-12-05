@@ -26,6 +26,7 @@ RUN echo "Install OS packages" && \
         dnsutils \
         dos2unix \
         fonts-powerline \
+        fio \
         gcc \
         gettext \
         gnupg \
