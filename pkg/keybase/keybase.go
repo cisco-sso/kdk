@@ -33,16 +33,13 @@ const mirrorScript = `
 @ECHO off
 
 if "%1"=="" (
-  ECHO You must pass either start or stop
+  ECHO You must pass either 'start' or 'stop' as the first script argument
   BREAK
 )
 
 if "%1"=="start" (
   ECHO Starting
-  SET SEARCHPATH="c:\Program Files\Dokan"
-  SET SEARCHREGEX="\\sample\\mirror\\mirror.exe"
-
-  FOR /F "tokens=*" %%F IN ('dir %SEARCHPATH% /S/B ^| findstr /R %SEARCHREGEX%') DO @(
+  FOR /F "tokens=*" %%F IN ('dir "c:\Program Files\Dokan" /S/B ^| findstr /R "\\sample\\mirror\\mirror.exe"') DO @(
     SET MIRROREXE=%%F
     GOTO :once
   )
@@ -55,7 +52,7 @@ if "%1"=="start" (
     ECHO   Please IGNORE THE BENIGN ERROR below regarding the failure to add security privilege
     START "KDK Keybase Mirror" /B "%MIRROREXE%" /r K:\ /l C:\Users\%USERNAME%\.kdk\keybase
   ) ELSE (
-    ECHO Failed to locate mirror.exe within %SEARCHPATH%
+    ECHO Failed to locate mirror.exe within "c:\Program Files\Dokan"
     ECHO   Will not start keybase mirror for KDK
   )
 
@@ -66,8 +63,6 @@ IF "%1"=="stop" (
   ECHO Stopping
   tskill.exe mirror
   BREAK
-) ELSE (
-  ECHO Unrecognized parameter %1.  You must pass either start or stop
 )
 `
 
