@@ -30,26 +30,44 @@ import (
 
 // Write keybase mirror script [windows only]
 const mirrorScript = `
-@echo off
+@ECHO off
 
 if "%1"=="" (
-  echo "You must pass either start or stop"
-  break
+  ECHO You must pass either start or stop
+  BREAK
 )
 
 if "%1"=="start" (
-  echo "Starting"
-  echo "  Please IGNORE THE BENIGN ERROR below regarding the failure to add security privilege"
-  start "KDK Keybase Mirror" /B "C:\Program Files\Dokan\Dokan Library-1.1.0\sample\mirror\mirror.exe" /r K:\ /l C:\Users\%USERNAME%\.kdk\keybase
-  break
+  ECHO Starting
+  SET SEARCHPATH="c:\Program Files\Dokan"
+  SET SEARCHREGEX="\\sample\\mirror\\mirror.exe"
+
+  FOR /F "tokens=*" %%F IN ('dir %SEARCHPATH% /S/B ^| findstr /R %SEARCHREGEX%') DO @(
+    SET MIRROREXE=%%F
+    GOTO :once
+  )
+
+  :once
+  IF DEFINED MIRROREXE (
+    ECHO Found mirror.exe at:
+    ECHO   %MIRROREXE%
+    ECHO Starting Keybase Mirror
+    ECHO   Please IGNORE THE BENIGN ERROR below regarding the failure to add security privilege
+    START "KDK Keybase Mirror" /B "%MIRROREXE%" /r K:\ /l C:\Users\%USERNAME%\.kdk\keybase
+  ) ELSE (
+    ECHO Failed to locate mirror.exe within %SEARCHPATH%
+    ECHO   Will not start keybase mirror for KDK
+  )
+
+  BREAK
 )
 
-if "%1"=="stop" (
-  echo "stopping"
+IF "%1"=="stop" (
+  ECHO Stopping
   tskill.exe mirror
-  break
-) else (
-  echo "Unrecognized parameter %1.  You must pass either start or stop"
+  BREAK
+) ELSE (
+  ECHO Unrecognized parameter %1.  You must pass either start or stop
 )
 `
 
@@ -57,11 +75,9 @@ func writeMirrorScript(configDir string) (out string, err error) {
 	script := []byte(mirrorScript)
 
 	scriptPath := filepath.Join(configDir, "keybase-mirror.cmd")
-	if _, err := os.Stat(scriptPath); os.IsNotExist(err) {
-		err := ioutil.WriteFile(scriptPath, script, 0700)
-		if err != nil {
-			return "", err
-		}
+	err = ioutil.WriteFile(scriptPath, script, 0700)
+	if err != nil {
+		return "", err
 	}
 	return scriptPath, nil
 }
@@ -76,11 +92,15 @@ func StartMirror(configDir string) error {
 		log.Info("Keybase mirror already started")
 		return nil
 	}
+
+	// Write/Overwrite the mirror script every time
+	//   in case it changes up upgrades
 	log.Info("Writing keybase mirror script")
 	scriptPath, err := writeMirrorScript(configDir)
 	if err != nil {
 		return err
 	}
+
 	commandString := fmt.Sprintf("powershell %s %s", scriptPath, "start")
 	log.Debugf("Starting Keybase mirror with command; %s", commandString)
 	commandMap := strings.Split(commandString, " ")
