@@ -166,6 +166,7 @@ RUN echo "Install python-based utils and libs" && \
          'jinja2-cli[yaml]==0.6.0' \
          'openshift==0.7.1' \
          'passlib==1.7.1' \
+         'peru==1.2.0' \
          'python-neutronclient==6.10.0' \
          'python-octaviaclient==1.7.0' \
          'python-openstackclient==3.16.1' \
