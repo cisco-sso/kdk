@@ -88,10 +88,12 @@ ifdef NEEDS_BUILD_DOCKER
 	@#   docker build -t $(NEW_IMAGE_TAG) --cache-from $(BASE_IMAGE):latest -f files/Dockerfile files
 
 	@# Populate the build cache
-	docker pull $(BASE_IMAGE):build-cache-base || true
-	docker pull $(BASE_IMAGE):build-cache-multistage-goinstall || true
-	docker pull $(BASE_IMAGE):build-cache-multistage-compiler || true
-	docker pull $(BASE_IMAGE):latest || true
+	if ! docker images | grep build-cache 2>&1 > /dev/null; then \
+	    docker pull $(BASE_IMAGE):build-cache-base || true; \
+	    docker pull $(BASE_IMAGE):build-cache-multistage-goinstall || true; \
+	    docker pull $(BASE_IMAGE):build-cache-multistage-compiler || true; \
+	    docker pull $(BASE_IMAGE):latest || true; \
+	fi
 
 	@# The option '--cache-from' order is significant
 	docker build \
