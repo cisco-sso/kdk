@@ -1,4 +1,4 @@
-FROM debian:9.6 AS build-cache-base
+FROM debian:9.7 AS build-cache-base
 
 LABEL maintainer="rluckie@cisco.com" \
       kdk=""
@@ -84,6 +84,24 @@ RUN echo "Install OS packages" && \
         nodejs \
         postgresql-client-10 \
         yarn && \
+    # Add deps to enable pyenv-driven on-demand python installs on KDK \
+    apt-get --no-install-recommends -y install \
+        make build-essential \
+        libssl-dev \
+        zlib1g-dev \
+        libbz2-dev \
+        libreadline-dev \
+        libsqlite3-dev \
+        wget \
+        curl \
+        llvm \
+        libncurses5-dev \
+        libncursesw5-dev \
+        xz-utils \
+        tk-dev \
+        libffi-dev \
+        liblzma-dev \
+        python-openssl && \
     apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
 
 
@@ -167,6 +185,7 @@ RUN echo "Install python-based utils and libs" && \
          'openshift==0.7.1' \
          'passlib==1.7.1' \
          'peru==1.2.0' \
+         'pipenv' \
          'python-neutronclient==6.10.0' \
          'python-octaviaclient==1.7.0' \
          'python-openstackclient==3.16.1' \
@@ -312,6 +331,11 @@ RUN echo "Install emacs." && \
         --with-compress-install && \
     make && make install && cd .. && rm -fr emacs-*
 
+RUN echo "Install pyenv with dependencies." && \
+    curl -sSLo pyenv-installer https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer && \
+    chmod a+x pyenv-installer && mv pyenv-installer /usr/local/bin && \
+    PYENV_ROOT=/usr/local/pyenv pyenv-installer && chmod -R a+rwx /usr/local/pyenv
+
 RUN echo "Install vim." && \
     curl -sSL https://github.com/vim/vim/archive/v8.1.0481.tar.gz | tar xz && cd vim-* && \
     ./configure \
@@ -329,9 +353,9 @@ RUN echo "Install vim." && \
     make VIMRUNTIMEDIR=/usr/local/share/vim/vim81 && make install && cd .. && rm -fr vim-*
 
 RUN echo "Install tmux." && \
-    curl -sSL https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz | tar xz && cd libevent-* && \
+    curl -sSL https://github.com/libevent/libevent/releases/download/release-2.1.8-stable/libevent-2.1.8-stable.tar.gz | tar xz && cd libevent-* && \
     ./configure && make &&  make install && cd .. && rm -fr libevent-* && \
-    curl -sSL https://github.com/tmux/tmux/releases/download/2.7/tmux-2.7.tar.gz | tar xz && cd tmux-* && \
+    curl -sSL https://github.com/tmux/tmux/releases/download/2.8/tmux-2.8.tar.gz | tar xz && cd tmux-* && \
     ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr tmux-*
 
 RUN echo "Install zsh." && \
@@ -357,7 +381,8 @@ COPY --from=build-cache-multistage-compiler  /etc/shells /etc/shells
 
 COPY usr/local/bin/ /usr/local/bin/
 COPY lib/systemd/system/ /lib/systemd/system/
-RUN systemctl enable kdk-setup.service
+RUN systemctl enable kdk-setup.service && \
+    ldconfig
 
 #######################################
 # Ensure systemd starts, which subsequently starts ssh and docker
