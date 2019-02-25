@@ -204,7 +204,7 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         curl -sSLo dep https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 && \
         chmod a+x dep && mv dep /usr/local/bin && \
     echo "Install direnv." && \
-        curl -sSLo direnv https://github.com/direnv/direnv/releases/download/v2.17.0/direnv.linux-amd64 && \
+        curl -sSLo direnv https://github.com/direnv/direnv/releases/download/v2.19.2/direnv.linux-amd64 && \
         chmod a+x direnv && mv direnv /usr/local/bin && \
     echo "Install drone-cli." && \
         curl -sSL https://github.com/drone/drone-cli/releases/download/v0.8.6/drone_linux_amd64.tar.gz | tar xz && \
