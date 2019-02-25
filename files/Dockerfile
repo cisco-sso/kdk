@@ -224,7 +224,7 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         curl -sSL https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz | tar -C /usr/local -xz && \
         mkdir -p /go && chmod a+rw /go && \
     echo "Install goreleaser." && \
-        curl -sSLO https://github.com/goreleaser/goreleaser/releases/download/v0.93.2/goreleaser_Linux_x86_64.tar.gz && \
+        curl -sSLO https://github.com/goreleaser/goreleaser/releases/download/v0.101.0/goreleaser_Linux_x86_64.tar.gz && \
         tar -C /usr/local/bin -xzf goreleaser*.tar.gz goreleaser && rm goreleaser*.tar.gz && \
     echo "Install grpcurl." && \
         curl -sSL https://github.com/fullstorydev/grpcurl/releases/download/v1.0.0/grpcurl_1.0.0_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz grpcurl && chmod a+x /usr/local/bin/grpcurl && \
