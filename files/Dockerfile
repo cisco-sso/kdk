@@ -221,7 +221,7 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         curl -sSLo gomplate https://github.com/hairyhenderson/gomplate/releases/download/v3.2.0/gomplate_linux-amd64 && \
         chmod a+x gomplate && mv gomplate /usr/local/bin && \
     echo "Install golang." && \
-        curl -sSL https://dl.google.com/go/go1.11.2.linux-amd64.tar.gz | tar -C /usr/local -xz && \
+        curl -sSL https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz | tar -C /usr/local -xz && \
         mkdir -p /go && chmod a+rw /go && \
     echo "Install goreleaser." && \
         curl -sSLO https://github.com/goreleaser/goreleaser/releases/download/v0.93.2/goreleaser_Linux_x86_64.tar.gz && \
