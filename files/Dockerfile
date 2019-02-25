@@ -209,7 +209,7 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
     echo "Install drone-cli." && \
         curl -sSL https://github.com/drone/drone-cli/releases/download/v0.8.6/drone_linux_amd64.tar.gz | tar xz && \
         chmod a+x drone && mv drone /usr/local/bin/drone-0.8.6 && \
-        curl -sSL https://github.com/drone/drone-cli/releases/download/v1.0.0/drone_linux_amd64.tar.gz | tar xz && \
+        curl -sSL https://github.com/drone/drone-cli/releases/download/v1.0.7/drone_linux_amd64.tar.gz | tar xz && \
         chmod a+x drone && mv drone /usr/local/bin/drone-1.0.0 && \
         ln -s /usr/local/bin/drone-1.0.0 /usr/local/bin/drone && \
     echo "Install easy-rsa." && \
