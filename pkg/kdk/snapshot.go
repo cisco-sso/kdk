@@ -15,20 +15,19 @@
 package kdk
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/docker/docker/api/types"
 	log "github.com/sirupsen/logrus"
 )
 
-func Snapshot(cfg KdkEnvConfig) error {
-	snapshotName := cfg.ConfigFile.AppConfig.Name + "-" + strconv.Itoa(int(time.Now().UnixNano()))
+func Snapshot(cfg KdkEnvConfig) (string, error) {
+	snapshotName := "ciscosso/kdk" + ":" + cfg.User() + "-" + cfg.ConfigFile.AppConfig.Name + "-" + time.Now().Format("20060102150405")
 	_, err := cfg.DockerClient.ContainerCommit(cfg.Ctx, cfg.ConfigFile.AppConfig.Name, types.ContainerCommitOptions{Reference: snapshotName})
 	if err != nil {
 		log.WithField("error", err).Fatal("Failed to create snapshot of KDK container")
-		return err
+		return "", err
 	}
 	log.Info("Successfully created snapshot of KDK container.", snapshotName)
-	return nil
+	return snapshotName, nil
 }
