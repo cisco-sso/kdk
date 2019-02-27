@@ -362,7 +362,7 @@ RUN echo "Install zsh." && \
     ./configure --with-tcsetpgrp --prefix=/usr/local && make && make install && echo "/usr/local/bin/zsh" >> /etc/shells && cd .. && rm -fr zsh-*
 
 RUN echo "Install redis-cli tools." && \
-    curl -sSL http://download.redis.io/releases/redis-5.0.0.tar.gz | tar xz && cd redis-* && \
+    curl -sSL http://download.redis.io/releases/redis-5.0.3.tar.gz | tar xz && cd redis-* && \
     make && cp src/redis-cli src/redis-benchmark /usr/local/bin && cd .. && rm -fr redis-*
 
 
