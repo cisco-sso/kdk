@@ -229,13 +229,11 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
     echo "Install grpcurl." && \
         curl -sSL https://github.com/fullstorydev/grpcurl/releases/download/v1.1.0/grpcurl_1.1.0_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz grpcurl && chmod a+x /usr/local/bin/grpcurl && \
     echo "Install helm." && \
-        curl -sSL https://storage.googleapis.com/kubernetes-helm/helm-v2.9.1-linux-amd64.tar.gz | tar xz && \
-          chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.9.1 && rm -fr linux-amd64 && \
-        curl -sSL https://storage.googleapis.com/kubernetes-helm/helm-v2.10.0-linux-amd64.tar.gz | tar xz && \
-          chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.10.0 && rm -fr linux-amd64 && \
         curl -sSL https://storage.googleapis.com/kubernetes-helm/helm-v2.11.0-linux-amd64.tar.gz | tar xz && \
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.11.0 && rm -fr linux-amd64 && \
-        ln -s /usr/local/bin/helm-2.11.0 /usr/local/bin/helm && \
+        curl -sSL https://storage.googleapis.com/kubernetes-helm/helm-v2.12.3-linux-amd64.tar.gz | tar xz && \
+          chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.12.3 && rm -fr linux-amd64 && \
+        ln -s /usr/local/bin/helm-2.12.3 /usr/local/bin/helm && \
     echo "Install hugo." && \
         curl -sSL https://github.com/gohugoio/hugo/releases/download/v0.51/hugo_0.51_Linux-64bit.tar.gz | tar xz && \
         chmod a+x hugo && mv hugo /usr/local/bin/hugo && \
