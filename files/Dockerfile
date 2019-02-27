@@ -235,7 +235,7 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.12.3 && rm -fr linux-amd64 && \
         ln -s /usr/local/bin/helm-2.12.3 /usr/local/bin/helm && \
     echo "Install hugo." && \
-        curl -sSL https://github.com/gohugoio/hugo/releases/download/v0.51/hugo_0.51_Linux-64bit.tar.gz | tar xz && \
+        curl -sSL https://github.com/gohugoio/hugo/releases/download/v0.54.0/hugo_0.54.0_Linux-64bit.tar.gz | tar xz && \
         chmod a+x hugo && mv hugo /usr/local/bin/hugo && \
     echo "Install jq." && \
         curl -sSLo jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
