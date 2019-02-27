@@ -241,8 +241,8 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         curl -sSLo jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
         chmod a+x jq && mv jq /usr/local/bin/ && \
     echo "Install kops." && \
-        curl -sSLo kops-1.10.0 https://github.com/kubernetes/kops/releases/download/1.10.0/kops-linux-amd64 && \
-        chmod a+x kops-1.10.0 && mv kops-1.10.0 /usr/local/bin/ && \
+        curl -sSLo kops-1.10.1 https://github.com/kubernetes/kops/releases/download/1.10.1/kops-linux-amd64 && \
+        chmod a+x kops-1.10.1 && mv kops-1.10.1 /usr/local/bin/ && \
         curl -sSLo kops-1.11.0 https://github.com/kubernetes/kops/releases/download/1.11.0/kops-linux-amd64 && \
         chmod a+x kops-1.11.0 && mv kops-1.11.0 /usr/local/bin/ && \
         ln -s /usr/local/bin/kops-1.11.0 /usr/local/bin/kops && \
