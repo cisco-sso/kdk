@@ -185,7 +185,7 @@ RUN echo "Install python-based utils and libs" && \
          'openshift==0.7.1' \
          'passlib==1.7.1' \
          'peru==1.2.0' \
-         'pipenv' \
+         'pipenv==2018.11.26' \
          'python-neutronclient==6.10.0' \
          'python-octaviaclient==1.7.0' \
          'python-openstackclient==3.16.1' \
