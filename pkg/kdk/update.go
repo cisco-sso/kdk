@@ -51,7 +51,6 @@ func WarnIfUpdateAvailable(cfg *KdkEnvConfig) {
 		log.Warn("Upgrade Available\n" + strings.Join([]string{
 			"***************************************",
 			"Some KDK components are out of date.",
-			"It is safe to ignore updates if you are using a custom image (from snapshot or restart).",
 			"  Latest Version:                      " + latestReleaseVersion,
 			"  Binary Version:                      " + Version,
 			"  Image Tag:                           " + cfg.ConfigFile.AppConfig.ImageTag,
