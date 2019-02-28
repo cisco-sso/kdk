@@ -24,7 +24,7 @@ var destroyCmd = &cobra.Command{
 	Short: "Destroy the running KDK container",
 	Long:  `Destroy the running KDK container`,
 	Run: func(cmd *cobra.Command, args []string) {
-		kdk.Destroy(CurrentKdkEnvConfig)
+		kdk.Destroy(CurrentKdkEnvConfig, false)
 	},
 }
 

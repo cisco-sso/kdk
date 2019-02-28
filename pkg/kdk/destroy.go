@@ -22,7 +22,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func Destroy(cfg KdkEnvConfig) error {
+func Destroy(cfg KdkEnvConfig, force bool) error {
 
 	var containerIds []string
 
@@ -42,15 +42,17 @@ func Destroy(cfg KdkEnvConfig) error {
 	if len(containerIds) > 0 {
 		log.Info("Destroying KDK container(s)...")
 		for _, containerId := range containerIds {
-			fmt.Printf("Delete KDK container [%s][%v]\n", cfg.ConfigFile.AppConfig.Name, containerId[:8])
-			prmpt := prompt.Prompt{
-				Text:     "Continue? [y/n] ",
-				Loop:     true,
-				Validate: prompt.ValidateYorN,
-			}
-			if result, err := prmpt.Run(); err != nil || result == "n" {
-				log.Error("KDK container deletion canceled or invalid input.")
-				return nil
+			if !force {
+				fmt.Printf("Delete KDK container [%s][%v]\n", cfg.ConfigFile.AppConfig.Name, containerId[:8])
+				prmpt := prompt.Prompt{
+					Text:     "Continue? [y/n] ",
+					Loop:     true,
+					Validate: prompt.ValidateYorN,
+				}
+				if result, err := prmpt.Run(); err != nil || result == "n" {
+					log.Error("KDK container deletion canceled or invalid input.")
+					return nil
+				}
 			}
 			if err := cfg.DockerClient.ContainerRemove(cfg.Ctx, containerId, types.ContainerRemoveOptions{Force: true}); err != nil {
 				log.WithField("error", err).Fatal("Failed to remove KDK container")

@@ -15,9 +15,7 @@
 package kdk
 
 import (
-	"github.com/ghodss/yaml"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
 	"strings"
 )
 
@@ -32,20 +30,12 @@ func Restart(cfg KdkEnvConfig) {
 	}
 
 	// Destroy running KDK container
-	Destroy(cfg)
+	Destroy(cfg, true)
 
 	// Save config with snapshot image tag
 	cfg.ConfigFile.AppConfig.ImageTag = strings.Split(snapshotName, ":")[1]
 	cfg.ConfigFile.ContainerConfig.Image = snapshotName
-	y, err := yaml.Marshal(cfg.ConfigFile)
-	if err != nil {
-		log.WithField("error", err).Error("Failed to create YAML string of configuration")
-	}
 
-	err = ioutil.WriteFile(cfg.ConfigPath(), y, 0600)
-	if err != nil {
-		log.WithField("error", err).Error("Failed to write new config file")
-	}
 	// Start KDK container with snapshot image
 	cfg.Start()
 	log.Info("KDK container restarted")
