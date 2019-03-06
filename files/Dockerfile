@@ -1,4 +1,4 @@
-FROM debian:9.7 AS build-cache-base
+FROM debian:9.8 AS build-cache-base
 
 LABEL maintainer="rluckie@cisco.com" \
       kdk=""
