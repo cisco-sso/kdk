@@ -42,8 +42,10 @@ RUN echo "Install OS packages" && \
         nmap \
         ntp \
         ntpdate \
+        openconnect \
         openssh-server \
         perl \
+        proxychains \
         python \
         python-dev \
         python3 \
@@ -312,6 +314,10 @@ RUN echo "Clean out /usr/local" && \
 RUN echo "Install git (needs to build first as a dependency)." && \
     curl -sSL https://github.com/git/git/archive/v2.19.1.tar.gz | tar xz && cd git-* && \
     make configure && ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr git-*
+
+RUN echo "Install bats" && \
+    curl -sSL https://github.com/sstephenson/bats/archive/v0.4.0.tar.gz | tar xz && cd bats-* && \
+    ./install.sh /usr/local && cd .. && rm -fr bats-*
 
 RUN echo "Install emacs." && \
     curl -sSL http://mirrors.ibiblio.org/gnu/ftp/gnu/emacs/emacs-26.1.tar.gz | tar xz && cd emacs-* && \
