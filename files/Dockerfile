@@ -236,6 +236,9 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         curl -sSL https://storage.googleapis.com/kubernetes-helm/helm-v2.12.3-linux-amd64.tar.gz | tar xz && \
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.12.3 && rm -fr linux-amd64 && \
         ln -s /usr/local/bin/helm-2.12.3 /usr/local/bin/helm && \
+    echo "Install helmfile" && \
+        curl -sSLo helmfile https://github.com/roboll/helmfile/releases/download/v0.54.2/helmfile_linux_amd64 && \
+        chmod a+x helmfile && mv helmfile /usr/local/bin && \
     echo "Install hugo." && \
         curl -sSL https://github.com/gohugoio/hugo/releases/download/v0.54.0/hugo_0.54.0_Linux-64bit.tar.gz | tar xz && \
         chmod a+x hugo && mv hugo /usr/local/bin/hugo && \
@@ -335,6 +338,10 @@ RUN echo "Install emacs." && \
         --with-gnutls \
         --with-compress-install && \
     make && make install && cd .. && rm -fr emacs-*
+
+RUN echo "Install jsonnet" && \
+    curl -sSL https://github.com/google/jsonnet/archive/v0.12.1.tar.gz | tar xz && cd jsonnet-* && \
+    make && chmod a+x jsonnet && mv jsonnet /usr/local/bin
 
 RUN echo "Install pyenv with dependencies." && \
     curl -sSLo pyenv-installer https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer && \
