@@ -203,7 +203,7 @@ RUN echo "Install python-based utils and libs" && \
 
 RUN echo "Install apps (with pinned version) that are not provided by the OS packages." && \
     echo "Install dep." && \
-        curl -sSLo dep https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 && \
+        curl -sSLo dep https://github.com/golang/dep/releases/download/v0.5.1/dep-linux-amd64 && \
         chmod a+x dep && mv dep /usr/local/bin && \
     echo "Install direnv." && \
         curl -sSLo direnv https://github.com/direnv/direnv/releases/download/v2.19.2/direnv.linux-amd64 && \
