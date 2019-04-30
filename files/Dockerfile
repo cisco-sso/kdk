@@ -227,7 +227,7 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         curl -sSLO https://github.com/goreleaser/goreleaser/releases/download/v0.106.0/goreleaser_Linux_x86_64.tar.gz && \
         tar -C /usr/local/bin -xzf goreleaser*.tar.gz goreleaser && rm goreleaser*.tar.gz && \
     echo "Install grpcurl." && \
-        curl -sSL https://github.com/fullstorydev/grpcurl/releases/download/v1.1.0/grpcurl_1.1.0_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz grpcurl && chmod a+x /usr/local/bin/grpcurl && \
+        curl -sSL https://github.com/fullstorydev/grpcurl/releases/download/v1.2.1/grpcurl_1.2.1_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz grpcurl && chmod a+x /usr/local/bin/grpcurl && \
     echo "Install helm." && \
         curl -sSL https://storage.googleapis.com/kubernetes-helm/helm-v2.11.0-linux-amd64.tar.gz | tar xz && \
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.11.0 && rm -fr linux-amd64 && \
