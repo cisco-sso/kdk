@@ -263,7 +263,7 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
         curl -sSLo /usr/local/bin/mc https://dl.minio.io/client/mc/release/linux-amd64/mc.RELEASE.2019-04-24T00-09-41Z && \
         chmod a+x /usr/local/bin/mc && \
     echo "Install minikube." && \
-        curl -sSLo minikube https://storage.googleapis.com/minikube/releases/v0.28.2/minikube-linux-amd64 && \
+        curl -sSLo minikube https://storage.googleapis.com/minikube/releases/v1.0.1/minikube-linux-amd64 && \
         chmod a+x minikube &&  mv minikube /usr/local/bin/ && \
     echo "Install terraform." && \
         curl -sSLo terraform.zip https://releases.hashicorp.com/terraform/0.11.11/terraform_0.11.11_linux_amd64.zip && \
