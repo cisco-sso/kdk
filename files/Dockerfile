@@ -233,7 +233,9 @@ RUN echo "Install apps (with pinned version) that are not provided by the OS pac
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.11.0 && rm -fr linux-amd64 && \
         curl -sSL https://storage.googleapis.com/kubernetes-helm/helm-v2.12.3-linux-amd64.tar.gz | tar xz && \
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.12.3 && rm -fr linux-amd64 && \
-        ln -s /usr/local/bin/helm-2.12.3 /usr/local/bin/helm && \
+        curl -sSL https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz | tar xz && \
+          chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.13.1 && rm -fr linux-amd64 && \
+        ln -s /usr/local/bin/helm-2.13.1 /usr/local/bin/helm && \
     echo "Install helmfile" && \
         curl -sSLo helmfile https://github.com/roboll/helmfile/releases/download/v0.54.2/helmfile_linux_amd64 && \
         chmod a+x helmfile && mv helmfile /usr/local/bin && \
