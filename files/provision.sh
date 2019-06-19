@@ -2,7 +2,16 @@
 set -euo pipefail
 
 function main() {
-    vagrant
+    export DEBIAN_FRONTEND="noninteractive"
+
+    if [ "$#" -eq 0 ]; then
+	# If this script was called with zero args, then we build for vagrant
+	vagrant
+    else
+	# If this script was called with arguments, then we build for docker
+	#   The following expects the first argument to be the function name
+	$@
+    fi
 }
 
 function vagrant() {
