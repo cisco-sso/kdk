@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-OS=$(grep "^ID" /etc/os-release | cut -d= -f2)  # debian | centos
-SUDO_GROUP=$([ "$OS" == "debian" ] && echo "sudo" || echo "wheel")
+OS=$(grep "^ID" /etc/os-release | cut -d= -f2)  # ubuntu | debian | centos
+SUDO_GROUP=$([ "$OS" == "centos" ] && echo "wheel" || echo "sudo")
 
 if [[ ! -f "/etc/kdk/provisioned" ]]; then
     # Check if user exists. If not, create

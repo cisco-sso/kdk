@@ -52,7 +52,6 @@ function layer_install_os_packages() {
         htop \
         less \
         libcurl4-openssl-dev \
-        libevent-2.0-5 \
         locales \
         make \
         man \
@@ -84,9 +83,9 @@ function layer_install_os_packages() {
         wget \
         whois \
         xauth && \
-    curl -sSfL https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    curl -sSfL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
        add-apt-repository \
-         "deb [arch=amd64] https://download.docker.com/linux/debian \
+         "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
          $(lsb_release -cs) \
          stable" && \
     export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" && \
@@ -128,8 +127,8 @@ function layer_install_os_packages() {
 function layer_install_python_based_utils_and_libs() {
     echo "Install python-based utils and libs" && \
     curl -sSfL https://bootstrap.pypa.io/get-pip.py | python2 && \
-    pip2.7 install --no-cache-dir -U setuptools && \
-    pip2.7 install \
+    pip install --no-cache-dir -U setuptools && \
+    pip install \
         --no-cache-dir \
         --ignore-installed six \
         'ansible==2.6.4' \
@@ -150,8 +149,8 @@ function layer_install_python_based_utils_and_libs() {
         'virtualenv==16.0.0' \
         'yq==2.7.0' && \
     curl -sSfL https://bootstrap.pypa.io/get-pip.py | python3 && \
-    pip3.5 install --no-cache-dir -U setuptools && \
-    pip3.5 install \
+    pip3 install --no-cache-dir -U setuptools && \
+    pip3 install \
          --no-cache-dir \
          'ansible==2.6.4' \
          'awscli==1.16.14' \
