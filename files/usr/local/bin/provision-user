@@ -1,6 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+#####################################################################
+# These env vars are set within the kdk docker image upon startup from the
+#   ~/.kdk/kdk/config.yaml.  However, if we're running the packer vagrant image of
+#   the kdk, these are not passed in.  Set sane defaults for packer.
+KDK_SHELL=${KDK_SHELL:-$SHELL}
+KDK_DOTFILES_REPO=${KDK_DOTFILES_REPO:-https://github.com/cisco-sso/yadm-dotfiles.git}
+if [ -z "${KDK_USERNAME+x}" ]; then
+    # Set KDK_USERNAME to be $SUDO_USER if exists, otherwise $USER
+    if [ ! -z "${SUDO_USER+x}" ]; then
+	KDK_USERNAME=${SUDO_USER}
+    else
+	KDK_USERNAME=${USER}
+    fi
+fi
+#####################################################################
+
 OS=$(grep "^ID" /etc/os-release | cut -d= -f2)  # ubuntu | debian | centos
 SUDO_GROUP=$([ "$OS" == "centos" ] && echo "wheel" || echo "sudo")
 
@@ -25,10 +41,10 @@ if [[ ! -f "/etc/kdk/provisioned" ]]; then
     fi
 
     # Set no password for sudo users
-    if [[ "$OS" == "debian" ]]; then
-      sed -i 's@\%sudo\tALL=(ALL:ALL) ALL@\%sudo\tALL=(ALL) NOPASSWD:ALL@g' /etc/sudoers
-    else
+    if [[ "$OS" == "centos" ]]; then
       sed -i 's@^# %wheel@%wheel@g' /etc/sudoers
+    else
+      sed -i 's@\%sudo\tALL=(ALL:ALL) ALL@\%sudo\tALL=(ALL) NOPASSWD:ALL@g' /etc/sudoers
     fi
 
     # Ensure permissions for a few locations

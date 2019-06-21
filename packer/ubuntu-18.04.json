@@ -19,6 +19,15 @@
           "execute_command": "sudo {{.Path}}"
         }
       }
+    },
+    {
+      "type": "shell",
+      "script": "../files/usr/local/bin/provision-user",
+      "override": {
+        "vagrant": {
+          "execute_command": "sudo {{.Path}}"
+        }
+      }
     }
   ]
 }

@@ -11,6 +11,52 @@ COPY provision.sh /tmp/provision.sh
 RUN /tmp/provision.sh layer_install_os_packages
 
 #######################################
+# Install python-based utils and libs
+
+RUN /tmp/provision.sh layer_install_python_based_utils_and_libs
+
+#######################################
+# Install apps (with pinned version) that are not provided by the OS packages.
+
+RUN /tmp/provision.sh layer_install_apps_not_provided_by_os_packages
+
+#######################################
+# go get installs
+
+FROM build-cache-base AS build-cache-multistage-goinstall
+
+COPY provision.sh /tmp/provision.sh
+
+RUN /tmp/provision.sh layer_go_get_installs
+
+#######################################
+# Build apps that are not provided by the OS packages.
+
+FROM build-cache-multistage-goinstall AS build-cache-multistage-compiler
+
+COPY provision.sh /tmp/provision.sh
+
+RUN echo "Clean out /usr/local" && rm -rf /usr/local/*
+RUN /tmp/provision.sh layer_build_apps_not_provided_by_os_packages
+
+#######################################
+# Piece together the final image
+
+FROM build-cache-base AS the-final-image
+
+COPY --from=build-cache-multistage-goinstall /go/bin/    /go/bin/
+COPY --from=build-cache-multistage-compiler  /usr/local/ /usr/local/
+COPY --from=build-cache-multistage-compiler  /etc/shells /etc/shells
+
+#######################################
+# Copy local files
+
+COPY usr/local/bin/ /usr/local/bin/
+COPY lib/systemd/system/ /lib/systemd/system/
+RUN systemctl enable kdk-setup.service && \
+    ldconfig
+
+#######################################
 # Configure systemd and other Miscellaneous configuration bits
 #  Mostly taken from:
 #  https://github.com/dramaturg/docker-debian-systemd/blob/master/Dockerfile
@@ -47,52 +93,6 @@ RUN echo "Configuring systemd" && \
         sed -i 's/#Port 22/Port 2022/' /etc/ssh/sshd_config && \
         # Configure docker daemon to support docker in docker && \
         mkdir /etc/docker && echo '{"storage-driver": "vfs"}' > /etc/docker/daemon.json
-
-
-#######################################
-# Install python-based utils and libs
-
-RUN /tmp/provision.sh layer_install_python_based_utils_and_libs
-
-#######################################
-# Install apps (with pinned version) that are not provided by the OS packages.
-
-RUN /tmp/provision.sh layer_install_apps_not_provided_by_os_packages
-
-#######################################
-# go get installs
-
-FROM build-cache-base AS build-cache-multistage-goinstall
-
-COPY provision.sh /tmp/provision.sh
-
-RUN /tmp/provision.sh layer_go_get_installs
-
-#######################################
-# Build apps that are not provided by the OS packages.
-
-FROM build-cache-multistage-goinstall AS build-cache-multistage-compiler
-
-COPY provision.sh /tmp/provision.sh
-
-RUN /tmp/provision.sh layer_build_apps_not_provided_by_os_packages
-
-#######################################
-# Piece together the final image
-
-FROM build-cache-base AS the-final-image
-
-COPY --from=build-cache-multistage-goinstall /go/bin/    /go/bin/
-COPY --from=build-cache-multistage-compiler  /usr/local/ /usr/local/
-COPY --from=build-cache-multistage-compiler  /etc/shells /etc/shells
-
-#######################################
-# Copy local files
-
-COPY usr/local/bin/ /usr/local/bin/
-COPY lib/systemd/system/ /lib/systemd/system/
-RUN systemctl enable kdk-setup.service && \
-    ldconfig
 
 #######################################
 # Ensure systemd starts, which subsequently starts ssh and docker

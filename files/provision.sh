@@ -3,7 +3,6 @@ set -euo pipefail
 
 function main() {
     export DEBIAN_FRONTEND="noninteractive"
-
     if [ "$#" -eq 0 ]; then
         # If this script was called with zero args, then we build for vagrant
         vagrant
@@ -15,18 +14,22 @@ function main() {
 }
 
 function vagrant() {
+    exit_if_provisioned
+
+    pushd /tmp
     layer_install_os_packages
     layer_install_python_based_utils_and_libs
     layer_install_apps_not_provided_by_os_packages
     layer_go_get_installs
     layer_build_apps_not_provided_by_os_packages
     mark_provisioned
+    rm -rf /tmp/* && popd
 }
 
 function layer_install_os_packages() {
     # big items: gcc, python-dev
 
-    echo "Install OS packages" && \
+    echo "#### ${FUNCNAME[0]}"
     apt-get -y update && apt-get --no-install-recommends -y install \
         apache2-utils \
         apt-transport-https \
@@ -125,14 +128,14 @@ function layer_install_os_packages() {
 }
 
 function layer_install_python_based_utils_and_libs() {
-    echo "Install python-based utils and libs" && \
+    echo "#### ${FUNCNAME[0]}"
     curl -sSfL https://bootstrap.pypa.io/get-pip.py | python2 && \
     pip install --no-cache-dir -U setuptools && \
     pip install \
         --no-cache-dir \
         --ignore-installed six \
         'ansible==2.6.4' \
-        'awscli==1.16.14' \
+        'awscli==1.16.183' \
         'boto==2.49.0' \
         'boto3==1.9.4' \
         'docker-compose==1.22.0' \
@@ -175,6 +178,7 @@ function layer_install_python_based_utils_and_libs() {
 }
 
 function layer_install_apps_not_provided_by_os_packages() {
+    echo "#### ${FUNCNAME[0]}"
     echo "Install apps (with pinned version) that are not provided by the OS packages." && \
     echo "Install dep." && \
         curl -sSfLo dep https://github.com/golang/dep/releases/download/v0.5.1/dep-linux-amd64 && \
@@ -232,7 +236,7 @@ function layer_install_apps_not_provided_by_os_packages() {
     echo "Install kubetail." && \
         curl -sSfLo kubetail.zip https://github.com/johanhaleby/kubetail/archive/1.6.8.zip && \
         unzip -qq kubetail.zip && chmod a+x kubetail-1.6.8/kubetail && mv kubetail-1.6.8/kubetail /usr/local/bin && \
-        rm -f kubetail.zip && \
+        rm -rf kubetail* && \
     echo "Install mc." && \
         curl -sSfLo /usr/local/bin/mc https://dl.minio.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2019-05-01T23-27-44Z && \
         chmod a+x /usr/local/bin/mc && \
@@ -251,7 +255,8 @@ function layer_install_apps_not_provided_by_os_packages() {
 }
 
 function layer_go_get_installs() {
-    export GOPATH=/go
+    echo "#### ${FUNCNAME[0]}"
+    export GOPATH=/go && \
     echo "go get installs" && \
       apt-get -y update && apt-get --no-install-recommends -y install git && \
       apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
@@ -264,20 +269,18 @@ function layer_go_get_installs() {
     /usr/local/go/bin/go get github.com/cisco-sso/mh && ln -sf /go/bin/mh /go/bin/multihelm
     /usr/local/go/bin/go get github.com/mikefarah/yq
     rm -rf /root/.cache/go-build
+    rm -rf /go/src
 }
 
 function layer_build_apps_not_provided_by_os_packages() {
-    echo "Install OS BUILD packages" && \
+    echo "#### ${FUNCNAME[0]}"
     apt-get -y update && apt-get --no-install-recommends -y install \
         autoconf \
         build-essential \
         libgnutls28-dev \
         libncurses5-dev \
         libz-dev && \
-   apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
-
-    echo "Clean out /usr/local" && \
-    rm -rf /usr/local/*
+    apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
 
     echo "Install git (needs to build first as a dependency)." && \
     curl -sSfL https://github.com/git/git/archive/v2.19.1.tar.gz | tar xz && cd git-* && \
@@ -306,7 +309,7 @@ function layer_build_apps_not_provided_by_os_packages() {
 
     echo "Install jsonnet" && \
     curl -sSfL https://github.com/google/jsonnet/archive/v0.12.1.tar.gz | tar xz && cd jsonnet-* && \
-    make && chmod a+x jsonnet && mv jsonnet /usr/local/bin
+    make && chmod a+x jsonnet && mv jsonnet /usr/local/bin && cd .. && rm -fr jsonnet-*
 
     echo "Install pyenv with dependencies." && \
     curl -sSfLo pyenv-installer https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer && \
@@ -344,7 +347,16 @@ function layer_build_apps_not_provided_by_os_packages() {
     make && cp src/redis-cli src/redis-benchmark /usr/local/bin && cd .. && rm -fr redis-*
 }
 
+function exit_if_provisioned() {
+    echo "#### ${FUNCNAME[0]}"
+    if [ -f /var/lib/provisioned ]; then
+	echo "Already provisioned since exists: /var/lib/provisioned"
+	exit 0
+    fi
+}
+
 function mark_provisioned() {
+    echo "#### ${FUNCNAME[0]}"
     sudo touch /var/lib/provisioned
 }
 
