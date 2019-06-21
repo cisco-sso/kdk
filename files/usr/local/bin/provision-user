@@ -22,9 +22,16 @@ SUDO_GROUP=$([ "$OS" == "centos" ] && echo "wheel" || echo "sudo")
 
 if [[ ! -f "/etc/kdk/provisioned" ]]; then
     # Check if user exists. If not, create
-    if ! getent passwd ${KDK_USERNAME} > /dev/null 2>&1; then
+    if ! getent passwd ${KDK_USERNAME} 2>&1 > /dev/null; then
       useradd ${KDK_USERNAME} -m -G ${SUDO_GROUP},docker -s ${KDK_SHELL} > /dev/null 2>&1
     fi
+
+    # Check if user is not in docker group.  If not, add them
+    #   For vagrant, the user may already exist but not be in the group
+    if ! groups ${KDK_USERNAME} | grep -E ' docker\s?' 2>&1 > /dev/null; then
+	usermod -a -G docker ${KDK_USERNAME}
+    fi
+
     # Check if .ssh dir exists
     if [[ ! -d /home/${KDK_USERNAME}/.ssh/ ]]; then
       install -d -o ${KDK_USERNAME} -g ${KDK_USERNAME} -m 0700 /home/${KDK_USERNAME}/.ssh
