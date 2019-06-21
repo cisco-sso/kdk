@@ -10,7 +10,7 @@ build: validate  ## Build the vagrant images
 build_debug:
 	PACKER_LOG=1 packer build -on-error=ask ubuntu-18.04.json 2>&1 | tee build.log
 
-add_box:
+add_box:  ## Add the box as kdk/ubuntu-18.04-test
 	vagrant box add output-vagrant/package.box --name kdk/ubuntu-18.04-test --force
 
 validate:  ## Validate the packer json file
