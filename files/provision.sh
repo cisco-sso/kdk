@@ -309,7 +309,8 @@ function layer_build_apps_not_provided_by_os_packages() {
 
     echo "Install jsonnet" && \
     curl -sSfL https://github.com/google/jsonnet/archive/v0.13.0.tar.gz | tar xz && cd jsonnet-* && \
-    make && chmod a+x jsonnet && mv jsonnet /usr/local/bin && cd .. && rm -fr jsonnet-*
+    make && chmod a+x jsonnet jsonnetfmt && mv jsonnet /usr/local/bin && mv jsonnetfmt /usr/local/bin \
+    && cd .. && rm -fr jsonnet-*
 
     echo "Install pyenv with dependencies." && \
     curl -sSfLo pyenv-installer https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer && \
