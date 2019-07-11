@@ -1,0 +1,26 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+# * text=auto
+* text=auto eof=lf
+
+# Declare files that will always have LF line endings on checkout.
+*.gitignore text eol=lf
+*.gitattributes text eol=lf
+*.md text eol=lf
+*.svg text eol=lf
+*.sh text eol=lf
+*.go text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.rb text eol=lf
+*.py text eol=lf
+*.pl text eol=lf
+*.service text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+
+# Denote all files that are truly binary and should not be modified.
+*.png binary
+*.jpg binary
+*.pdf binary
