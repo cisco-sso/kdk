@@ -1,0 +1,9 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "{{.BoxName}}"
+  {{ if ne .SyncedFolder "" -}}
+      config.vm.synced_folder "{{.SyncedFolder}}", "/vagrant"
+  {{- else -}}
+      config.vm.synced_folder ".", "/vagrant", disabled: true
+  {{- end}}
+  config.vm.network 'public_network', bridge: 'Default Switch'
+end

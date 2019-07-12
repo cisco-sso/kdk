@@ -1,0 +1,34 @@
+{
+  "builders": [
+    {
+      "type": "vagrant",
+      "provider": "virtualbox",
+      "box_name": "kdk/ubuntu-18.04",
+      "box_version": "201812.27.0",
+      "source_path": "bento/ubuntu-18.04",
+      "add_force": true,
+      "skip_add": false,
+      "communicator": "ssh"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "../files/provision.sh",
+      "override": {
+        "vagrant": {
+          "execute_command": "sudo {{.Path}}"
+        }
+      }
+    },
+    {
+      "type": "shell",
+      "script": "../files/usr/local/bin/provision-user",
+      "override": {
+        "vagrant": {
+          "execute_command": "sudo {{.Path}}"
+        }
+      }
+    }
+  ]
+}
