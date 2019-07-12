@@ -17,6 +17,8 @@ function vagrant() {
     exit_if_provisioned
 
     pushd /tmp
+    # Remove this workaround after bento releases new hyperv box
+    vagrant_bento_workaround_openssl_bug
     layer_install_os_packages
     layer_install_python_based_utils_and_libs
     layer_install_apps_not_provided_by_os_packages
@@ -24,6 +26,14 @@ function vagrant() {
     layer_build_apps_not_provided_by_os_packages
     mark_provisioned
     rm -rf /tmp/* && popd
+}
+
+function vagrant_bento_workaround_openssl_bug() {
+  # https://github.com/chef/bento/issues/1201#issuecomment-503060115
+  DEBIAN_FRONTEND=noninteractive dpkg-reconfigure libc6
+  DEBIAN_FRONTEND=noninteractive dpkg-reconfigure libssl1.1
+  apt-get update
+  DEBIAN_FRONTEND=noninteractive apt-get install -y libssl1.1
 }
 
 function layer_install_os_packages() {

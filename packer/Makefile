@@ -3,21 +3,24 @@
 # Required for globs to work correctly
 SHELL=/bin/bash
 
+deps_windows:
+	choco install -y make packer git
 
-build: validate  ## Build the vagrant images
-	packer build ubuntu-18.04.json 2>&1 | tee build.log
+build_virtualbox: validate  ## Build the virtualbox vagrant image
+	PACKER_LOG=1 packer build packer_virtualbox.json 2>&1 | tee build-virtualbox.log
 
-build_debug:
-	PACKER_LOG=1 packer build -on-error=ask ubuntu-18.04.json 2>&1 | tee build.log
+build_hyperv: validate  ## Build the hyperv vagrant images
+	PACKER_LOG=1 packer build packer_hyperv.json     2>&1 | tee build-hyperv.log
 
 add_box:  ## Add the box as kdk/ubuntu-18.04-test
 	vagrant box add output-vagrant/package.box --name kdk/ubuntu-18.04-test --force
 
-validate:  ## Validate the packer json file
-	packer validate ubuntu-18.04.json
+validate:  ## Validate the packer json files
+	packer validate packer_virtualbox.json
+	packer validate packer_hyperv.json
 
 clean:  ## Clean up the build dirs
-	@rm -rf build.log output-vagrant
+	@rm -rf *.log output-vagrant *~
 
 help:  ## Print list of Makefile targets
 	@# Taken from https://github.com/spf13/hugo/blob/master/Makefile

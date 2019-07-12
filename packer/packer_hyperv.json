@@ -2,11 +2,13 @@
   "builders": [
     {
       "type": "vagrant",
-      "provider": "virtualbox",
+      "provider": "hyperv",
       "box_name": "kdk/ubuntu-18.04",
       "box_version": "201812.27.0",
       "source_path": "bento/ubuntu-18.04",
       "add_force": true,
+      "skip_add": false,
+      "template": "Vagrantfile_hyperv.tmpl",
       "communicator": "ssh"
     }
   ],
