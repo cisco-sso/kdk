@@ -225,7 +225,7 @@ function layer_install_apps_not_provided_by_os_packages() {
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.13.1 && rm -fr linux-amd64 && \
         ln -s /usr/local/bin/helm-2.13.1 /usr/local/bin/helm && \
     echo "Install helmfile" && \
-        curl -sSfLo helmfile https://github.com/roboll/helmfile/releases/download/v0.54.2/helmfile_linux_amd64 && \
+        curl -sSfLo helmfile https://github.com/roboll/helmfile/releases/download/v0.80.1/helmfile_linux_amd64 && \
         chmod a+x helmfile && mv helmfile /usr/local/bin && \
     echo "Install hugo." && \
         curl -sSfL https://github.com/gohugoio/hugo/releases/download/v0.55.4/hugo_0.55.4_Linux-64bit.tar.gz | tar xz && \
