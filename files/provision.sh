@@ -18,6 +18,7 @@ function vagrant() {
 
     pushd /tmp
     # Remove this workaround after bento releases new hyperv box
+    vagrant_upgrade_kernel_workaround_sshuttle_kernel_bug
     vagrant_bento_workaround_openssl_bug
     layer_install_os_packages
     layer_install_python_based_utils_and_libs
@@ -28,12 +29,38 @@ function vagrant() {
     rm -rf /tmp/* && popd
 }
 
+function vagrant_upgrade_kernel_workaround_sshuttle_kernel_bug() {
+    # https://github.com/sshuttle/sshuttle/issues/208
+    echo "#### ${FUNCNAME[0]}"
+
+    # Install a kernel upgrade helper
+    apt-add-repository -y ppa:teejee2008/ppa
+    apt-get update
+    apt-get -y install dkms ukuu linux-headers-$(uname -r)
+
+    # Install a newer kernel
+    ukuu --list
+    ukuu --install v5.1.16
+    ukuu --list-installed
+
+    # Update virtualbox guest additions and rebuild kernel modules
+    wget -O /tmp/additions.iso \
+      http://download.virtualbox.org/virtualbox/6.0.10/VBoxGuestAdditions_6.0.10.iso
+    mkdir -p /cdrom
+    mount -o loop /tmp/additions.iso /cdrom
+    /cdrom/VBoxLinuxAdditions.run || true # always errors
+    umount /cdrom
+    rm -rf /cdrom /tmp/additions.iso
+    /sbin/rcvboxadd quicksetup all # build kernel modules for non-active but installed kernels
+}
+
 function vagrant_bento_workaround_openssl_bug() {
-  # https://github.com/chef/bento/issues/1201#issuecomment-503060115
-  DEBIAN_FRONTEND=noninteractive dpkg-reconfigure libc6
-  DEBIAN_FRONTEND=noninteractive dpkg-reconfigure libssl1.1
-  apt-get update
-  DEBIAN_FRONTEND=noninteractive apt-get install -y libssl1.1
+    # https://github.com/chef/bento/issues/1201#issuecomment-503060115
+    echo "#### ${FUNCNAME[0]}"
+    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure libc6
+    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure libssl1.1
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y libssl1.1
 }
 
 function layer_install_os_packages() {
@@ -181,6 +208,7 @@ function layer_install_python_based_utils_and_libs() {
          'python-octaviaclient==1.7.0' \
          'python-openstackclient==3.16.1' \
          'pyvmomi==6.7.0.2018.9' \
+         'sshuttle==0.78.5' \
          'urllib3==1.22' \
          'virtualenv==16.0.0' \
          'yq==2.7.0' && \
@@ -293,7 +321,7 @@ function layer_build_apps_not_provided_by_os_packages() {
     apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
 
     echo "Install git (needs to build first as a dependency)." && \
-    curl -sSfL https://github.com/git/git/archive/v2.19.1.tar.gz | tar xz && cd git-* && \
+    curl -sSfL https://github.com/git/git/archive/v2.22.0.tar.gz | tar xz && cd git-* && \
     make configure && ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr git-*
 
     echo "Install bats" && \
@@ -301,7 +329,7 @@ function layer_build_apps_not_provided_by_os_packages() {
     ./install.sh /usr/local && cd .. && rm -fr bats-*
 
     echo "Install emacs." && \
-    curl -sSfL http://mirrors.ibiblio.org/gnu/ftp/gnu/emacs/emacs-26.1.tar.gz | tar xz && cd emacs-* && \
+    curl -sSfL http://mirrors.ibiblio.org/gnu/ftp/gnu/emacs/emacs-26.2.tar.gz | tar xz && cd emacs-* && \
     CANNOT_DUMP=yes ./configure \
         --prefix=/usr/local \
         --disable-build-details \
