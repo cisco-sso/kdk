@@ -18,6 +18,7 @@ function vagrant() {
 
     pushd /tmp
     # Remove this workaround after bento releases new hyperv box
+    vagrant_disable_ssh_password_logins
     vagrant_upgrade_kernel_workaround_sshuttle_kernel_bug
     vagrant_bento_workaround_openssl_bug
     layer_install_os_packages
@@ -27,6 +28,13 @@ function vagrant() {
     layer_build_apps_not_provided_by_os_packages
     mark_provisioned
     rm -rf /tmp/* && popd
+}
+
+function vagrant_disable_ssh_password_logins() {
+    # Vagrant machines are ssh-able via user/pass vagrant/vagrant.
+    #   Disable this, since some boxes may run with bridged networking by default
+    sed -i 's@#PasswordAuthentication yes@PasswordAuthentication no@g' \
+	/etc/ssh/sshd_config
 }
 
 function vagrant_upgrade_kernel_workaround_sshuttle_kernel_bug() {
