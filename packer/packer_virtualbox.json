@@ -7,7 +7,7 @@
       "box_version": "201812.27.0",
       "source_path": "bento/ubuntu-18.04",
       "add_force": true,
-      "skip_add": false,
+      "skip_add": true,
       "communicator": "ssh"
     }
   ],
