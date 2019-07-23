@@ -13,6 +13,7 @@ build_hyperv: validate  ## Build the hyperv vagrant images
 	PACKER_LOG=1 packer build packer_hyperv.json     2>&1 | tee build-hyperv.log
 
 add_box:  ## Add the box as kdk/ubuntu-18.04-test
+	vagrant box remove kdk/ubuntu-18.04-test 2>&1 > /dev/null || true
 	vagrant box add output-vagrant/package.box --name kdk/ubuntu-18.04-test --force
 
 validate:  ## Validate the packer json files

@@ -42,24 +42,25 @@ function vagrant_upgrade_kernel_workaround_sshuttle_kernel_bug() {
     echo "#### ${FUNCNAME[0]}"
 
     # Install a kernel upgrade helper
+    #   Dkms will automatically recompile kmods upon kernel update
     apt-add-repository -y ppa:teejee2008/ppa
     apt-get update
     apt-get -y install dkms ukuu linux-headers-$(uname -r)
 
-    # Install a newer kernel
-    ukuu --list
-    ukuu --install v5.1.16
-    ukuu --list-installed
-
-    # Update virtualbox guest additions and rebuild kernel modules
-    wget -O /tmp/additions.iso \
-      http://download.virtualbox.org/virtualbox/6.0.10/VBoxGuestAdditions_6.0.10.iso
+    # Update virtualbox guest additions.  This will rebuild kernel modules
+    wget -q -O /tmp/additions.iso \
+      http://download.virtualbox.org/virtualbox/6.0.4/VBoxGuestAdditions_6.0.4.iso
     mkdir -p /cdrom
     mount -o loop /tmp/additions.iso /cdrom
     /cdrom/VBoxLinuxAdditions.run || true # always errors
     umount /cdrom
     rm -rf /cdrom /tmp/additions.iso
-    /sbin/rcvboxadd quicksetup all # build kernel modules for non-active but installed kernels
+
+    # Install a newer kernel
+    #   dkms will kick in and rebuild modules for this new kernel
+    ukuu --list
+    ukuu --install v4.20.17
+    ukuu --list-installed
 }
 
 function vagrant_bento_workaround_openssl_bug() {
