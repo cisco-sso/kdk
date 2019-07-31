@@ -37,27 +37,18 @@ Detailed installation instructions of the KDK along with all of its dependencies
 
 ## Background
 
-The kdk repository may be used to create a docker container with all of the
-tools that one would typically use in order to develop and operate kubernetes
-clusters.
+Getting your workstation setup to work with Kubernetes clusters may require the install and configuration of quite a few tools. Do it inconsistently among your team, and your automation and workflows may not work properly for everyone. Even if it works on your machine because the latest code you've written requires the latest version of `kubectl` and a new installation of `jq`, your teammates Billy on Windows and Jane on Mac are busy filing bugs against your latest PR because they haven't received the memo about updating their toolchains.
 
-Getting setup to create and operate a Kubernetes cluster in AWS, Openstack, or
-even locally may be painful because a user may be running Windows10 or OSX, and
-one must configure 20+ tools for cluster automation to work effectively. We've
-created a Docker Image to enable every one of us to work in the same
-environment, with the same tools, at the same versions.
+We've created the open-source Kubernetes Development Kit (KDK) in order to solve this problem. The KDK is a docker container or a vagrant virtual machine, which may be deployed on Mac, Windows, and Linux. It is a Linux-based environment which has over 30+ tools pre-installed and pre-configured. If your team uses the KDK, then you are guaranteed to have a similar development and operations environment, with the same tools, at the same versions.
 
-Tools include: docker, kubectl, helm, multihelm, kops, terraform, ansible,
-minio-cli, aws-cli, direnv, golang, git, vi/vim, emacs, python 2/3, jq, zsh,
-helm-s3, kafkacat, dig, ssh-keygen, gitslave, dep, gomplate, minikube, awscli,
-docker-compose, neutronclient, openstackclient, supernova, virtualenv, yq,
-colordiff, nmap, screen, tmux, yadm, and many others.
+A sampling of tools include: docker, kubectl, helm, helmfile, kops, kubetail, docker-compose, terraform, ansible, minio-cli, aws-cli, gcloud, drone-cli, direnv, golang, git, hub, jsonnet, vi/vim, emacs, python 2/3, pipenv, pyenv, jq, zsh, helm-s3, kafkacat, dig, ssh-keygen, dep, gomplate, minikube, neutronclient, openstackclient, supernova, virtualenv, yq, colordiff, nmap, screen, tmux, sshuttle, yadm, and many others.
 
-* Some example use cases include:
-  * Operating Kubernetes clusters.
-  * Deploying Kubernetes clusters to AWS using `kops`.
-  * Developing and applying Helm Charts and mh Apps.
-  * Developing docker containers.
+The KDK may make your life easier if you often:
+
+* Operate Kubernetes clusters.
+* Deploy Kubernetes clusters to various clouds including AWS and GKE.
+* Develop and deploy Helm Charts.
+* Develop docker containers.
 
 
 ## Basic Usage
