@@ -228,44 +228,44 @@ function layer_install_apps_not_provided_by_os_packages() {
     echo "#### ${FUNCNAME[0]}"
     echo "Install apps (with pinned version) that are not provided by the OS packages." && \
     echo "Install dep." && \
-        curl -sSfLo dep https://github.com/golang/dep/releases/download/v0.5.1/dep-linux-amd64 && \
+        curl -sSfLo dep https://github.com/golang/dep/releases/download/v0.5.4/dep-linux-amd64 && \
         chmod a+x dep && mv dep /usr/local/bin && \
     echo "Install direnv." && \
         curl -sSfLo direnv https://github.com/direnv/direnv/releases/download/v2.20.0/direnv.linux-amd64 && \
         chmod a+x direnv && mv direnv /usr/local/bin && \
     echo "Install drone-cli." && \
-        curl -sSfL https://github.com/drone/drone-cli/releases/download/v1.1.0/drone_linux_amd64.tar.gz | tar xz && \
-        chmod a+x drone && mv drone /usr/local/bin/drone-1.1.0 && \
-        ln -s /usr/local/bin/drone-1.1.0 /usr/local/bin/drone && \
+        curl -sSfL https://github.com/drone/drone-cli/releases/download/v1.1.4/drone_linux_amd64.tar.gz | tar xz && \
+        chmod a+x drone && mv drone /usr/local/bin/drone-1.1.4 && \
+        ln -sf /usr/local/bin/drone-1.1.4 /usr/local/bin/drone && \
     echo "Install easy-rsa." && \
         curl -sSfL https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.6/EasyRSA-unix-v3.0.6.tgz | tar xz && \
         chmod a+x EasyRSA-* && mv EasyRSA-* /usr/local/bin/easyrsa && \
     echo "Install go-task." && \
-        curl -sSfL https://github.com/go-task/task/releases/download/v2.5.1/task_linux_amd64.tar.gz | tar -C /usr/local/bin -xz task && chmod a+x /usr/local/bin/task && \
+        curl -sSfL https://github.com/go-task/task/releases/download/v2.6.0/task_linux_amd64.tar.gz | tar -C /usr/local/bin -xz task && chmod a+x /usr/local/bin/task && \
     echo "Install gomplate." && \
-        curl -sSfLo gomplate https://github.com/hairyhenderson/gomplate/releases/download/v3.4.0/gomplate_linux-amd64 && \
+        curl -sSfLo gomplate https://github.com/hairyhenderson/gomplate/releases/download/v3.5.0/gomplate_linux-amd64 && \
         chmod a+x gomplate && mv gomplate /usr/local/bin && \
     echo "Install golang." && \
-        curl -sSfL https://dl.google.com/go/go1.12.4.linux-amd64.tar.gz | tar -C /usr/local -xz && \
+        curl -sSfL https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz | tar -C /usr/local -xz && \
         mkdir -p /go && chmod a+rw /go && \
     echo "Install goreleaser." && \
-        curl -sSfLO https://github.com/goreleaser/goreleaser/releases/download/v0.106.0/goreleaser_Linux_x86_64.tar.gz && \
+        curl -sSfLO https://github.com/goreleaser/goreleaser/releases/download/v0.113.1/goreleaser_Linux_x86_64.tar.gz && \
         tar -C /usr/local/bin -xzf goreleaser*.tar.gz goreleaser && rm goreleaser*.tar.gz && \
     echo "Install grpcurl." && \
-        curl -sSfL https://github.com/fullstorydev/grpcurl/releases/download/v1.2.1/grpcurl_1.2.1_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz grpcurl && chmod a+x /usr/local/bin/grpcurl && \
+        curl -sSfL https://github.com/fullstorydev/grpcurl/releases/download/v1.3.1/grpcurl_1.3.1_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz grpcurl && chmod a+x /usr/local/bin/grpcurl && \
     echo "Install helm." && \
-        curl -sSfL https://storage.googleapis.com/kubernetes-helm/helm-v2.11.0-linux-amd64.tar.gz | tar xz && \
-          chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.11.0 && rm -fr linux-amd64 && \
         curl -sSfL https://storage.googleapis.com/kubernetes-helm/helm-v2.12.3-linux-amd64.tar.gz | tar xz && \
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.12.3 && rm -fr linux-amd64 && \
         curl -sSfL https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz | tar xz && \
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.13.1 && rm -fr linux-amd64 && \
-        ln -s /usr/local/bin/helm-2.13.1 /usr/local/bin/helm && \
+        curl -sSfL https://storage.googleapis.com/kubernetes-helm/helm-v2.14.2-linux-amd64.tar.gz | tar xz && \
+          chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.14.2 && rm -fr linux-amd64 && \
+        ln -sf /usr/local/bin/helm-2.14.2 /usr/local/bin/helm && \
     echo "Install helmfile" && \
-        curl -sSfLo helmfile https://github.com/roboll/helmfile/releases/download/v0.80.1/helmfile_linux_amd64 && \
+        curl -sSfLo helmfile https://github.com/roboll/helmfile/releases/download/v0.80.2/helmfile_linux_amd64 && \
         chmod a+x helmfile && mv helmfile /usr/local/bin && \
     echo "Install hugo." && \
-        curl -sSfL https://github.com/gohugoio/hugo/releases/download/v0.55.4/hugo_0.55.4_Linux-64bit.tar.gz | tar xz && \
+        curl -sSfL https://github.com/gohugoio/hugo/releases/download/v0.56.3/hugo_0.56.3_Linux-64bit.tar.gz | tar xz && \
         chmod a+x hugo && mv hugo /usr/local/bin/hugo && \
     echo "Install jq." && \
         curl -sSfLo jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
@@ -275,11 +275,15 @@ function layer_install_apps_not_provided_by_os_packages() {
         chmod a+x kops-1.10.1 && mv kops-1.10.1 /usr/local/bin/ && \
         curl -sSfLo kops-1.11.1 https://github.com/kubernetes/kops/releases/download/1.11.1/kops-linux-amd64 && \
         chmod a+x kops-1.11.1 && mv kops-1.11.1 /usr/local/bin/ && \
-        ln -s /usr/local/bin/kops-1.11.1 /usr/local/bin/kops && \
+        curl -sSfLo kops-1.12.2 https://github.com/kubernetes/kops/releases/download/1.12.2/kops-linux-amd64 && \
+        chmod a+x kops-1.12.2 && mv kops-1.12.2 /usr/local/bin/ && \
+        ln -sf /usr/local/bin/kops-1.12.2 /usr/local/bin/kops && \
     echo "Install kubectl." && \
         curl -sSfLo /usr/local/bin/kubectl-1.14.1 https://storage.googleapis.com/kubernetes-release/release/v1.14.1/bin/linux/amd64/kubectl && \
         chmod a+x /usr/local/bin/kubectl-* && \
-        ln -s /usr/local/bin/kubectl-1.14.1 /usr/local/bin/kubectl && \
+        curl -sSfLo /usr/local/bin/kubectl-1.15.1 https://storage.googleapis.com/kubernetes-release/release/v1.15.1/bin/linux/amd64/kubectl && \
+        chmod a+x /usr/local/bin/kubectl-* && \
+        ln -sf /usr/local/bin/kubectl-1.15.1 /usr/local/bin/kubectl && \
     echo "Install kubetail." && \
         curl -sSfLo kubetail.zip https://github.com/johanhaleby/kubetail/archive/1.6.8.zip && \
         unzip -qq kubetail.zip && chmod a+x kubetail-1.6.8/kubetail && mv kubetail-1.6.8/kubetail /usr/local/bin && \
@@ -291,14 +295,17 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfLo minikube https://storage.googleapis.com/minikube/releases/v1.0.1/minikube-linux-amd64 && \
         chmod a+x minikube &&  mv minikube /usr/local/bin/ && \
     echo "Install terraform." && \
-        curl -sSfLo terraform.zip https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip && \
-        unzip -qq terraform.zip && chmod a+x terraform && mv terraform /usr/local/bin && rm -f terraform.zip && \
+        curl -sSfLo terraform.zip https://releases.hashicorp.com/terraform/0.11.14/terraform_0.11.14_linux_amd64.zip && \
+        unzip -qq terraform.zip && chmod a+x terraform && mv terraform /usr/local/bin/terraform-0.11.14 && rm -f terraform.zip && \
+        curl -sSfLo terraform.zip https://releases.hashicorp.com/terraform/0.12.6/terraform_0.12.6_linux_amd64.zip && \
+        unzip -qq terraform.zip && chmod a+x terraform && mv terraform /usr/local/bin/terraform-0.12.6 && rm -f terraform.zip && \
+        ln -sf /usr/local/bin/terraform-0.12.6 /usr/local/bin/terraform && \
     echo "Install testssl." && \
         curl -sSfL https://github.com/drwetter/testssl.sh/archive/v2.9.5-7.tar.gz | tar xz && \
-        mv testssl* /usr/local/share/testssl && ln -s /usr/local/share/testssl/testssl.sh /usr/local/bin/testssl && chmod a+x /usr/local/bin/testssl && \
+        mv testssl* /usr/local/share/testssl && ln -sf /usr/local/share/testssl/testssl.sh /usr/local/bin/testssl && chmod a+x /usr/local/bin/testssl && \
     echo "Install yadm." && \
         curl -sSfL https://github.com/TheLocehiliosan/yadm/archive/1.12.0.tar.gz | tar xz && \
-        mv yadm* /usr/local/share/yadm && ln -s /usr/local/share/yadm/yadm /usr/local/bin/yadm && chmod a+x /usr/local/bin/yadm
+        mv yadm* /usr/local/share/yadm && ln -sf /usr/local/share/yadm/yadm /usr/local/bin/yadm && chmod a+x /usr/local/bin/yadm
 }
 
 function layer_go_get_installs() {
