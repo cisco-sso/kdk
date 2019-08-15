@@ -26,6 +26,7 @@ function vagrant() {
     layer_install_apps_not_provided_by_os_packages
     layer_go_get_installs
     layer_build_apps_not_provided_by_os_packages
+    vagrant_fix_permissions
     mark_provisioned
     rm -rf /tmp/* && popd
 }
@@ -180,47 +181,47 @@ function layer_install_python_based_utils_and_libs() {
     pip install \
         --no-cache-dir \
         --ignore-installed six \
-        'ansible==2.6.4' \
-        'awscli==1.16.183' \
+        'ansible==2.7.12' \
+        'awscli==1.16.218' \
         'boto==2.49.0' \
-        'boto3==1.9.4' \
-        'docker-compose==1.22.0' \
-        'idna==2.6' \
-        'Jinja2==2.10' \
-        'jinja2-cli[yaml]==0.6.0' \
-        'openshift==0.7.1' \
+        'boto3==1.9.208' \
+        'docker-compose==1.24.1' \
+        'idna==2.8' \
+        'Jinja2==2.10.1' \
+        'jinja2-cli[yaml]==0.7.0' \
+        'openshift==0.9.0' \
         'passlib==1.7.1' \
-        'python-neutronclient==6.10.0' \
-        'python-octaviaclient==1.7.0' \
-        'python-openstackclient==3.16.1' \
-        'pyvmomi==6.7.0.2018.9' \
-        'urllib3==1.22' \
-        'virtualenv==16.0.0' \
-        'yq==2.7.0' && \
+        'python-neutronclient==6.12.0' \
+        'python-octaviaclient==1.9.0' \
+        'python-openstackclient==3.19.0' \
+        'pyvmomi==6.7.1.2018.12' \
+        'urllib3==1.25.3' \
+        'virtualenv==16.7.2' \
+        'yq==2.7.2' && \
     curl -sSfL https://bootstrap.pypa.io/get-pip.py | python3 && \
     pip3 install --no-cache-dir -U setuptools && \
     pip3 install \
          --no-cache-dir \
-         'ansible==2.6.4' \
-         'awscli==1.16.14' \
+         'ansible==2.7.12' \
+         'awscli==1.16.218' \
          'boto==2.49.0' \
-         'boto3==1.9.4' \
-         'docker-compose==1.22.0' \
-         'idna==2.6' \
-         'Jinja2==2.10' \
-         'jinja2-cli[yaml]==0.6.0' \
-         'openshift==0.7.1' \
+         'boto3==1.9.208' \
+         'docker-compose==1.24.1' \
+         'idna==2.8' \
+         'Jinja2==2.10.1' \
+         'jinja2-cli[yaml]==0.7.0' \
+         'openshift==0.9.0' \
          'passlib==1.7.1' \
+         'python-neutronclient==6.12.0' \
+         'python-octaviaclient==1.9.0' \
+         'python-openstackclient==3.19.0' \
+         'pyvmomi==6.7.1.2018.12' \
+         'urllib3==1.25.3' \
+         'virtualenv==16.7.2' \
+         'yq==2.7.2' \
          'peru==1.2.0' \
          'pipenv==2018.11.26' \
-         'python-neutronclient==6.10.0' \
-         'python-octaviaclient==1.7.0' \
-         'python-openstackclient==3.16.1' \
-         'pyvmomi==6.7.0.2018.9' \
-         'sshuttle==0.78.5' \
-         'urllib3==1.22' \
-         'virtualenv==16.0.0' \
-         'yq==2.7.0' && \
+         'sshuttle==0.78.5' && \
     rm -rf /root/.cache/pip
 }
 
@@ -408,6 +409,12 @@ function exit_if_provisioned() {
 	echo "Already provisioned since exists: /var/lib/provisioned"
 	exit 0
     fi
+}
+
+function vagrant_fix_permissions() {
+    chown -R vagrant:vagrant /home/vagrant/.ssh
+    chown -R vagrant:vagrant /home/vagrant/.cache
+    chown -R vagrant:vagrant /home/vagrant/.wget-hsts
 }
 
 function mark_provisioned() {
