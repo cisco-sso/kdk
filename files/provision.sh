@@ -4,8 +4,8 @@ set -euo pipefail
 function main() {
     export DEBIAN_FRONTEND="noninteractive"
     if [ "$#" -eq 0 ]; then
-        # If this script was called with zero args, then we build for vagrant
-        vagrant
+        # If this script was called with zero args, then we build for ubuntu bionic
+        ubuntu_bionic
     else
         # If this script was called with arguments, then we build for docker
         #   The following expects the first argument to be the function name
@@ -27,6 +27,19 @@ function vagrant() {
     layer_go_get_installs
     layer_build_apps_not_provided_by_os_packages
     vagrant_fix_permissions
+    mark_provisioned
+    rm -rf /tmp/* && popd
+}
+
+function ubuntu_bionic() {
+    exit_if_provisioned
+
+    pushd /tmp
+    layer_install_os_packages
+    layer_install_python_based_utils_and_libs
+    layer_install_apps_not_provided_by_os_packages
+    layer_go_get_installs
+    layer_build_apps_not_provided_by_os_packages
     mark_provisioned
     rm -rf /tmp/* && popd
 }
