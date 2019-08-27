@@ -15,7 +15,7 @@
   "provisioners": [
     {
       "type": "shell",
-      "script": "../files/provision.sh",
+      "script": "../files/provision.sh vagrant",
       "override": {
         "vagrant": {
           "execute_command": "sudo {{.Path}}"
