@@ -48,7 +48,7 @@ function vagrant_disable_ssh_password_logins() {
     # Vagrant machines are ssh-able via user/pass vagrant/vagrant.
     #   Disable this, since some boxes may run with bridged networking by default
     sed -i 's@#PasswordAuthentication yes@PasswordAuthentication no@g' \
-	/etc/ssh/sshd_config
+        /etc/ssh/sshd_config
 }
 
 function vagrant_upgrade_kernel_workaround_sshuttle_kernel_bug() {
@@ -126,8 +126,6 @@ function layer_install_os_packages() {
         openssh-server \
         perl \
         proxychains \
-        python \
-        python-dev \
         python3 \
         python3-dev \
         qemu-user-static \
@@ -183,64 +181,48 @@ function layer_install_os_packages() {
         tk-dev \
         libffi-dev \
         liblzma-dev \
-        python-openssl && \
+        python3-openssl && \
     apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
 }
 
 function layer_install_python_based_utils_and_libs() {
     echo "#### ${FUNCNAME[0]}"
-    curl -sSfL https://bootstrap.pypa.io/get-pip.py | python2 && \
-    pip install --no-cache-dir -U setuptools && \
-    pip install \
-        --no-cache-dir \
-        --ignore-installed six \
-        'ansible==2.7.12' \
-        'awscli==1.16.218' \
-        'boto==2.49.0' \
-        'boto3==1.9.208' \
-        'docker-compose==1.24.1' \
-        'idna==2.8' \
-        'Jinja2==2.10.1' \
-        'jinja2-cli[yaml]==0.7.0' \
-        'openshift==0.9.0' \
-        'passlib==1.7.1' \
-        'python-neutronclient==6.12.0' \
-        'python-octaviaclient==1.9.0' \
-        'python-openstackclient==3.19.0' \
-        'pyvmomi==6.7.1.2018.12' \
-        'urllib3==1.25.3' \
-        'virtualenv==16.7.2' \
-        'yq==2.7.2' && \
     curl -sSfL https://bootstrap.pypa.io/get-pip.py | python3 && \
     pip3 install --no-cache-dir -U setuptools && \
     pip3 install \
          --no-cache-dir \
          'ansible==2.7.12' \
          'awscli==1.16.218' \
-         'boto==2.49.0' \
          'boto3==1.9.208' \
+         'boto==2.49.0' \
          'docker-compose==1.24.1' \
-         'idna==2.8' \
          'Jinja2==2.10.1' \
          'jinja2-cli[yaml]==0.7.0' \
+         'jsonschema' \
          'openshift==0.9.0' \
-         'passlib==1.7.1' \
+         'peru==1.2.0' \
+         'pipenv==2018.11.26' \
          'python-neutronclient==6.12.0' \
          'python-octaviaclient==1.9.0' \
          'python-openstackclient==3.19.0' \
          'pyvmomi==6.7.1.2018.12' \
-         'urllib3==1.25.3' \
+         'sh==1.12.14' \
+         'sshuttle==0.78.5' \
+         'structlog==19.1.0' \
+         'urllib3==1.22' \
          'virtualenv==16.7.2' \
-         'yq==2.7.2' \
-         'peru==1.2.0' \
-         'pipenv==2018.11.26' \
-         'sshuttle==0.78.5' && \
+         'yamllint' \
+         'yapf' \
+         'yq==2.7.2' && \
     rm -rf /root/.cache/pip
 }
 
 function layer_install_apps_not_provided_by_os_packages() {
     echo "#### ${FUNCNAME[0]}"
     echo "Install apps (with pinned version) that are not provided by the OS packages." && \
+    echo "Install amtool." && \
+        curl -sSfL https://github.com/prometheus/alertmanager/releases/download/v0.19.0/alertmanager-0.19.0.linux-amd64.tar.gz | tar xz && \
+        mv alertmanager*/amtool /usr/local/bin/amtool && rm -rf alertmanager* && \
     echo "Install dep." && \
         curl -sSfLo dep https://github.com/golang/dep/releases/download/v0.5.4/dep-linux-amd64 && \
         chmod a+x dep && mv dep /usr/local/bin && \
@@ -254,13 +236,16 @@ function layer_install_apps_not_provided_by_os_packages() {
     echo "Install easy-rsa." && \
         curl -sSfL https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.6/EasyRSA-unix-v3.0.6.tgz | tar xz && \
         chmod a+x EasyRSA-* && mv EasyRSA-* /usr/local/bin/easyrsa && \
+    echo "Install etcdctl." && \
+        curl -sSfL https://github.com/etcd-io/etcd/releases/download/v3.4.1/etcd-v3.4.1-linux-amd64.tar.gz | tar xz && \
+        mv etcd*/etcdctl /usr/local/bin/etcdctl && rm -rf etcd* && \
     echo "Install go-task." && \
         curl -sSfL https://github.com/go-task/task/releases/download/v2.6.0/task_linux_amd64.tar.gz | tar -C /usr/local/bin -xz task && chmod a+x /usr/local/bin/task && \
     echo "Install gomplate." && \
         curl -sSfLo gomplate https://github.com/hairyhenderson/gomplate/releases/download/v3.5.0/gomplate_linux-amd64 && \
         chmod a+x gomplate && mv gomplate /usr/local/bin && \
     echo "Install golang." && \
-        curl -sSfL https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz | tar -C /usr/local -xz && \
+        curl -sSfL https://dl.google.com/go/go1.13.1.linux-amd64.tar.gz | tar -C /usr/local -xz && \
         mkdir -p /go && chmod a+rw /go && \
     echo "Install goreleaser." && \
         curl -sSfLO https://github.com/goreleaser/goreleaser/releases/download/v0.113.1/goreleaser_Linux_x86_64.tar.gz && \
@@ -268,10 +253,6 @@ function layer_install_apps_not_provided_by_os_packages() {
     echo "Install grpcurl." && \
         curl -sSfL https://github.com/fullstorydev/grpcurl/releases/download/v1.3.1/grpcurl_1.3.1_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz grpcurl && chmod a+x /usr/local/bin/grpcurl && \
     echo "Install helm." && \
-        curl -sSfL https://storage.googleapis.com/kubernetes-helm/helm-v2.12.3-linux-amd64.tar.gz | tar xz && \
-          chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.12.3 && rm -fr linux-amd64 && \
-        curl -sSfL https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz | tar xz && \
-          chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.13.1 && rm -fr linux-amd64 && \
         curl -sSfL https://storage.googleapis.com/kubernetes-helm/helm-v2.14.2-linux-amd64.tar.gz | tar xz && \
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.14.2 && rm -fr linux-amd64 && \
         ln -sf /usr/local/bin/helm-2.14.2 /usr/local/bin/helm && \
@@ -285,19 +266,17 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfLo jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
         chmod a+x jq && mv jq /usr/local/bin/ && \
     echo "Install kops." && \
-        curl -sSfLo kops-1.10.1 https://github.com/kubernetes/kops/releases/download/1.10.1/kops-linux-amd64 && \
-        chmod a+x kops-1.10.1 && mv kops-1.10.1 /usr/local/bin/ && \
         curl -sSfLo kops-1.11.1 https://github.com/kubernetes/kops/releases/download/1.11.1/kops-linux-amd64 && \
         chmod a+x kops-1.11.1 && mv kops-1.11.1 /usr/local/bin/ && \
         curl -sSfLo kops-1.12.2 https://github.com/kubernetes/kops/releases/download/1.12.2/kops-linux-amd64 && \
         chmod a+x kops-1.12.2 && mv kops-1.12.2 /usr/local/bin/ && \
         ln -sf /usr/local/bin/kops-1.12.2 /usr/local/bin/kops && \
     echo "Install kubectl." && \
-        curl -sSfLo /usr/local/bin/kubectl-1.14.1 https://storage.googleapis.com/kubernetes-release/release/v1.14.1/bin/linux/amd64/kubectl && \
+        curl -sSfLo /usr/local/bin/kubectl-1.15.4 https://storage.googleapis.com/kubernetes-release/release/v1.15.4/bin/linux/amd64/kubectl && \
         chmod a+x /usr/local/bin/kubectl-* && \
-        curl -sSfLo /usr/local/bin/kubectl-1.15.1 https://storage.googleapis.com/kubernetes-release/release/v1.15.1/bin/linux/amd64/kubectl && \
+        curl -sSfLo /usr/local/bin/kubectl-1.16.0 https://storage.googleapis.com/kubernetes-release/release/v1.16.0/bin/linux/amd64/kubectl && \
         chmod a+x /usr/local/bin/kubectl-* && \
-        ln -sf /usr/local/bin/kubectl-1.15.1 /usr/local/bin/kubectl && \
+        ln -sf /usr/local/bin/kubectl-1.15.4 /usr/local/bin/kubectl && \
     echo "Install kubetail." && \
         curl -sSfLo kubetail.zip https://github.com/johanhaleby/kubetail/archive/1.6.8.zip && \
         unzip -qq kubetail.zip && chmod a+x kubetail-1.6.8/kubetail && mv kubetail-1.6.8/kubetail /usr/local/bin && \
@@ -404,7 +383,7 @@ function layer_build_apps_not_provided_by_os_packages() {
     echo "Install tmux." && \
     curl -sSfL https://github.com/libevent/libevent/releases/download/release-2.1.8-stable/libevent-2.1.8-stable.tar.gz | tar xz && cd libevent-* && \
     ./configure && make &&  make install && cd .. && rm -fr libevent-* && \
-    curl -sSfL https://github.com/tmux/tmux/releases/download/2.8/tmux-2.8.tar.gz | tar xz && cd tmux-* && \
+    curl -sSfL https://github.com/tmux/tmux/releases/download/2.9a/tmux-2.9a.tar.gz | tar xz && cd tmux-* && \
     ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr tmux-*
 
     echo "Install zsh." && \
@@ -419,8 +398,8 @@ function layer_build_apps_not_provided_by_os_packages() {
 function exit_if_provisioned() {
     echo "#### ${FUNCNAME[0]}"
     if [ -f /var/lib/provisioned ]; then
-	echo "Already provisioned since exists: /var/lib/provisioned"
-	exit 0
+        echo "Already provisioned since exists: /var/lib/provisioned"
+        exit 0
     fi
 }
 
