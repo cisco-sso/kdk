@@ -3,7 +3,7 @@
     {
       "type": "vagrant",
       "provider": "hyperv",
-      "box_name": "kdk/ubuntu-18.04",
+      "box_name": "bento/ubuntu-18.04",
       "box_version": "201812.27.0",
       "source_path": "bento/ubuntu-18.04",
       "add_force": true,
@@ -15,10 +15,10 @@
   "provisioners": [
     {
       "type": "shell",
-      "script": "../files/provision.sh vagrant",
+      "script": "../files/provision.sh",
       "override": {
         "vagrant": {
-          "execute_command": "sudo {{.Path}}"
+          "execute_command": "sudo {{.Path}} vagrant"
         }
       }
     },
