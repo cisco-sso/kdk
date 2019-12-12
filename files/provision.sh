@@ -351,6 +351,8 @@ function layer_go_get_installs() {
     echo "go get installs" && \
       apt-get -y update && apt-get --no-install-recommends -y install git && \
       apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
+    /usr/local/go/bin/go get github.com/cloudflare/cfssl/cmd/cfssl
+    /usr/local/go/bin/go get github.com/cloudflare/cfssl/cmd/cfssljson
     /usr/local/go/bin/go get github.com/spf13/cobra/cobra
     /usr/local/go/bin/go get github.com/kubernetes-incubator/cri-tools/cmd/crictl
     /usr/local/go/bin/go get golang.org/x/lint/golint
