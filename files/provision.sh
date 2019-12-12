@@ -283,9 +283,14 @@ function layer_install_apps_not_provided_by_os_packages() {
         export ORG="fullstorydev" && export REPO="grpcurl" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
         curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_"${VERSION}"_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz "${ARTIFACT}" && chmod a+x /usr/local/bin/"${ARTIFACT}" && \
     echo "Install helm." && \
-        curl -sSfL https://storage.googleapis.com/kubernetes-helm/helm-v2.14.2-linux-amd64.tar.gz | tar xz && \
-          chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.14.2 && rm -fr linux-amd64 && \
-        ln -sf /usr/local/bin/helm-2.14.2 /usr/local/bin/helm && \
+        export ORG="helm" && export REPO="helm" && export ARTIFACT="${REPO}" && \
+        export VERSION="3.0.1" && curl -sSfL https://get.helm.sh/"${ARTIFACT}"-v"${VERSION}"-linux-amd64.tar.gz | tar xz && \
+            chmod a+x linux-amd64/"${ARTIFACT}" && mv linux-amd64/"${ARTIFACT}" /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && rm -fr linux-amd64 &&
+            ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}"3 && \
+            ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
+        export VERSION="2.16.1" && curl -sSfL https://get.helm.sh/"${ARTIFACT}"-v"${VERSION}"-linux-amd64.tar.gz | tar xz && \
+            chmod a+x linux-amd64/"${ARTIFACT}" && mv linux-amd64/"${ARTIFACT}" /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && rm -fr linux-amd64 &&
+            ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}"2 && \
     echo "Install helmfile" && \
         curl -sSfLo helmfile https://github.com/roboll/helmfile/releases/download/v0.80.2/helmfile_linux_amd64 && \
         chmod a+x helmfile && mv helmfile /usr/local/bin && \
