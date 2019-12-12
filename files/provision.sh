@@ -308,11 +308,10 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfLo "${ARTIFACT}"-"${VERSION}" https://github.com/"${ORG}"/"${REPO}"/releases/download/"${VERSION}"/"${ARTIFACT}"-linux-amd64 && \
         chmod a+x "${ARTIFACT}"-"${VERSION}" && mv "${ARTIFACT}"-"${VERSION}" /usr/local/bin/ && \
     echo "Install kubectl." && \
-        curl -sSfLo /usr/local/bin/kubectl-1.15.4 https://storage.googleapis.com/kubernetes-release/release/v1.15.4/bin/linux/amd64/kubectl && \
-        chmod a+x /usr/local/bin/kubectl-* && \
-        curl -sSfLo /usr/local/bin/kubectl-1.16.0 https://storage.googleapis.com/kubernetes-release/release/v1.16.0/bin/linux/amd64/kubectl && \
-        chmod a+x /usr/local/bin/kubectl-* && \
-        ln -sf /usr/local/bin/kubectl-1.15.4 /usr/local/bin/kubectl && \
+        export ORG="kubernetes" && export REPO="kubernetes" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="kubectl" && \
+        curl -sSfLo /usr/local/bin/"${ARTIFACT}"-"${VERSION}" https://storage.googleapis.com/kubernetes-release/release/v"${VERSION}"/bin/linux/amd64/"${ARTIFACT}" && \
+        chmod a+x /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && \
+        ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
     echo "Install kubetail." && \
         curl -sSfLo kubetail.zip https://github.com/johanhaleby/kubetail/archive/1.6.8.zip && \
         unzip -qq kubetail.zip && chmod a+x kubetail-1.6.8/kubetail && mv kubetail-1.6.8/kubetail /usr/local/bin && \
