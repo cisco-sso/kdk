@@ -268,8 +268,9 @@ function layer_install_apps_not_provided_by_os_packages() {
         export ORG="go-task" && export REPO="task" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
         curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_linux_amd64.tar.gz | tar -C /usr/local/bin -xz "${ARTIFACT}" && chmod a+x /usr/local/bin/"${ARTIFACT}" && \
     echo "Install gomplate." && \
-        curl -sSfLo gomplate https://github.com/hairyhenderson/gomplate/releases/download/v3.5.0/gomplate_linux-amd64 && \
-        chmod a+x gomplate && mv gomplate /usr/local/bin && \
+        export ORG="hairyhenderson" && export REPO="gomplate" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
+        curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_linux-amd64 && \
+        chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
     echo "Install golang." && \
         curl -sSfL https://dl.google.com/go/go1.13.1.linux-amd64.tar.gz | tar -C /usr/local -xz && \
         mkdir -p /go && chmod a+rw /go && \
