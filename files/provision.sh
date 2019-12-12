@@ -243,8 +243,9 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfL https://github.com/"${ORG}/${REPO}"/releases/download/v"${VERSION}"/"${REPO}"-"${VERSION}".linux-amd64.tar.gz | tar xz && \
         mv "${REPO}"*/"${ARTIFACT}" /usr/local/bin/"${ARTIFACT}" && rm -rf "${REPO}"* && \
     echo "Install dep." && \
-        curl -sSfLo dep https://github.com/golang/dep/releases/download/v0.5.4/dep-linux-amd64 && \
-        chmod a+x dep && mv dep /usr/local/bin && \
+        export ORG="golang" && export REPO="dep" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}"  && \
+        curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-linux-amd64 && \
+        chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
     echo "Install direnv." && \
         curl -sSfLo direnv https://github.com/direnv/direnv/releases/download/v2.20.0/direnv.linux-amd64 && \
         chmod a+x direnv && mv direnv /usr/local/bin && \
