@@ -280,7 +280,8 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfLO https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_Linux_x86_64.tar.gz && \
         tar -C /usr/local/bin -xzf "${ARTIFACT}"*.tar.gz "${ARTIFACT}" && rm "${ARTIFACT}"*.tar.gz && \
     echo "Install grpcurl." && \
-        curl -sSfL https://github.com/fullstorydev/grpcurl/releases/download/v1.3.1/grpcurl_1.3.1_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz grpcurl && chmod a+x /usr/local/bin/grpcurl && \
+        export ORG="fullstorydev" && export REPO="grpcurl" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
+        curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_"${VERSION}"_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz "${ARTIFACT}" && chmod a+x /usr/local/bin/"${ARTIFACT}" && \
     echo "Install helm." && \
         curl -sSfL https://storage.googleapis.com/kubernetes-helm/helm-v2.14.2-linux-amd64.tar.gz | tar xz && \
           chmod a+x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm-2.14.2 && rm -fr linux-amd64 && \
