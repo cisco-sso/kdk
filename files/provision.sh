@@ -318,8 +318,9 @@ function layer_install_apps_not_provided_by_os_packages() {
         unzip -qq "${ARTIFACT}".zip && chmod a+x "${ARTIFACT}"-"${VERSION}"/"${ARTIFACT}" && mv "${ARTIFACT}"-"${VERSION}"/"${ARTIFACT}" /usr/local/bin && \
         rm -rf "${ARTIFACT}"* && \
     echo "Install mc." && \
-        curl -sSfLo /usr/local/bin/mc https://dl.minio.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2019-05-01T23-27-44Z && \
-        chmod a+x /usr/local/bin/mc && \
+        export ORG="minio" && export REPO="minio" && export ARTIFACT="mc" && \
+        curl -sSfLo /usr/local/bin/"${ARTIFACT}" https://dl."${ORG}".io/client/"${ARTIFACT}"/release/linux-amd64/"${ARTIFACT}" && \
+        chmod a+x /usr/local/bin/"${ARTIFACT}" && \
     echo "Install minikube." && \
         curl -sSfLo minikube https://storage.googleapis.com/minikube/releases/v1.0.1/minikube-linux-amd64 && \
         chmod a+x minikube &&  mv minikube /usr/local/bin/ && \
