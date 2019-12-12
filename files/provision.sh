@@ -247,8 +247,9 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-linux-amd64 && \
         chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
     echo "Install direnv." && \
-        curl -sSfLo direnv https://github.com/direnv/direnv/releases/download/v2.20.0/direnv.linux-amd64 && \
-        chmod a+x direnv && mv direnv /usr/local/bin && \
+        export ORG="direnv" && export REPO="direnv" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
+        curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${REPO}".linux-amd64 && \
+        chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
     echo "Install drone-cli." && \
         curl -sSfL https://github.com/drone/drone-cli/releases/download/v1.1.4/drone_linux_amd64.tar.gz | tar xz && \
         chmod a+x drone && mv drone /usr/local/bin/drone-1.1.4 && \
