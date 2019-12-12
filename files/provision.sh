@@ -292,8 +292,9 @@ function layer_install_apps_not_provided_by_os_packages() {
             chmod a+x linux-amd64/"${ARTIFACT}" && mv linux-amd64/"${ARTIFACT}" /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && rm -fr linux-amd64 &&
             ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}"2 && \
     echo "Install helmfile" && \
-        curl -sSfLo helmfile https://github.com/roboll/helmfile/releases/download/v0.80.2/helmfile_linux_amd64 && \
-        chmod a+x helmfile && mv helmfile /usr/local/bin && \
+        export ORG="roboll" && export REPO="helmfile" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
+        curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_linux_amd64 && \
+        chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
     echo "Install hugo." && \
         curl -sSfL https://github.com/gohugoio/hugo/releases/download/v0.56.3/hugo_0.56.3_Linux-64bit.tar.gz | tar xz && \
         chmod a+x hugo && mv hugo /usr/local/bin/hugo && \
