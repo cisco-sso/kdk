@@ -322,8 +322,10 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfLo /usr/local/bin/"${ARTIFACT}" https://dl."${ORG}".io/client/"${ARTIFACT}"/release/linux-amd64/"${ARTIFACT}" && \
         chmod a+x /usr/local/bin/"${ARTIFACT}" && \
     echo "Install minikube." && \
-        curl -sSfLo minikube https://storage.googleapis.com/minikube/releases/v1.0.1/minikube-linux-amd64 && \
-        chmod a+x minikube &&  mv minikube /usr/local/bin/ && \
+        export ORG="kubernetes" && export REPO="minikube" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
+        curl -sSfLo /usr/local/bin/"${ARTIFACT}"-"${VERSION}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-linux-amd64  && \
+        chmod a+x /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && \
+        ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
     echo "Install terraform." && \
         curl -sSfLo terraform.zip https://releases.hashicorp.com/terraform/0.11.14/terraform_0.11.14_linux_amd64.zip && \
         unzip -qq terraform.zip && chmod a+x terraform && mv terraform /usr/local/bin/terraform-0.11.14 && rm -f terraform.zip && \
