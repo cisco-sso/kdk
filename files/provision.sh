@@ -272,8 +272,9 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_linux-amd64 && \
         chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
     echo "Install golang." && \
-        curl -sSfL https://dl.google.com/go/go1.13.1.linux-amd64.tar.gz | tar -C /usr/local -xz && \
-        mkdir -p /go && chmod a+rw /go && \
+        export ORG="golang" && export REPO="go" && export VERSION="1.13.5" && export ARTIFACT="${REPO}" && \
+        curl -sSfL https://dl.google.com/"${REPO}"/"${ARTIFACT}""${VERSION}".linux-amd64.tar.gz | tar -C /usr/local -xz && \
+        mkdir -p /"${ARTIFACT}" && chmod a+rw /"${ARIFACT}" && \
     echo "Install goreleaser." && \
         curl -sSfLO https://github.com/goreleaser/goreleaser/releases/download/v0.113.1/goreleaser_Linux_x86_64.tar.gz && \
         tar -C /usr/local/bin -xzf goreleaser*.tar.gz goreleaser && rm goreleaser*.tar.gz && \
