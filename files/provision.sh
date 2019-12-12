@@ -134,6 +134,7 @@ function layer_install_os_packages() {
         less \
         libcurl4-openssl-dev \
         locales \
+        lsof \
         make \
         man \
         moreutils \
