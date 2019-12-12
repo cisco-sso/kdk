@@ -265,7 +265,8 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${REPO}"-v"${VERSION}"-linux-amd64.tar.gz | tar xz && \
         mv "${REPO}"*/${ARTIFACT} /usr/local/bin/${ARTIFACT} && rm -rf "${REPO}"* && \
     echo "Install go-task." && \
-        curl -sSfL https://github.com/go-task/task/releases/download/v2.6.0/task_linux_amd64.tar.gz | tar -C /usr/local/bin -xz task && chmod a+x /usr/local/bin/task && \
+        export ORG="go-task" && export REPO="task" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
+        curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_linux_amd64.tar.gz | tar -C /usr/local/bin -xz "${ARTIFACT}" && chmod a+x /usr/local/bin/"${ARTIFACT}" && \
     echo "Install gomplate." && \
         curl -sSfLo gomplate https://github.com/hairyhenderson/gomplate/releases/download/v3.5.0/gomplate_linux-amd64 && \
         chmod a+x gomplate && mv gomplate /usr/local/bin && \
