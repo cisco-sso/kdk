@@ -239,8 +239,9 @@ function layer_install_apps_not_provided_by_os_packages() {
     echo "#### ${FUNCNAME[0]}"
     echo "Install apps (with pinned version) that are not provided by the OS packages." && \
     echo "Install amtool." && \
-        curl -sSfL https://github.com/prometheus/alertmanager/releases/download/v0.19.0/alertmanager-0.19.0.linux-amd64.tar.gz | tar xz && \
-        mv alertmanager*/amtool /usr/local/bin/amtool && rm -rf alertmanager* && \
+        export ORG="prometheus" && export REPO="alertmanager" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="amtool" && \
+        curl -sSfL https://github.com/"${ORG}/${REPO}"/releases/download/v"${VERSION}"/"${REPO}"-"${VERSION}".linux-amd64.tar.gz | tar xz && \
+        mv "${REPO}"*/"${ARTIFACT}" /usr/local/bin/"${ARTIFACT}" && rm -rf "${REPO}"* && \
     echo "Install dep." && \
         curl -sSfLo dep https://github.com/golang/dep/releases/download/v0.5.4/dep-linux-amd64 && \
         chmod a+x dep && mv dep /usr/local/bin && \
