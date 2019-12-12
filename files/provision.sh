@@ -327,11 +327,10 @@ function layer_install_apps_not_provided_by_os_packages() {
         chmod a+x /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && \
         ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
     echo "Install terraform." && \
-        curl -sSfLo terraform.zip https://releases.hashicorp.com/terraform/0.11.14/terraform_0.11.14_linux_amd64.zip && \
-        unzip -qq terraform.zip && chmod a+x terraform && mv terraform /usr/local/bin/terraform-0.11.14 && rm -f terraform.zip && \
-        curl -sSfLo terraform.zip https://releases.hashicorp.com/terraform/0.12.6/terraform_0.12.6_linux_amd64.zip && \
-        unzip -qq terraform.zip && chmod a+x terraform && mv terraform /usr/local/bin/terraform-0.12.6 && rm -f terraform.zip && \
-        ln -sf /usr/local/bin/terraform-0.12.6 /usr/local/bin/terraform && \
+        export ORG="hashicorp" && export REPO="terraform" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
+        curl -sSfLo "${ARTIFACT}".zip https://releases."${ORG}".com/"${REPO}"/"${VERSION}"/"${ARTIFACT}"_"${VERSION}"_linux_amd64.zip && \
+        unzip -qq "${ARTIFACT}".zip && chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && rm -f "${ARTIFACT}".zip && \
+        ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
     echo "Install testssl." && \
         curl -sSfL https://github.com/drwetter/testssl.sh/archive/v2.9.5-7.tar.gz | tar xz && \
         mv testssl* /usr/local/share/testssl && ln -sf /usr/local/share/testssl/testssl.sh /usr/local/bin/testssl && chmod a+x /usr/local/bin/testssl && \
