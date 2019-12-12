@@ -336,8 +336,8 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfL https://github.com/"${ORG}"/"${REPO}"/archive/v"${VERSION}".tar.gz | tar xz && \
         mv "${ARTIFACT}"* /usr/local/share/"${ARTIFACT}" && ln -sf /usr/local/share/"${ARTIFACT}"/"${REPO}" /usr/local/bin/"${ARTIFACT}" && chmod a+x /usr/local/bin/"${ARTIFACT}" && \
     echo "Install yadm." && \
-        curl -sSfL https://github.com/TheLocehiliosan/yadm/archive/1.12.0.tar.gz | tar xz && \
-        mv yadm* /usr/local/share/yadm && ln -sf /usr/local/share/yadm/yadm /usr/local/bin/yadm && chmod a+x /usr/local/bin/yadm
+        export ORG="thelocehiliosan" && export REPO="yadm" && export VERSION="2.2.0" && export ARTIFACT="${REPO}" && \
+        curl -sSfLo /usr/local/bin/"${ARTIFACT}" https://github.com/"${ORG}"/"${ARTIFACT}"/raw/"${VERSION}"/"${ARTIFACT}" && chmod a+x /usr/local/bin/"${ARTIFACT}"
 }
 
 function layer_go_get_installs() {
