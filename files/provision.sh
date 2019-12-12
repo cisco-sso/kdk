@@ -261,8 +261,9 @@ function layer_install_apps_not_provided_by_os_packages() {
         chmod a+x "${ARTIFACT}"-v"${VERSION}"/$(echo "${ARTIFACT}" | tr '[:upper:]' '[:lower:]') && mv "${ARTIFACT}"-v"${VERSION}" /usr/local/share/"${ARTIFACT}"-"${VERSION}" && \
         ln -s /usr/local/share/"${ARTIFACT}"-"${VERSION}"/$(echo "${ARTIFACT}" | tr '[:upper:]' '[:lower:]') /usr/local/bin/ && \
     echo "Install etcdctl." && \
-        curl -sSfL https://github.com/etcd-io/etcd/releases/download/v3.4.1/etcd-v3.4.1-linux-amd64.tar.gz | tar xz && \
-        mv etcd*/etcdctl /usr/local/bin/etcdctl && rm -rf etcd* && \
+        export ORG="etcd-io" && export REPO="etcd" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="etcdctl" && \
+        curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${REPO}"-v"${VERSION}"-linux-amd64.tar.gz | tar xz && \
+        mv "${REPO}"*/${ARTIFACT} /usr/local/bin/${ARTIFACT} && rm -rf "${REPO}"* && \
     echo "Install go-task." && \
         curl -sSfL https://github.com/go-task/task/releases/download/v2.6.0/task_linux_amd64.tar.gz | tar -C /usr/local/bin -xz task && chmod a+x /usr/local/bin/task && \
     echo "Install gomplate." && \
