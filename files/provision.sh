@@ -131,6 +131,7 @@ function layer_install_os_packages() {
         gnupg \
         gnupg2 \
         htop \
+        iputils-ping \
         less \
         libcurl4-openssl-dev \
         locales \
