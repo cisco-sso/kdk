@@ -276,7 +276,7 @@ function layer_install_apps_not_provided_by_os_packages() {
     echo "Install golang." && \
         export ORG="golang" && export REPO="go" && export VERSION="1.13.5" && export ARTIFACT="${REPO}" && \
         curl -sSfL https://dl.google.com/"${REPO}"/"${ARTIFACT}""${VERSION}".linux-amd64.tar.gz | tar -C /usr/local -xz && \
-        mkdir -p /"${ARTIFACT}" && chmod a+rw /"${ARIFACT}" && \
+        mkdir -p /"${ARTIFACT}" && chmod a+rw /"${ARTIFACT}" && \
     echo "Install goreleaser." && \
         export ORG="goreleaser" && export REPO="goreleaser" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
         curl -sSfLO https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_Linux_x86_64.tar.gz && \
