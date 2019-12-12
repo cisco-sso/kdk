@@ -256,8 +256,10 @@ function layer_install_apps_not_provided_by_os_packages() {
         chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && \
         ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
     echo "Install easy-rsa." && \
-        curl -sSfL https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.6/EasyRSA-unix-v3.0.6.tgz | tar xz && \
-        chmod a+x EasyRSA-* && mv EasyRSA-* /usr/local/bin/easyrsa && \
+        export ORG="OpenVPN" && export REPO="easy-rsa" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="EasyRSA" && \
+        curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-unix-v"${VERSION}".tgz | tar xz && \
+        chmod a+x "${ARTIFACT}"-v"${VERSION}"/$(echo "${ARTIFACT}" | tr '[:upper:]' '[:lower:]') && mv "${ARTIFACT}"-v"${VERSION}" /usr/local/share/"${ARTIFACT}"-"${VERSION}" && \
+        ln -s /usr/local/share/"${ARTIFACT}"-"${VERSION}"/$(echo "${ARTIFACT}" | tr '[:upper:]' '[:lower:]') /usr/local/bin/ && \
     echo "Install etcdctl." && \
         curl -sSfL https://github.com/etcd-io/etcd/releases/download/v3.4.1/etcd-v3.4.1-linux-amd64.tar.gz | tar xz && \
         mv etcd*/etcdctl /usr/local/bin/etcdctl && rm -rf etcd* && \
