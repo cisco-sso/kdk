@@ -332,8 +332,9 @@ function layer_install_apps_not_provided_by_os_packages() {
         unzip -qq "${ARTIFACT}".zip && chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && rm -f "${ARTIFACT}".zip && \
         ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
     echo "Install testssl." && \
-        curl -sSfL https://github.com/drwetter/testssl.sh/archive/v2.9.5-7.tar.gz | tar xz && \
-        mv testssl* /usr/local/share/testssl && ln -sf /usr/local/share/testssl/testssl.sh /usr/local/bin/testssl && chmod a+x /usr/local/bin/testssl && \
+        export ORG="drwetter" && export REPO="testssl.sh" && export VERSION="2.9.5-8" && export ARTIFACT="testssl" && \
+        curl -sSfL https://github.com/"${ORG}"/"${REPO}"/archive/v"${VERSION}".tar.gz | tar xz && \
+        mv "${ARTIFACT}"* /usr/local/share/"${ARTIFACT}" && ln -sf /usr/local/share/"${ARTIFACT}"/"${REPO}" /usr/local/bin/"${ARTIFACT}" && chmod a+x /usr/local/bin/"${ARTIFACT}" && \
     echo "Install yadm." && \
         curl -sSfL https://github.com/TheLocehiliosan/yadm/archive/1.12.0.tar.gz | tar xz && \
         mv yadm* /usr/local/share/yadm && ln -sf /usr/local/share/yadm/yadm /usr/local/bin/yadm && chmod a+x /usr/local/bin/yadm
