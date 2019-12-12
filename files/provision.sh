@@ -296,8 +296,9 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_linux_amd64 && \
         chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
     echo "Install hugo." && \
-        curl -sSfL https://github.com/gohugoio/hugo/releases/download/v0.56.3/hugo_0.56.3_Linux-64bit.tar.gz | tar xz && \
-        chmod a+x hugo && mv hugo /usr/local/bin/hugo && \
+        export ORG="gohugoio" && export REPO="hugo" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
+        curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_"${VERSION}"_Linux-64bit.tar.gz | tar xz && \
+        chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin/"${ARTIFACT}" && \
     echo "Install jq." && \
         curl -sSfLo jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
         chmod a+x jq && mv jq /usr/local/bin/ && \
