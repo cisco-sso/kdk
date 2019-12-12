@@ -304,11 +304,9 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/"${VERSION}"/"${ARTIFACT}"-linux64 && \
         chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin/ && \
     echo "Install kops." && \
-        curl -sSfLo kops-1.11.1 https://github.com/kubernetes/kops/releases/download/1.11.1/kops-linux-amd64 && \
-        chmod a+x kops-1.11.1 && mv kops-1.11.1 /usr/local/bin/ && \
-        curl -sSfLo kops-1.12.2 https://github.com/kubernetes/kops/releases/download/1.12.2/kops-linux-amd64 && \
-        chmod a+x kops-1.12.2 && mv kops-1.12.2 /usr/local/bin/ && \
-        ln -sf /usr/local/bin/kops-1.12.2 /usr/local/bin/kops && \
+        export ORG="kubernetes" && export REPO="kops" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
+        curl -sSfLo "${ARTIFACT}"-"${VERSION}" https://github.com/"${ORG}"/"${REPO}"/releases/download/"${VERSION}"/"${ARTIFACT}"-linux-amd64 && \
+        chmod a+x "${ARTIFACT}"-"${VERSION}" && mv "${ARTIFACT}"-"${VERSION}" /usr/local/bin/ && \
     echo "Install kubectl." && \
         curl -sSfLo /usr/local/bin/kubectl-1.15.4 https://storage.googleapis.com/kubernetes-release/release/v1.15.4/bin/linux/amd64/kubectl && \
         chmod a+x /usr/local/bin/kubectl-* && \
