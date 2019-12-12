@@ -13,6 +13,24 @@ function main() {
     fi
 }
 
+function get_latest_github_release_version() {
+    if [[ ! "$#" -eq 2 ]]; then
+        # If this function was not called with 2 args. then complain and exitcalled with zero args, then we build for ubuntu bionic
+        echo "Function must be called with 2 args (ORG and REPO)"
+        exit 1
+    else
+        export ORG=$1
+        export REPO=$2
+        export VERSION=$(curl -sSfL https://api.github.com/repos/"${ORG}/${REPO}"/releases/latest 2>/dev/null | grep tag_name | cut -d '"' -f 4 | sed 's|v||g')
+        if [[ -z "${VERSION}" ]]; then
+            echo "Failed to get version"
+            exit 1
+        else
+            echo "${VERSION}"
+        fi
+    fi
+}
+
 function vagrant() {
     exit_if_provisioned
 
