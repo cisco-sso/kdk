@@ -244,6 +244,11 @@ function layer_install_apps_not_provided_by_os_packages() {
         export ORG="prometheus" && export REPO="alertmanager" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="amtool" && \
         curl -sSfL https://github.com/"${ORG}/${REPO}"/releases/download/v"${VERSION}"/"${REPO}"-"${VERSION}".linux-amd64.tar.gz | tar xz && \
         mv "${REPO}"*/"${ARTIFACT}" /usr/local/bin/"${ARTIFACT}" && rm -rf "${REPO}"* && \
+    echo "Install consul." && \
+        export ORG="hashicorp" && export REPO="consul" && export VERSION="1.6.2" && export ARTIFACT="${REPO}" && \
+        curl -sSfLo "${ARTIFACT}".zip https://releases."${ORG}".com/"${ARTIFACT}"/"${VERSION}"/"${ARTIFACT}"_"${VERSION}"_linux_amd64.zip && \
+        unzip -qq "${ARTIFACT}".zip && chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
+        rm -rf "${ARTIFACT}"* && \
     echo "Install dep." && \
         export ORG="golang" && export REPO="dep" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}"  && \
         curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-linux-amd64 && \
