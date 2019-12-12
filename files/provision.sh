@@ -251,9 +251,10 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${REPO}".linux-amd64 && \
         chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
     echo "Install drone-cli." && \
-        curl -sSfL https://github.com/drone/drone-cli/releases/download/v1.1.4/drone_linux_amd64.tar.gz | tar xz && \
-        chmod a+x drone && mv drone /usr/local/bin/drone-1.1.4 && \
-        ln -sf /usr/local/bin/drone-1.1.4 /usr/local/bin/drone && \
+        export ORG="drone" && export REPO="drone-cli" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${ORG}" && \
+        curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_linux_amd64.tar.gz | tar xz && \
+        chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && \
+        ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
     echo "Install easy-rsa." && \
         curl -sSfL https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.6/EasyRSA-unix-v3.0.6.tgz | tar xz && \
         chmod a+x EasyRSA-* && mv EasyRSA-* /usr/local/bin/easyrsa && \
