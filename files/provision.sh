@@ -313,9 +313,10 @@ function layer_install_apps_not_provided_by_os_packages() {
         chmod a+x /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && \
         ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
     echo "Install kubetail." && \
-        curl -sSfLo kubetail.zip https://github.com/johanhaleby/kubetail/archive/1.6.8.zip && \
-        unzip -qq kubetail.zip && chmod a+x kubetail-1.6.8/kubetail && mv kubetail-1.6.8/kubetail /usr/local/bin && \
-        rm -rf kubetail* && \
+        export ORG="johanhaleby" && export REPO="kubetail" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
+        curl -sSfLo "${ARTIFACT}".zip https://github.com/"${ORG}"/"${REPO}"/archive/"${VERSION}".zip && \
+        unzip -qq "${ARTIFACT}".zip && chmod a+x "${ARTIFACT}"-"${VERSION}"/"${ARTIFACT}" && mv "${ARTIFACT}"-"${VERSION}"/"${ARTIFACT}" /usr/local/bin && \
+        rm -rf "${ARTIFACT}"* && \
     echo "Install mc." && \
         curl -sSfLo /usr/local/bin/mc https://dl.minio.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2019-05-01T23-27-44Z && \
         chmod a+x /usr/local/bin/mc && \
