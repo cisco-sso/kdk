@@ -276,8 +276,9 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfL https://dl.google.com/"${REPO}"/"${ARTIFACT}""${VERSION}".linux-amd64.tar.gz | tar -C /usr/local -xz && \
         mkdir -p /"${ARTIFACT}" && chmod a+rw /"${ARIFACT}" && \
     echo "Install goreleaser." && \
-        curl -sSfLO https://github.com/goreleaser/goreleaser/releases/download/v0.113.1/goreleaser_Linux_x86_64.tar.gz && \
-        tar -C /usr/local/bin -xzf goreleaser*.tar.gz goreleaser && rm goreleaser*.tar.gz && \
+        export ORG="goreleaser" && export REPO="goreleaser" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
+        curl -sSfLO https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_Linux_x86_64.tar.gz && \
+        tar -C /usr/local/bin -xzf "${ARTIFACT}"*.tar.gz "${ARTIFACT}" && rm "${ARTIFACT}"*.tar.gz && \
     echo "Install grpcurl." && \
         curl -sSfL https://github.com/fullstorydev/grpcurl/releases/download/v1.3.1/grpcurl_1.3.1_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz grpcurl && chmod a+x /usr/local/bin/grpcurl && \
     echo "Install helm." && \
