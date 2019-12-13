@@ -388,9 +388,12 @@ function layer_build_apps_not_provided_by_os_packages() {
     apt-get -y update && apt-get --no-install-recommends -y install \
         autoconf \
         build-essential \
+        gcc \
         libgnutls28-dev \
         libncurses5-dev \
-        libz-dev && \
+        libz-dev \
+        texinfo \
+        yodl && \
     apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
 
     echo "Install git (needs to build first as a dependency)." && \
@@ -440,18 +443,38 @@ function layer_build_apps_not_provided_by_os_packages() {
     make VIMRUNTIMEDIR=/usr/local/share/vim/vim81 && make install && cd .. && rm -fr vim-*
 
     echo "Install tmux." && \
-    curl -sSfL https://github.com/libevent/libevent/releases/download/release-2.1.11-stable/libevent-2.1.11-stable.tar.gz | tar xz && cd libevent-* && \
-    ./configure && make &&  make install && cd .. && rm -fr libevent-* && \
-    curl -sSfL https://github.com/tmux/tmux/releases/download/3.0a/tmux-3.0a.tar.gz | tar xz && cd tmux-* && \
-    ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr tmux-*
+        curl -sSfL https://github.com/libevent/libevent/releases/download/release-2.1.11-stable/libevent-2.1.11-stable.tar.gz | tar xz && cd libevent-* && \
+        ./configure && make &&  make install && cd .. && rm -fr libevent-* && \
+        curl -sSfL https://github.com/tmux/tmux/releases/download/3.0a/tmux-3.0a.tar.gz | tar xz && cd tmux-* && \
+        ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr tmux-*
 
     echo "Install zsh." && \
-    curl -sSfL https://sourceforge.net/projects/zsh/files/zsh/5.6.2/zsh-5.6.2.tar.xz/download | tar Jx && cd zsh-* && \
-    ./configure --with-tcsetpgrp --prefix=/usr/local && make && make install && echo "/usr/local/bin/zsh" >> /etc/shells && cd .. && rm -fr zsh-*
+        export ORG="zsh-users" && export REPO="zsh" && export VERSION="5.7.1" && export ARTIFACT="${REPO}" && \
+        curl -sSfL https://github.com/"${ORG}"/"${REPO}"/archive/"${ARTIFACT}"-"${VERSION}".tar.gz | tar xz && cd "${ARTIFACT}"-* && \
+        ./Util/preconfig && 
+        ./configure \
+            --prefix=/usr/local \
+            --mandir=/usr/share/man \
+            --bindir=/usr/local/bin \
+            --infodir=/usr/share/info \
+            --enable-maildir-support \
+            --enable-max-jobtable-size=256 \
+            --enable-etcdir=/etc/zsh \
+            --enable-function-subdirs \
+            --enable-site-fndir=/usr/local/share/zsh/site-functions \
+            --enable-fndir=/usr/share/zsh/functions \
+            --with-tcsetpgrp \
+            --with-term-lib="ncursesw" \
+            --enable-cap \
+            --enable-pcre \
+            --enable-readnullcmd=pager \
+            --enable-custom-patchlevel=Debian \
+            LDFLAGS="-Wl,--as-needed -g" && \
+        make && make install && echo "/usr/local/bin/zsh" >> /etc/shells && cd .. && rm -fr zsh-*
 
     echo "Install redis-cli tools." && \
-    curl -sSfL http://download.redis.io/releases/redis-5.0.7.tar.gz | tar xz && cd redis-* && \
-    make && cp src/redis-cli src/redis-benchmark /usr/local/bin && cd .. && rm -fr redis-*
+        curl -sSfL http://download.redis.io/releases/redis-5.0.7.tar.gz | tar xz && cd redis-* && \
+        make && cp src/redis-cli src/redis-benchmark /usr/local/bin && cd .. && rm -fr redis-*
 }
 
 function exit_if_provisioned() {
