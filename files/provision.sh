@@ -440,9 +440,9 @@ function layer_build_apps_not_provided_by_os_packages() {
     make VIMRUNTIMEDIR=/usr/local/share/vim/vim81 && make install && cd .. && rm -fr vim-*
 
     echo "Install tmux." && \
-    curl -sSfL https://github.com/libevent/libevent/releases/download/release-2.1.8-stable/libevent-2.1.8-stable.tar.gz | tar xz && cd libevent-* && \
+    curl -sSfL https://github.com/libevent/libevent/releases/download/release-2.1.11-stable/libevent-2.1.11-stable.tar.gz | tar xz && cd libevent-* && \
     ./configure && make &&  make install && cd .. && rm -fr libevent-* && \
-    curl -sSfL https://github.com/tmux/tmux/releases/download/2.9a/tmux-2.9a.tar.gz | tar xz && cd tmux-* && \
+    curl -sSfL https://github.com/tmux/tmux/releases/download/3.0a/tmux-3.0a.tar.gz | tar xz && cd tmux-* && \
     ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr tmux-*
 
     echo "Install zsh." && \
