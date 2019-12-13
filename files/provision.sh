@@ -244,7 +244,7 @@ function layer_install_apps_not_provided_by_os_packages() {
         export ORG="prometheus" && export REPO="alertmanager" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="amtool" && \
         curl -sSfL https://github.com/"${ORG}/${REPO}"/releases/download/v"${VERSION}"/"${REPO}"-"${VERSION}".linux-amd64.tar.gz | tar xz && \
         mv "${REPO}"*/"${ARTIFACT}" /usr/local/bin/"${ARTIFACT}" && rm -rf "${REPO}"* && \
-    echo "Install consul." && \
+    echo "Install consul cli." && \
         export ORG="hashicorp" && export REPO="consul" && export VERSION="1.6.2" && export ARTIFACT="${REPO}" && \
         curl -sSfLo "${ARTIFACT}".zip https://releases."${ORG}".com/"${ARTIFACT}"/"${VERSION}"/"${ARTIFACT}"_"${VERSION}"_linux_amd64.zip && \
         unzip -qq "${ARTIFACT}".zip && chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
@@ -350,6 +350,11 @@ function layer_install_apps_not_provided_by_os_packages() {
         export ORG="drwetter" && export REPO="testssl.sh" && export VERSION="2.9.5-8" && export ARTIFACT="testssl" && \
         curl -sSfL https://github.com/"${ORG}"/"${REPO}"/archive/v"${VERSION}".tar.gz | tar xz && \
         mv "${ARTIFACT}"* /usr/local/share/"${ARTIFACT}" && ln -sf /usr/local/share/"${ARTIFACT}"/"${REPO}" /usr/local/bin/"${ARTIFACT}" && chmod a+x /usr/local/bin/"${ARTIFACT}" && \
+    echo "Install vault cli." && \
+        export ORG="hashicorp" && export REPO="vault" && export VERSION="1.3.0" && export ARTIFACT="${REPO}" && \
+        curl -sSfLo "${ARTIFACT}".zip https://releases."${ORG}".com/"${ARTIFACT}"/"${VERSION}"/"${ARTIFACT}"_"${VERSION}"_linux_amd64.zip && \
+        unzip -qq "${ARTIFACT}".zip && chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
+        rm -rf "${ARTIFACT}"* && \
     echo "Install yadm." && \
         export ORG="thelocehiliosan" && export REPO="yadm" && export VERSION="2.2.0" && export ARTIFACT="${REPO}" && \
         curl -sSfLo /usr/local/bin/"${ARTIFACT}" https://github.com/"${ORG}"/"${ARTIFACT}"/raw/"${VERSION}"/"${ARTIFACT}" && chmod a+x /usr/local/bin/"${ARTIFACT}"
