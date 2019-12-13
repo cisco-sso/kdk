@@ -405,26 +405,26 @@ function layer_build_apps_not_provided_by_os_packages() {
     ./install.sh /usr/local && cd .. && rm -fr bats-*
 
     echo "Install emacs." && \
-    curl -sSfL http://mirrors.ibiblio.org/gnu/ftp/gnu/emacs/emacs-26.2.tar.gz | tar xz && cd emacs-* && \
-    CANNOT_DUMP=yes ./configure \
-        --prefix=/usr/local \
-        --disable-build-details \
-        --without-all \
-        --without-x \
-        --without-x-toolkit \
-        --without-sound \
-        --with-xml2 \
-        --with-zlib \
-        --with-modules \
-        --with-file-notification \
-        --with-gnutls \
-        --with-compress-install && \
-    make && make install && cd .. && rm -fr emacs-*
+        curl -sSfL http://mirrors.ibiblio.org/gnu/ftp/gnu/emacs/emacs-26.3.tar.gz | tar xz && cd emacs-* && \
+        CANNOT_DUMP=yes ./configure \
+            --prefix=/usr/local \
+            --disable-build-details \
+            --without-all \
+            --without-x \
+            --without-x-toolkit \
+            --without-sound \
+            --with-xml2 \
+            --with-zlib \
+            --with-modules \
+            --with-file-notification \
+            --with-gnutls \
+            --with-compress-install && \
+        make && make install && cd .. && rm -fr emacs-*
 
     echo "Install pyenv with dependencies." && \
-    curl -sSfLo pyenv-installer https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer && \
-    chmod a+x pyenv-installer && mv pyenv-installer /usr/local/bin && \
-    PYENV_ROOT=/usr/local/pyenv pyenv-installer && chmod -R a+rwx /usr/local/pyenv
+        curl -sSfLo pyenv-installer https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer && \
+        chmod a+x pyenv-installer && mv pyenv-installer /usr/local/bin && \
+        PYENV_ROOT=/usr/local/pyenv pyenv-installer && chmod -R a+rwx /usr/local/pyenv
 
     echo "Install vim." && \
         export ORG="vim" && export REPO="vim" && export VERSION="8.2.0" && export ARTIFACT="${REPO}" && \
