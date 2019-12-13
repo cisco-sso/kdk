@@ -427,20 +427,21 @@ function layer_build_apps_not_provided_by_os_packages() {
     PYENV_ROOT=/usr/local/pyenv pyenv-installer && chmod -R a+rwx /usr/local/pyenv
 
     echo "Install vim." && \
-    curl -sSfL https://github.com/vim/vim/archive/v8.1.0481.tar.gz | tar xz && cd vim-* && \
-    ./configure \
-       --with-features=huge \
-       --enable-multibyte \
-       --enable-rubyinterp=yes \
-       --enable-pythoninterp=yes \
-       --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu \
-       --enable-python3interp=yes \
-       --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu \
-       --enable-perlinterp=yes \
-       --enable-luainterp=yes \
-       --enable-cscope \
-      --prefix=/usr/local && \
-    make VIMRUNTIMEDIR=/usr/local/share/vim/vim81 && make install && cd .. && rm -fr vim-*
+        export ORG="vim" && export REPO="vim" && export VERSION="8.2.0" && export ARTIFACT="${REPO}" && \
+        curl -sSfL https://github.com/"${ORG}"/"${REPO}"/archive/v"${VERSION}".tar.gz | tar xz && cd "${ARTIFACT}"-* && \
+        ./configure \
+            --with-features=huge \
+            --enable-multibyte \
+            --enable-rubyinterp=yes \
+            --enable-pythoninterp=yes \
+            --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu \
+            --enable-python3interp=yes \
+            --with-python3-config-dir=/usr/lib/python3.6/config-3.6m-x86_64-linux-gnu/ \
+            --enable-perlinterp=yes \
+            --enable-luainterp=yes \
+            --enable-cscope \
+            --prefix=/usr/local && \
+        make VIMRUNTIMEDIR=/usr/local/share/vim/vim82 && make install && cd .. && rm -fr vim-*
 
     echo "Install tmux." && \
         curl -sSfL https://github.com/libevent/libevent/releases/download/release-2.1.11-stable/libevent-2.1.11-stable.tar.gz | tar xz && cd libevent-* && \
