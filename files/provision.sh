@@ -375,7 +375,7 @@ function layer_go_get_installs() {
     /usr/local/go/bin/go get github.com/vmware/govmomi/govc
     /usr/local/go/bin/go get github.com/github/hub
     /usr/local/go/bin/go get github.com/cisco-sso/mh && ln -sf /go/bin/mh /go/bin/multihelm
-    /usr/local/go/bin/go get github.com/mikefarah/yq
+    GO111MODULE=on /usr/local/go/bin/go get github.com/mikefarah/yq/v2
     rm -rf /root/.cache/go-build
     rm -rf /go/src
 }
