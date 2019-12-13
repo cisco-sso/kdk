@@ -332,6 +332,10 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfLo "${ARTIFACT}".zip https://github.com/"${ORG}"/"${REPO}"/archive/"${VERSION}".zip && \
         unzip -qq "${ARTIFACT}".zip && chmod a+x "${ARTIFACT}"-"${VERSION}"/"${ARTIFACT}" && mv "${ARTIFACT}"-"${VERSION}"/"${ARTIFACT}" /usr/local/bin && \
         rm -rf "${ARTIFACT}"* && \
+    echo "Install maven." && \
+        export VERSION="3.6.3"
+        curl -sSfL http://apache.mirrors.tds.net/maven/maven-3/"${VERSION}"/binaries/apache-maven-"${VERSION}"-bin.tar.gz | tar -C /usr/local/share -xz && \
+        ln -sf /usr/local/share/apache-maven-"${VERSION}"/bin/mvn /usr/local/bin/mvn && \
     echo "Install mc." && \
         export ORG="minio" && export REPO="minio" && export ARTIFACT="mc" && \
         curl -sSfLo /usr/local/bin/"${ARTIFACT}" https://dl."${ORG}".io/client/"${ARTIFACT}"/release/linux-amd64/"${ARTIFACT}" && \
