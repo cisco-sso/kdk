@@ -314,6 +314,9 @@ function layer_install_apps_not_provided_by_os_packages() {
         export ORG="stedolan" && export REPO="jq" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
         curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/"${VERSION}"/"${ARTIFACT}"-linux64 && \
         chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin/ && \
+    echo "Install jsonnet." && \
+        export ORG="google" && export REPO="jsonnet" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="jsonnet" && \
+        curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-bin-v"${VERSION}"-linux.tar.gz | tar -C /usr/local/bin -xz && \
     echo "Install kops." && \
         export ORG="kubernetes" && export REPO="kops" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
         curl -sSfLo "${ARTIFACT}"-"${VERSION}" https://github.com/"${ORG}"/"${REPO}"/releases/download/"${VERSION}"/"${ARTIFACT}"-linux-amd64 && \
@@ -414,11 +417,6 @@ function layer_build_apps_not_provided_by_os_packages() {
         --with-gnutls \
         --with-compress-install && \
     make && make install && cd .. && rm -fr emacs-*
-
-    echo "Install jsonnet" && \
-    curl -sSfL https://github.com/google/jsonnet/archive/v0.13.0.tar.gz | tar xz && cd jsonnet-* && \
-    make && chmod a+x jsonnet jsonnetfmt && mv jsonnet /usr/local/bin && mv jsonnetfmt /usr/local/bin \
-    && cd .. && rm -fr jsonnet-*
 
     echo "Install pyenv with dependencies." && \
     curl -sSfLo pyenv-installer https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer && \
