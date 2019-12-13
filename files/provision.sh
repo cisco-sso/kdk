@@ -143,6 +143,7 @@ function layer_install_os_packages() {
         ntp \
         ntpdate \
         openconnect \
+        openjdk-11-jdk-headless \
         openssh-server \
         perl \
         proxychains \
