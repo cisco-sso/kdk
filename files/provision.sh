@@ -397,8 +397,9 @@ function layer_build_apps_not_provided_by_os_packages() {
     apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
 
     echo "Install git (needs to build first as a dependency)." && \
-    curl -sSfL https://github.com/git/git/archive/v2.22.0.tar.gz | tar xz && cd git-* && \
-    make configure && ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr git-*
+        export ORG="git" && export REPO="git" && export VERSION="2.24.1" && export ARTIFACT="${REPO}" && \
+        curl -sSfL https://github.com/"${ORG}"/"${REPO}"/archive/v"${VERSION}".tar.gz | tar xz && cd git-* && \
+        make configure && ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr git-*
 
     echo "Install bats" && \
     curl -sSfL https://github.com/sstephenson/bats/archive/v0.4.0.tar.gz | tar xz && cd bats-* && \
