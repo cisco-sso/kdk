@@ -212,29 +212,35 @@ function layer_install_python_based_utils_and_libs() {
     pip3 install --no-cache-dir -U setuptools && \
     pip3 install \
          --no-cache-dir \
-         'ansible==2.7.12' \
-         'awscli==1.16.218' \
-         'boto3==1.9.208' \
+         'ansible==2.9.2' \
+         'awscli==1.16.302' \
+         'boto3==1.10.38' \
          'boto==2.49.0' \
-         'docker-compose==1.24.1' \
-         'Jinja2==2.10.1' \
+         'click==7.0' \
+         'docker-compose==1.25.0' \
+         'ipython==7.10.1' \
+         'ipdb==0.12.3' \
+         'Jinja2==2.10.3' \
          'jinja2-cli[yaml]==0.7.0' \
-         'jsonschema' \
-         'openshift==0.9.0' \
+         'jsonschema==3.2.0' \
+         'openshift==0.10.0' \
          'peru==1.2.0' \
          'pipenv==2018.11.26' \
-         'python-neutronclient==6.12.0' \
-         'python-octaviaclient==1.9.0' \
+         'pytest==5.3.1' \
+         'python-neutronclient==6.14.0' \
+         'python-octaviaclient==1.11.0' \
          'python-openstackclient==3.19.0' \
-         'pyvmomi==6.7.1.2018.12' \
+         'pyvmomi==6.7.3' \
+         'pyyaml==5.2' \
+         'requests==2.22.0' \
          'sh==1.12.14' \
          'sshuttle==0.78.5' \
-         'structlog==19.1.0' \
-         'urllib3==1.22' \
-         'virtualenv==16.7.2' \
-         'yamllint' \
-         'yapf' \
-         'yq==2.7.2' && \
+         'structlog==19.2.0' \
+         'urllib3==1.25.7' \
+         'virtualenv==16.7.8' \
+         'yamllint==1.19.0' \
+         'yapf==0.29.0' \
+         'yq==2.9.2' && \
     rm -rf /root/.cache/pip
 }
 
