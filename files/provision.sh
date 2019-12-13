@@ -473,15 +473,14 @@ function layer_build_apps_not_provided_by_os_packages() {
         ./Util/preconfig && 
         ./configure \
             --prefix=/usr/local \
-            --mandir=/usr/share/man \
+            --mandir=/usr/local/share/man \
             --bindir=/usr/local/bin \
-            --infodir=/usr/share/info \
+            --infodir=/usr/local/share/info \
             --enable-maildir-support \
-            --enable-max-jobtable-size=256 \
-            --enable-etcdir=/etc/zsh \
+            --enable-etcdir=/usr/local/etc/zsh \
             --enable-function-subdirs \
             --enable-site-fndir=/usr/local/share/zsh/site-functions \
-            --enable-fndir=/usr/share/zsh/functions \
+            --enable-fndir=/usr/local/share/zsh/functions \
             --with-tcsetpgrp \
             --with-term-lib="ncursesw" \
             --enable-cap \
