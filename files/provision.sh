@@ -450,7 +450,7 @@ function layer_build_apps_not_provided_by_os_packages() {
     ./configure --with-tcsetpgrp --prefix=/usr/local && make && make install && echo "/usr/local/bin/zsh" >> /etc/shells && cd .. && rm -fr zsh-*
 
     echo "Install redis-cli tools." && \
-    curl -sSfL http://download.redis.io/releases/redis-5.0.3.tar.gz | tar xz && cd redis-* && \
+    curl -sSfL http://download.redis.io/releases/redis-5.0.7.tar.gz | tar xz && cd redis-* && \
     make && cp src/redis-cli src/redis-benchmark /usr/local/bin && cd .. && rm -fr redis-*
 }
 
