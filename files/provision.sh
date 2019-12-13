@@ -332,8 +332,9 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-bin-v"${VERSION}"-linux.tar.gz | tar -C /usr/local/bin -xz && \
     echo "Install kops." && \
         export ORG="kubernetes" && export REPO="kops" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
-        curl -sSfLo "${ARTIFACT}"-"${VERSION}" https://github.com/"${ORG}"/"${REPO}"/releases/download/"${VERSION}"/"${ARTIFACT}"-linux-amd64 && \
-        chmod a+x "${ARTIFACT}"-"${VERSION}" && mv "${ARTIFACT}"-"${VERSION}" /usr/local/bin/ && \
+        curl -sSfLo /usr/local/bin/"${ARTIFACT}"-"${VERSION}" https://github.com/"${ORG}"/"${REPO}"/releases/download/"${VERSION}"/"${ARTIFACT}"-linux-amd64 && \
+        chmod a+x /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && \
+        ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
     echo "Install kubectl." && \
         export ORG="kubernetes" && export REPO="kubernetes" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="kubectl" && \
         curl -sSfLo /usr/local/bin/"${ARTIFACT}"-"${VERSION}" https://storage.googleapis.com/kubernetes-release/release/v"${VERSION}"/bin/linux/amd64/"${ARTIFACT}" && \
