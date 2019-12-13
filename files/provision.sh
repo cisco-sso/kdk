@@ -358,6 +358,10 @@ function layer_install_apps_not_provided_by_os_packages() {
         curl -sSfLo /usr/local/bin/"${ARTIFACT}"-"${VERSION}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-linux-amd64  && \
         chmod a+x /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && \
         ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
+    echo "Install neovim." && \
+        export ORG="neovim" && export REPO="neovim" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="nvim" && \
+        mkdir -p /usr/local/share/"${ARTIFACT}" && curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-linux64.tar.gz | tar -C /usr/local/share/"${ARTIFACT}"  --strip-components=1 -xz && \
+        ln -sf /usr/local/share/"${ARTIFACT}"/bin/"${ARTIFACT}" /usr/local/bin/"${ARTIFACT}" && \
     echo "Install sops." && \
         export ORG="mozilla" && export REPO="sops" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
         curl -sSfLo /usr/local/bin/"${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-v"${VERSION}".linux && \
