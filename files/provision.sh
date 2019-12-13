@@ -291,6 +291,12 @@ function layer_install_apps_not_provided_by_os_packages() {
         export ORG="goreleaser" && export REPO="goreleaser" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
         curl -sSfLO https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_Linux_x86_64.tar.gz && \
         tar -C /usr/local/bin -xzf "${ARTIFACT}"*.tar.gz "${ARTIFACT}" && rm "${ARTIFACT}"*.tar.gz && \
+    echo "Install gradle." && \
+        export VERSION="6.0.1" && ARTIFACT="gradle" && \
+        curl -sSfLo "${ARTIFACT}".zip https://services."${ARTIFACT}".org/distributions/"${ARTIFACT}"-"${VERSION}"-bin.zip && \
+        unzip -d /usr/local/share -qq "${ARTIFACT}".zip && \
+        ln -sf /usr/local/share/"${ARTIFACT}"-"${VERSION}"/bin/gradle /usr/local/bin/"${ARTIFACT}" && \
+        rm -rf "${ARTIFACT}"* && \
     echo "Install grpcurl." && \
         export ORG="fullstorydev" && export REPO="grpcurl" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
         curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_"${VERSION}"_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz "${ARTIFACT}" && chmod a+x /usr/local/bin/"${ARTIFACT}" && \
