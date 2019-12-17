@@ -403,11 +403,11 @@ function layer_go_get_installs() {
     /usr/local/go/bin/go get github.com/gpmgo/gopm
     /usr/local/go/bin/go get github.com/vmware/govmomi/govc
     /usr/local/go/bin/go get github.com/github/hub
-    quiet git clone https://github.com/cisco-sso/mh.git /tmp/mh && cd /tmp/mh && \
-        quiet /usr/local/go/bin/go mod init github.com/cisco-sso/mh && \
-        quiet /usr/local/go/bin/go build -o /go/bin/mh && \
+    git clone https://github.com/cisco-sso/mh.git /tmp/mh && cd /tmp/mh && \
+        /usr/local/go/bin/go mod init github.com/cisco-sso/mh && \
+        /usr/local/go/bin/go build -o /go/bin/mh && \
         ln -sf /go/bin/mh /go/bin/multihelm
-    quiet GO111MODULE=on /usr/local/go/bin/go get github.com/mikefarah/yq/v2
+    GO111MODULE=on /usr/local/go/bin/go get github.com/mikefarah/yq/v2
     rm -rf /root/.cache/go-build
     rm -rf /go/src
 }
