@@ -13,6 +13,10 @@ function main() {
     fi
 }
 
+function quiet() {
+  "$@" > /dev/null 2>&1
+}
+
 function get_latest_github_release_version() {
     if [[ ! "$#" -eq 2 ]]; then
         # If this function was not called with 2 args. then complain and exitcalled with zero args, then we build for ubuntu bionic
@@ -75,9 +79,9 @@ function vagrant_upgrade_kernel_workaround_sshuttle_kernel_bug() {
 
     # Install a kernel upgrade helper
     #   Dkms will automatically recompile kmods upon kernel update
-    apt-add-repository -y ppa:teejee2008/ppa
-    apt-get update
-    apt-get -y install dkms ukuu linux-headers-$(uname -r)
+    quiet apt-add-repository -y ppa:teejee2008/ppa
+    quiet apt-get update
+    quiet apt-get -y -qq install dkms ukuu linux-headers-$(uname -r)
 
     # Update virtualbox guest additions.  This will rebuild kernel modules
     wget -q -O /tmp/additions.iso \
@@ -100,15 +104,15 @@ function vagrant_bento_workaround_openssl_bug() {
     echo "#### ${FUNCNAME[0]}"
     DEBIAN_FRONTEND=noninteractive dpkg-reconfigure libc6
     DEBIAN_FRONTEND=noninteractive dpkg-reconfigure libssl1.1
-    apt-get update
-    DEBIAN_FRONTEND=noninteractive apt-get install -y libssl1.1
+    quiet apt-get update
+    quiet DEBIAN_FRONTEND=noninteractive apt-get install -y libssl1.1
 }
 
 function layer_install_os_packages() {
     # big items: gcc, python-dev
 
     echo "#### ${FUNCNAME[0]}"
-    apt-get -y update && apt-get --no-install-recommends -y install \
+    quiet apt-get -y -qq update && quiet apt-get --no-install-recommends -y -qq install \
         apache2-utils \
         apt-transport-https \
         bash-completion \
@@ -165,28 +169,28 @@ function layer_install_os_packages() {
         wget \
         whois \
         xauth && \
-    curl -sSfL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
-       add-apt-repository \
+    curl -sSfL https://download.docker.com/linux/ubuntu/gpg | quiet apt-key add - && \
+       quiet add-apt-repository \
          "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
          $(lsb_release -cs) \
          stable" && \
     export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" && \
-        echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
-        curl -sSfL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
+        echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | quiet tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+        curl -sSfL https://packages.cloud.google.com/apt/doc/apt-key.gpg | quiet apt-key add - && \
     export POSTGRESQL_REPO="$(lsb_release -c -s)-pgdg" && \
-        echo "deb https://apt.postgresql.org/pub/repos/apt $POSTGRESQL_REPO main" | tee -a /etc/apt/sources.list.d/pgdg.list && \
-        curl -sSfL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
-    curl -sSfL https://deb.nodesource.com/setup_11.x | bash - && \
-        curl -sSfL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-        echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee -a /etc/apt/sources.list.d/yarn.list && \
-    apt-get update -y && apt-get --no-install-recommends -y install \
+        echo "deb https://apt.postgresql.org/pub/repos/apt $POSTGRESQL_REPO main" | quiet tee -a /etc/apt/sources.list.d/pgdg.list && \
+        curl -sSfL https://www.postgresql.org/media/keys/ACCC4CF8.asc | quiet apt-key add - && \
+    curl -sSfL https://deb.nodesource.com/setup_13.x | quiet bash - && \
+        curl -sSfL https://dl.yarnpkg.com/debian/pubkey.gpg | quiet apt-key add - && \
+        echo "deb https://dl.yarnpkg.com/debian/ stable main" | quiet tee -a /etc/apt/sources.list.d/yarn.list && \
+    quiet apt-get update -y -qq && quiet apt-get --no-install-recommends -y -qq install \
         docker-ce \
         google-cloud-sdk \
         nodejs \
         postgresql-client-10 \
         yarn && \
     # Add deps to enable pyenv-driven on-demand python installs on KDK \
-    apt-get --no-install-recommends -y install \
+    quiet apt-get --no-install-recommends -y -qq install \
         make build-essential \
         libssl-dev \
         zlib1g-dev \
@@ -203,14 +207,14 @@ function layer_install_os_packages() {
         libffi-dev \
         liblzma-dev \
         python3-openssl && \
-    apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
+    quiet apt-get -y -qq clean && quiet apt-get -y -qq autoremove && rm -rf /var/lib/apt/lists/*
 }
 
 function layer_install_python_based_utils_and_libs() {
     echo "#### ${FUNCNAME[0]}"
-    curl -sSfL https://bootstrap.pypa.io/get-pip.py | python3 && \
-    pip3 install --no-cache-dir -U setuptools && \
-    pip3 install \
+    curl -sSfL https://bootstrap.pypa.io/get-pip.py | quiet python3 && \
+    quiet pip3 install -qq --no-cache-dir -U setuptools && \
+    quiet pip3 install -qq \
          --no-cache-dir \
          'ansible==2.9.2' \
          'awscli==1.16.302' \
@@ -389,8 +393,8 @@ function layer_go_get_installs() {
     echo "#### ${FUNCNAME[0]}"
     export GOPATH=/go && \
     echo "go get installs" && \
-      apt-get -y update && apt-get --no-install-recommends -y install git && \
-      apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
+      quiet apt-get -y -qq update && quiet apt-get --no-install-recommends -y -qq install git && \
+      quiet apt-get -y -qq clean && quiet apt-get -y -qq autoremove && rm -rf /var/lib/apt/lists/*
     /usr/local/go/bin/go get github.com/cloudflare/cfssl/cmd/cfssl
     /usr/local/go/bin/go get github.com/cloudflare/cfssl/cmd/cfssljson
     /usr/local/go/bin/go get github.com/spf13/cobra/cobra
@@ -399,15 +403,18 @@ function layer_go_get_installs() {
     /usr/local/go/bin/go get github.com/gpmgo/gopm
     /usr/local/go/bin/go get github.com/vmware/govmomi/govc
     /usr/local/go/bin/go get github.com/github/hub
-    /usr/local/go/bin/go get github.com/cisco-sso/mh && ln -sf /go/bin/mh /go/bin/multihelm
-    GO111MODULE=on /usr/local/go/bin/go get github.com/mikefarah/yq/v2
+    quiet git clone https://github.com/cisco-sso/mh.git /tmp/mh && cd /tmp/mh && \
+        quiet /usr/local/go/bin/go mod init github.com/cisco-sso/mh && \
+        quiet /usr/local/go/bin/go build -o /go/bin/mh && \
+        ln -sf /go/bin/mh /go/bin/multihelm
+    quiet GO111MODULE=on /usr/local/go/bin/go get github.com/mikefarah/yq/v2
     rm -rf /root/.cache/go-build
     rm -rf /go/src
 }
 
 function layer_build_apps_not_provided_by_os_packages() {
     echo "#### ${FUNCNAME[0]}"
-    apt-get -y update && apt-get --no-install-recommends -y install \
+    quiet apt-get -y -qq update && quiet apt-get --no-install-recommends -y -qq install \
         autoconf \
         build-essential \
         gcc \
@@ -416,20 +423,20 @@ function layer_build_apps_not_provided_by_os_packages() {
         libz-dev \
         texinfo \
         yodl && \
-    apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
+    quiet apt-get -y -qq clean && quiet apt-get -y -qq autoremove && rm -rf /var/lib/apt/lists/*
 
     echo "Install git (needs to build first as a dependency)." && \
         export ORG="git" && export REPO="git" && export VERSION="2.24.1" && export ARTIFACT="${REPO}" && \
         curl -sSfL https://github.com/"${ORG}"/"${REPO}"/archive/v"${VERSION}".tar.gz | tar xz && cd git-* && \
-        make configure && ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr git-*
+        quiet make configure && quiet ./configure --prefix=/usr/local && quiet make && quiet make install && cd .. && rm -fr git-*
 
     echo "Install bats" && \
     curl -sSfL https://github.com/sstephenson/bats/archive/v0.4.0.tar.gz | tar xz && cd bats-* && \
-    ./install.sh /usr/local && cd .. && rm -fr bats-*
+    quiet ./install.sh /usr/local && cd .. && rm -fr bats-*
 
     echo "Install emacs." && \
         curl -sSfL http://mirrors.ibiblio.org/gnu/ftp/gnu/emacs/emacs-26.3.tar.gz | tar xz && cd emacs-* && \
-        CANNOT_DUMP=yes ./configure \
+        quiet CANNOT_DUMP=yes ./configure \
             --prefix=/usr/local \
             --disable-build-details \
             --without-all \
@@ -442,17 +449,17 @@ function layer_build_apps_not_provided_by_os_packages() {
             --with-file-notification \
             --with-gnutls \
             --with-compress-install && \
-        make && make install && cd .. && rm -fr emacs-*
+        quiet make && quiet make install && cd .. && rm -fr emacs-*
 
     echo "Install pyenv with dependencies." && \
         curl -sSfLo pyenv-installer https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer && \
         chmod a+x pyenv-installer && mv pyenv-installer /usr/local/bin && \
-        PYENV_ROOT=/usr/local/pyenv pyenv-installer && chmod -R a+rwx /usr/local/pyenv
+        quiet PYENV_ROOT=/usr/local/pyenv pyenv-installer && chmod -R a+rwx /usr/local/pyenv
 
     echo "Install vim." && \
         export ORG="vim" && export REPO="vim" && export VERSION="8.2.0" && export ARTIFACT="${REPO}" && \
         curl -sSfL https://github.com/"${ORG}"/"${REPO}"/archive/v"${VERSION}".tar.gz | tar xz && cd "${ARTIFACT}"-* && \
-        ./configure \
+        quiet ./configure \
             --with-features=huge \
             --enable-multibyte \
             --enable-rubyinterp=yes \
@@ -462,19 +469,19 @@ function layer_build_apps_not_provided_by_os_packages() {
             --enable-luainterp=yes \
             --enable-cscope \
             --prefix=/usr/local && \
-        make VIMRUNTIMEDIR=/usr/local/share/vim/vim82 && make install && cd .. && rm -fr vim-*
+        quiet make VIMRUNTIMEDIR=/usr/local/share/vim/vim82 && quiet make install && cd .. && rm -fr vim-*
 
     echo "Install tmux." && \
         curl -sSfL https://github.com/libevent/libevent/releases/download/release-2.1.11-stable/libevent-2.1.11-stable.tar.gz | tar xz && cd libevent-* && \
-        ./configure && make &&  make install && cd .. && rm -fr libevent-* && \
+        quiet ./configure && quiet make && quiet make install && cd .. && rm -fr libevent-* && \
         curl -sSfL https://github.com/tmux/tmux/releases/download/3.0a/tmux-3.0a.tar.gz | tar xz && cd tmux-* && \
-        ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr tmux-*
+        quiet ./configure --prefix=/usr/local && quiet make && quiet make install && cd .. && rm -fr tmux-*
 
     echo "Install zsh." && \
         export ORG="zsh-users" && export REPO="zsh" && export VERSION="5.7.1" && export ARTIFACT="${REPO}" && \
         curl -sSfL https://github.com/"${ORG}"/"${REPO}"/archive/"${ARTIFACT}"-"${VERSION}".tar.gz | tar xz && cd "${ARTIFACT}"-* && \
-        ./Util/preconfig && 
-        ./configure \
+        quiet ./Util/preconfig && 
+        quiet ./configure \
             --prefix=/usr/local \
             --mandir=/usr/local/share/man \
             --bindir=/usr/local/bin \
@@ -491,11 +498,11 @@ function layer_build_apps_not_provided_by_os_packages() {
             --enable-readnullcmd=pager \
             --enable-custom-patchlevel=Debian \
             LDFLAGS="-Wl,--as-needed -g" && \
-        make && make install && echo "/usr/local/bin/zsh" >> /etc/shells && cd .. && rm -fr zsh-*
+        quiet make && quiet make install && echo "/usr/local/bin/zsh" >> /etc/shells && cd .. && rm -fr zsh-*
 
     echo "Install redis-cli tools." && \
         curl -sSfL http://download.redis.io/releases/redis-5.0.7.tar.gz | tar xz && cd redis-* && \
-        make && cp src/redis-cli src/redis-benchmark /usr/local/bin && cd .. && rm -fr redis-*
+        quiet make && cp src/redis-cli src/redis-benchmark /usr/local/bin && cd .. && rm -fr redis-*
 }
 
 function exit_if_provisioned() {
