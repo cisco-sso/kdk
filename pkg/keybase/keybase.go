@@ -129,7 +129,7 @@ func StopMirror(configDir string) error {
 // Windows10: Detect k: and /k
 func GetMounts(configRootDir string) (source string, target string, err error) {
 
-	keybaseRoots := []string{"/keybase", "k:", "/k"}
+	keybaseRoots := []string{"/keybase", "/Volumes/keybase", "k:", "/k"}
 	keybaseTestSubdir := "/private"
 	for _, keybaseRoot := range keybaseRoots {
 		if absPath, err := filepath.Abs(filepath.Join(keybaseRoot, keybaseTestSubdir)); err == nil {
