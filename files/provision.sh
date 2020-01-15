@@ -168,7 +168,8 @@ function layer_install_os_packages() {
         unzip \
         wget \
         whois \
-        xauth && \
+        xauth \
+        zip && \
     curl -sSfL https://download.docker.com/linux/ubuntu/gpg | quiet apt-key add - && \
        quiet add-apt-repository \
          "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
