@@ -415,7 +415,7 @@ function layer_build_apps_not_provided_by_os_packages() {
         autoconf \
         build-essential \
         gcc \
-        libgnutls30 \
+        libgnutls28-dev \
         libncurses5-dev \
         libz-dev \
         texinfo \
