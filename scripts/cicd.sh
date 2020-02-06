@@ -89,18 +89,15 @@ needs-build?() {
 }
 
 deps() {
-    if ! which dep &>/dev/null; then
-        go get -u github.com/golang/dep/cmd/dep
-    fi
     if ! which gox &>/dev/null; then
-        go get -u github.com/mitchellh/gox
+        go install -v github.com/mitchellh/gox
     fi
     if ! which goreleaser &>/dev/null; then
         curl -sSLO https://github.com/goreleaser/goreleaser/releases/download/v0.93.2/goreleaser_Linux_x86_64.tar.gz
         tar -C $GOPATH/bin -xzf goreleaser*.tar.gz goreleaser && rm goreleaser*.tar.gz
     fi
 
-    dep ensure
+    go mod download
 }
 
 version() {
