@@ -158,7 +158,8 @@ func (c *KdkEnvConfig) CreateKdkConfig() (err error) {
 	if err != nil {
 		log.Warn("Failed to add keybase mount:", err)
 	} else {
-		mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target, ReadOnly: false})
+		mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target,
+			ReadOnly: false, Consistency: mount.ConsistencyCached})
 		volumes[target] = struct{}{}
 	}
 
@@ -190,7 +191,8 @@ func (c *KdkEnvConfig) CreateKdkConfig() (err error) {
 				log.Infof("Entered container target directory mount %v", target)
 			}
 
-			mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target, ReadOnly: false})
+			mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: source, Target: target,
+				ReadOnly: false, Consistency: mount.ConsistencyCached})
 			volumes[target] = struct{}{}
 		} else {
 			break
