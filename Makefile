@@ -88,8 +88,9 @@ ifdef NEEDS_BUILD_DOCKER
 	@#   docker build -t $(NEW_IMAGE_TAG) --cache-from $(BASE_IMAGE):latest -f files/Dockerfile files
 	@# Our Dockerfile precludes caching because of an early COPY, so do not sweat it
 
-	@# Build the docker image as latest
-	docker build --tag $(BASE_IMAGE):latest files/
+	@# Build the docker image as latest, using a GITHUB_API_TOKEN to increase throttling limits
+	@if [[ -z "${GITHUB_API_TOKEN}" ]]; then echo "ERROR: GITHUB_API_TOKEN env var must be set: export GITHUB_API_TOKEN=(token created from https://github.com/settings/tokens)"; exit 1; fi
+	docker build --build-arg GITHUB_API_TOKEN=${GITHUB_API_TOKEN} --tag $(BASE_IMAGE):latest files/
 
 	@# Then retag as the new version
 	docker tag $(BASE_IMAGE):latest $(NEW_IMAGE_TAG)
