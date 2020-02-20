@@ -16,6 +16,8 @@ kdk init && kdk ssh
 
 ### Windows
 
+#### Docker KDK
+
 Please use Windows10 powershell for installation.
 
 ```console
@@ -26,6 +28,18 @@ kdk init ; kdk ssh
 
 NOTE: After installation, Windows CMD prompt will work. The KDK has not been
 tested with Cygwin, Mingw, or Windows Subsystem for Linux.
+
+#### Vagrant Hyper-V or Virtualbox KDK
+
+```console
+git clone git@github.com:cisco-sso/kdk.git # or https://github.com/cisco-sso/kdk.git
+cd kdk
+# Edit Vagrantfile: You may want to tune memory, network settings, or host-mounted directories.
+vagrant up  # Starts the KDK
+vagrant ssh -- -A -D 8000  # Connect to the KDK (-A ssh-agent forwarding, -D socks proxy forwarding)
+# Use the KDK
+vagrant destroy
+```
 
 ## Installation Instructions
 
