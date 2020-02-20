@@ -6,15 +6,39 @@ Kubernetes Development Kit (KDK)
 This Quickstart assumes that you have installed all of the
 [dependencies](https://github.com/cisco-sso/kdk#installation-instructions).
 
+The KDK works on many OS's, and may run as a docker container or virtual machine.
+
+* On Mac and Linux, the preferred route is to run the KDK as a docker image.
+* On Windows, the preferred route is to run the KDK as a Vagrant virtual machine (Hyper-V and Virtualbox are both supported).
+
 
 ### Mac and Linux
+
+#### Docker KDK (preferred for Mac)
 
 ```console
 curl -sSL https://raw.githubusercontent.com/cisco-sso/kdk/master/files/install | bash
 kdk init && kdk ssh
 ```
 
+#### Vagrant KDK
+
+The Vagrant Virtualbox image works on Mac, using the same instructions as the Windows version.  The only reason one may choose to use this run method is if support for IPV6 networking is required.  Docker for Mac does not support IPV6.
+
+
 ### Windows
+
+#### Vagrant Hyper-V or Virtualbox KDK (preferred for Windows)
+
+```console
+git clone git@github.com:cisco-sso/kdk.git # or https://github.com/cisco-sso/kdk.git
+cd kdk
+# Edit Vagrantfile: You may want to tune memory, network settings, or host-mounted directories.
+vagrant up  # Starts the KDK
+vagrant ssh -- -A -D 8000  # Connect to the KDK (-A ssh-agent forwarding, -D socks proxy forwarding)
+# Use the KDK
+vagrant destroy
+```
 
 #### Docker KDK
 
@@ -29,17 +53,6 @@ kdk init ; kdk ssh
 NOTE: After installation, Windows CMD prompt will work. The KDK has not been
 tested with Cygwin, Mingw, or Windows Subsystem for Linux.
 
-#### Vagrant Hyper-V or Virtualbox KDK
-
-```console
-git clone git@github.com:cisco-sso/kdk.git # or https://github.com/cisco-sso/kdk.git
-cd kdk
-# Edit Vagrantfile: You may want to tune memory, network settings, or host-mounted directories.
-vagrant up  # Starts the KDK
-vagrant ssh -- -A -D 8000  # Connect to the KDK (-A ssh-agent forwarding, -D socks proxy forwarding)
-# Use the KDK
-vagrant destroy
-```
 
 ## Installation Instructions
 

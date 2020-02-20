@@ -1,4 +1,7 @@
 {
+  "variables": {
+    "GITHUB_API_TOKEN": "{{env `GITHUB_API_TOKEN`}}"
+  },
   "builders": [
     {
       "type": "vagrant",
@@ -15,9 +18,12 @@
     {
       "type": "shell",
       "script": "../files/provision.sh",
+      "environment_vars": [
+	"GITHUB_API_TOKEN={{user `GITHUB_API_TOKEN`}}"
+      ],
       "override": {
         "vagrant": {
-          "execute_command": "sudo {{.Path}} vagrant"
+          "execute_command": "sudo {{.Vars}} {{.Path}} vagrant"
         }
       }
     },

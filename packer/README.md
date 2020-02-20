@@ -11,6 +11,8 @@ Supported targets/hypervisors:
 ## Mac Virtualbox Build
 
 ```bash
+# Set a Github API Token so that API call throttling limits are increased
+export GITHUB_API_TOKEN=<token created from https://github.com/settings/tokens>
 
 # Enter the packer build directory
 cd kdk/packer
@@ -28,6 +30,9 @@ make clean build_virtualbox
 # Start Powershell as Administrator
 # Start a bash shell in git
 C:\Program Files\git\bin\bash.exe
+
+# Set a Github API Token so that API call throttling limits are increased
+export GITHUB_API_TOKEN=<token created from https://github.com/settings/tokens>
 
 # Enter the packer build directory
 cd kdk/packer
@@ -48,7 +53,7 @@ make add_box
 # Create a vagrant file
 mkdir -p vagrant-test
 cd vagrant-test
-vagrant init kdk/ubuntu-18.04-test
+vagrant init kdk/test
 
 # Start the box
 vagrant up
