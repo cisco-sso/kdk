@@ -15,12 +15,11 @@
 package kdk
 
 import (
-	"bufio"
-	"encoding/json"
-	"fmt"
-
+	"github.com/docker/cli/cli/command"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/pkg/jsonmessage"
 	log "github.com/sirupsen/logrus"
+	"os"
 )
 
 type ProgressDetail struct {
@@ -52,23 +51,12 @@ func Pull(cfg *KdkEnvConfig, force bool) error {
 
 func pullImage(cfg *KdkEnvConfig, imageCoordinates string) error {
 
-	out, err := cfg.DockerClient.ImagePull(cfg.Ctx, imageCoordinates, types.ImagePullOptions{})
+	responseBody, err := cfg.DockerClient.ImagePull(cfg.Ctx, imageCoordinates, types.ImagePullOptions{})
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	defer responseBody.Close()
 
-	var message ProgressMessage
-	scanner := bufio.NewScanner(out)
-	for scanner.Scan() {
-		b := scanner.Bytes()
-		json.Unmarshal(b, &message)
-		fmt.Printf("%+v\n", message)
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.WithField("err", err).Fatal("Failed to read output from docker client pull")
-	}
-
-	return err
+	outStream := command.NewOutStream(os.Stdout)
+	return jsonmessage.DisplayJSONMessagesToStream(responseBody, outStream, nil)
 }
