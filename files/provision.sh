@@ -416,6 +416,7 @@ function layer_go_get_installs() {
 	ln -sf /go/bin/mh /go/bin/multihelm
     GO111MODULE=on /usr/local/go/bin/go get github.com/mikefarah/yq/v2
     GO111MODULE=on /usr/local/go/bin/go get github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@v0.3.0
+    GO111MODULE=on /usr/local/go/bin/go get github.com/mitchellh/gox@v1.0.1
     rm -rf /root/.cache/go-build
     rm -rf /go/src
 }
