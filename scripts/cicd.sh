@@ -98,7 +98,7 @@ deps() {
     fi
 
     if ! which gox &>/dev/null; then
-        go install -v github.com/mitchellh/gox
+        (cd /tmp && go get github.com/mitchellh/gox)
     fi
 }
 
