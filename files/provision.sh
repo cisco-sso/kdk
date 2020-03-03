@@ -243,6 +243,7 @@ function layer_install_python_based_utils_and_libs() {
 	     'python-octaviaclient==2.0.0' \
 	     'python-openstackclient==4.0.0' \
 	     'pyvmomi==6.7.3' \
+	     'pyyaml==3.13' \
 	     'requests==2.23.0' \
 	     'sh==1.12.14' \
 	     'sshuttle==0.78.5' \
@@ -414,9 +415,9 @@ function layer_go_get_installs() {
 	/usr/local/go/bin/go mod init github.com/cisco-sso/mh && \
 	/usr/local/go/bin/go build -o /go/bin/mh && \
 	ln -sf /go/bin/mh /go/bin/multihelm
-    GO111MODULE=on /usr/local/go/bin/go get github.com/mikefarah/yq/v2
-    GO111MODULE=on /usr/local/go/bin/go get github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@v0.3.0
-    GO111MODULE=on /usr/local/go/bin/go get github.com/mitchellh/gox@v1.0.1
+    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/mikefarah/yq/v2)
+    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@v0.3.0)
+    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/mitchellh/gox@v1.0.1)
     rm -rf /root/.cache/go-build
     rm -rf /go/src
 }
