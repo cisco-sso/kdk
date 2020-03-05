@@ -17,28 +17,35 @@ export GITHUB_API_TOKEN=<token created from https://github.com/settings/tokens>
 # Enter the packer build directory
 cd kdk/packer
 
-# Validate the Packer template
-make validate
-
 # Build the box
 make clean build_virtualbox
 ```
 
 ## Windows Hyper-V Build
 
+Before you start the Windows Hyper-V build:
+
+* Disconnect from your corporate VPN.
+* Ensure you are building from a wired connection.
+  * Wireless connections almost always fail because the build is network-intensive.
+* Configure Hyper-V network settings.
+  * The Hyper-V packer build only works if the vagrant VM build machine is directly on the network.
+  * The packer build is configured to auto-select the network named 'External Switch'.
+  * Create a new network switch called 'External Switch'
+  * Ensure the 'External Switch' is set to Bridge Mode.
+  * Ensure you select the wired physical adapter for the 'External Switch'
+
+
 ```bash
 # Start Powershell as Administrator
-# Start a bash shell in git
-C:\Program Files\git\bin\bash.exe
+# Start a bash shell in git (within the Administrator Powershell)
+"C:\Program Files\git\bin\bash.exe"
 
 # Set a Github API Token so that API call throttling limits are increased
 export GITHUB_API_TOKEN=<token created from https://github.com/settings/tokens>
 
 # Enter the packer build directory
 cd kdk/packer
-
-# Validate the Packer template
-make validate
 
 # Build the box
 make clean build_hyperv
