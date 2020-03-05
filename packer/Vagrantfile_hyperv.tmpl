@@ -1,9 +1,21 @@
+# https://github.com/hashicorp/packer/blob/master/builder/vagrant/step_create_vagrantfile.go#L25
+
 Vagrant.configure("2") do |config|
-  config.vm.box = "{{.BoxName}}"
+  config.vm.define "source", autostart: false do |source|
+	source.vm.box = "{{.SourceBox}}"
+	config.ssh.insert_key = {{.InsertKey}}
+  end
+  config.vm.define "output" do |output|
+	output.vm.box = "{{.BoxName}}"
+	output.vm.box_url = "file://package.box"
+	config.ssh.insert_key = {{.InsertKey}}
+  end
   {{ if ne .SyncedFolder "" -}}
-      config.vm.synced_folder "{{.SyncedFolder}}", "/vagrant"
+    config.vm.synced_folder "{{.SyncedFolder}}", "/vagrant"
   {{- else -}}
-      config.vm.synced_folder ".", "/vagrant", disabled: true
+    config.vm.synced_folder ".", "/vagrant", disabled: true
   {{- end}}
-  config.vm.network 'public_network', bridge: 'Default Switch'
+
+  # The line below allows Packer to auto-select the network device
+  config.vm.network 'public_network', bridge: 'External Switch'
 end

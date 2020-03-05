@@ -46,6 +46,10 @@ function vagrant() {
     exit_if_provisioned
 
     pushd /tmp
+    # Disable IPV6 temporarily for the current build
+    #   Building on windows seems to require it because
+    #     it hangs on add-apt-repository ppa...
+    echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
     # Remove this workaround after bento releases new hyperv box
     vagrant_disable_ssh_password_logins
     vagrant_upgrade_kernel_workaround_sshuttle_kernel_bug
@@ -214,14 +218,24 @@ function layer_install_os_packages() {
 		tk-dev \
 		libffi-dev \
 		liblzma-dev \
-		python3-openssl && \
+		python3-openssl \
+	        virt-what && \
 	apt-get -y -qq clean && apt-get -y -qq autoremove && rm -rf /var/lib/apt/lists/*
 }
 
 function layer_install_python_based_utils_and_libs() {
     echo "#### ${FUNCNAME[0]}"
-    curl -sSfL https://bootstrap.pypa.io/get-pip.py | python3 && \
-	pip3 install --no-cache-dir -U setuptools && \
+
+    curl -sSfL https://bootstrap.pypa.io/get-pip.py | python3
+
+    # Workaround Hyper-V Pip3 with distutils-installed pyyaml error
+    #   Pip v10 stopped uninstalling distutils packages which don't have enough metadata for a sure uninstall
+    if [ $(virt-what)=='hyperv' ]; then
+	# MUST match the PyYAML version below
+	pip3 install --ignore-installed PyYAML==3.13
+    fi
+
+    pip3 install --no-cache-dir -U setuptools && \
 	pip3 install \
 	     --no-cache-dir \
 	     'ansible==2.9.5' \
