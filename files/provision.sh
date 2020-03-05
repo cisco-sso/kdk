@@ -46,6 +46,10 @@ function vagrant() {
     exit_if_provisioned
 
     pushd /tmp
+    # Disable IPV6 temporarily for the current build
+    #   Building on windows seems to require it because
+    #     it hangs on add-apt-repository ppa...
+    echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
     # Remove this workaround after bento releases new hyperv box
     vagrant_disable_ssh_password_logins
     vagrant_bento_workaround_openssl_bug
