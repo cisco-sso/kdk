@@ -151,6 +151,8 @@ INFO[0026] Entered container target directory mount /home/mcboats/.aws
 
 If you are using OSX, then you can use ssh-agent to automatically forward your SSH keys into the KDK.  This will allow you to access SSH resources without physically copying your keys into the KDK machine, which lowers security.  To set this up, you may manually start ssh-agent and load the SSH keys into the agent.  Or, you can copy the following [lines](https://github.com/cisco-sso/yadm-dotfiles/blob/master/.bash_profile#L19-L44) into your OSX ~/.bash_profile for a more automatic method.
 
+However, you should not do this if you are using container version of kdk, because it always overwrites SSH_AUTH_SOCK to ~/.ssh/ssh_auth_sock then symlink to the actual socket (usually /tmp/ssh-<random>/agent.<pid>) for current session, which means exit of a newest session will kill auth agent for all other sessions, as ssh will delete the socket it created (like /tmp/ssh-<random>/agent.<pid>) which causes ~/.ssh/ssh_auth_sock points to nowhere.
+
 ### Customizing your dotfiles
 
 If you have your own yadm dotfiles repository, you may `kdk init` with the option:
