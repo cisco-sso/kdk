@@ -104,23 +104,6 @@ kdk destroy
 kdk update
 ```
 
-## Running Multiple KDK Containers
-
-You might have a need to run multiple KDK containers.  The KDK CLI can do that!
-
-1. Create a new KDK config
-
-  - **NOTE:** name parameter must be unique (no other container can have this name)
-```console
-kdk init --name kdk1
-```
-
-2. Connect to `kdk1` container
-
-```console
-kdk ssh --name kdk1
-```
-
 ## Saving State between Resetting your KDK Enviroment
 
 The KDK is meant to be ephemeral.  You should be able to `kdk destroy && kdk ssh` whenever you need to reset your enviroment.  Resetting should be done often, because over time your environment will diverge from original state as you use it.
@@ -129,9 +112,14 @@ Here are a few approaches for saving state in between resets.
 
 ### Customing your `.bash_profile`
 
-If you have installed [Keybase](https://keybase.io/), executing `kdk init` will ask if you would like to mount the keybase directory into the KDK.  If you do, you may customize your .bash_profile within the KDK by creating the file `/keybase/private/<user-keybase-id>/.bash_profile_private`.  The default KDK [`.bash_profile`](https://github.com/cisco-sso/yadm-dotfiles/blob/master/.bash_profile#L128) will automatically source the `.bash_profile_private` file from keybase, if it exists.
+The KDK default [dotfiles](https://github.com/cisco-sso/yadm-dotfiles) includes a default [`.bash_profile`](https://github.com/cisco-sso/yadm-dotfiles/blob/master/.bash_profile#L103) that will search for additional bash profiles in a few pre-defined locations.  If files in any of these locations exist, they will be sourced automatically.
 
-This method may be used to set enviroment variables as well as create entire dotfiles, such as `~/.aws/credentials` and `~/.aws/config`.  See [here for an example](https://github.com/cisco-sso/yadm-dotfiles#customizing-your-setup).
+* `$HOME/.bash_profile_private`
+* `$HOME/.config/kdk/.bash_profile_private`
+* `/keybase/private/<user-keybase-id>/.bash_profile_private`
+  * If the user has installed [Keybase](https://keybase.io/)
+
+Thus, one may customize their own private settings by creating any of the files above by host-mounting directories into the KDK when prompted during `kdk init`.  This method may be used to set enviroment variables as well as create entire dotfiles, such as `~/.aws/credentials` and `~/.aws/config`.  See [here for an example](https://github.com/cisco-sso/yadm-dotfiles#customizing-your-setup).
 
 ### Mounting Directories Directly into the KDK
 
@@ -149,9 +137,7 @@ INFO[0026] Entered container target directory mount /home/mcboats/.aws
 
 ### SSH-Agent
 
-If you are using OSX, then you can use ssh-agent to automatically forward your SSH keys into the KDK.  This will allow you to access SSH resources without physically copying your keys into the KDK machine, which lowers security.  To set this up, you may manually start ssh-agent and load the SSH keys into the agent.  Or, you can copy the following [lines](https://github.com/cisco-sso/yadm-dotfiles/blob/master/.bash_profile#L19-L44) into your OSX ~/.bash_profile for a more automatic method.
-
-However, you should not do this if you are using container version of kdk, because it always overwrites SSH_AUTH_SOCK to ~/.ssh/ssh_auth_sock then symlink to the actual socket (usually /tmp/ssh-<random>/agent.<pid>) for current session, which means exit of a newest session will kill auth agent for all other sessions, as ssh will delete the socket it created (like /tmp/ssh-<random>/agent.<pid>) which causes ~/.ssh/ssh_auth_sock points to nowhere.
+If you are using OSX, then you may use ssh-agent to automatically forward your SSH keys into the KDK.  This will allow you to access SSH resources (such as git cloning from Github) without physically copying your keys into the KDK machine, which lowers security.  OSX automatically starts ssh-agent automatically.  To load your keys into the agent, add your default keys with `ssh-add`.  From inside of the kdk, you may list which keys you have loaded with `ssh-add -l`
 
 ### Customizing your dotfiles
 
@@ -160,4 +146,21 @@ If you have your own yadm dotfiles repository, you may `kdk init` with the optio
 --dotfiles-repo string      KDK Dotfiles Repo (default "https://github.com/cisco-sso/yadm-dotfiles.git")
 ```
 
-**NOTE:** There are many configuration options available in `kdk init`.See `kdk init --help` for details 
+**NOTE:** There are many configuration options available in `kdk init`.See `kdk init --help` for details
+
+## Running Multiple KDK Containers
+
+You might have a need to run multiple KDK containers.  The KDK CLI can do that!
+
+1. Create a new KDK config
+
+  - **NOTE:** name parameter must be unique (no other container can have this name)
+```console
+kdk init --name kdk1
+```
+
+2. Connect to `kdk1` container
+
+```console
+kdk ssh --name kdk1
+```
