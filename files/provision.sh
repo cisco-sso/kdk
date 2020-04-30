@@ -283,8 +283,8 @@ function layer_install_apps_not_provided_by_os_packages() {
 	ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
 	echo "Install easy-rsa." && \
 	export ORG="OpenVPN" && export REPO="easy-rsa" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="EasyRSA" && \
-	curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-unix-v"${VERSION}".tgz | tar xz && \
-	chmod a+x "${ARTIFACT}"-v"${VERSION}"/$(echo "${ARTIFACT}" | tr '[:upper:]' '[:lower:]') && mv "${ARTIFACT}"-v"${VERSION}" /usr/local/share/"${ARTIFACT}"-"${VERSION}" && \
+	curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-"${VERSION}".tgz | tar xz && \
+	chmod a+x "${ARTIFACT}"-"${VERSION}"/$(echo "${ARTIFACT}" | tr '[:upper:]' '[:lower:]') && mv "${ARTIFACT}"-"${VERSION}" /usr/local/share/"${ARTIFACT}"-"${VERSION}" && \
 	ln -s /usr/local/share/"${ARTIFACT}"-"${VERSION}"/$(echo "${ARTIFACT}" | tr '[:upper:]' '[:lower:]') /usr/local/bin/ && \
 	echo "Install etcdctl." && \
 	export ORG="etcd-io" && export REPO="etcd" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="etcdctl" && \
@@ -316,7 +316,7 @@ function layer_install_apps_not_provided_by_os_packages() {
 	ln -sf /usr/local/share/"${ARTIFACT}"-"${VERSION}"/bin/gradle /usr/local/bin/"${ARTIFACT}" && \
 	rm -rf "${ARTIFACT}"* && \
 	echo "Install grpcurl." && \
-	export ORG="fullstorydev" && export REPO="grpcurl" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
+	export ORG="fullstorydev" && export REPO="grpcurl" && export VERSION="1.5.0" && export ARTIFACT="${REPO}" && \
 	curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_"${VERSION}"_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz "${ARTIFACT}" && chmod a+x /usr/local/bin/"${ARTIFACT}" && \
 	echo "Install helm." && \
 	export ORG="helm" && export REPO="helm" && export ARTIFACT="${REPO}" && \
