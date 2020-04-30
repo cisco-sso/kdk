@@ -1,4 +1,4 @@
-FROM ubuntu:bionic AS build-cache-base
+FROM ubuntu:focal AS build-cache-base
 
 ARG GITHUB_API_TOKEN
 

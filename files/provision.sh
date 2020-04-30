@@ -178,11 +178,15 @@ function layer_install_os_packages() {
 				 xauth \
 				 zip && \
 	curl -sSfL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
+	# TODO: Docker does not have a release file for Ubuntu 20.04 focal yet
+	#   Thus use bionic.  Eventually 'bionic' with '$(lsb_release -cs)` in the line below
 	add-apt-repository \
 	    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-	 $(lsb_release -cs) \
+	 bionic \
 	 stable" && \
-	export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" && \
+	# TODO: Google does not have a release file for Ubuntu 20.04 focal yet
+	#   Thus use bionic.  Eventually replace 'bionic' with '$(lsb_release -c -s)' in the line below
+	export CLOUD_SDK_REPO="cloud-sdk-bionic" && \
 	echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
 	curl -sSfL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
 	export POSTGRESQL_REPO="$(lsb_release -c -s)-pgdg" && \
