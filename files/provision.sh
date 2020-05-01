@@ -48,7 +48,6 @@ function vagrant() {
     pushd /tmp
     # Remove this workaround after bento releases new hyperv box
     vagrant_disable_ssh_password_logins
-    vagrant_upgrade_kernel_workaround_sshuttle_kernel_bug
     vagrant_bento_workaround_openssl_bug
     layer_install_os_packages
     layer_install_python_based_utils_and_libs
@@ -78,32 +77,6 @@ function vagrant_disable_ssh_password_logins() {
     #   Disable this, since some boxes may run with bridged networking by default
     sed -i 's@#PasswordAuthentication yes@PasswordAuthentication no@g' \
         /etc/ssh/sshd_config
-}
-
-function vagrant_upgrade_kernel_workaround_sshuttle_kernel_bug() {
-    # https://github.com/sshuttle/sshuttle/issues/208
-    echo "#### ${FUNCNAME[0]}"
-
-    # Install a kernel upgrade helper
-    #   Dkms will automatically recompile kmods upon kernel update
-    apt-add-repository -y ppa:teejee2008/ppa
-    apt-get update
-    apt-get -y -qq install dkms ukuu linux-headers-$(uname -r)
-
-    # Update virtualbox guest additions.  This will rebuild kernel modules
-    wget -q -O /tmp/additions.iso \
-         http://download.virtualbox.org/virtualbox/6.0.4/VBoxGuestAdditions_6.0.4.iso
-    mkdir -p /cdrom
-    mount -o loop /tmp/additions.iso /cdrom
-    /cdrom/VBoxLinuxAdditions.run || true # always errors
-    umount /cdrom
-    rm -rf /cdrom /tmp/additions.iso
-
-    # Install a newer kernel
-    #   dkms will kick in and rebuild modules for this new kernel
-    ukuu --list
-    ukuu --install v4.20.17
-    ukuu --list-installed
 }
 
 function vagrant_bento_workaround_openssl_bug() {
