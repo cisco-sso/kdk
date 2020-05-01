@@ -420,7 +420,7 @@ function layer_build_apps_not_provided_by_os_packages() {
     apt-get -y -qq clean && apt-get -y -qq autoremove && rm -rf /var/lib/apt/lists/*
 
     echo "Install git (needs to build first as a dependency)." && \
-        export ORG="git" && export REPO="git" && export VERSION="2.24.1" && export ARTIFACT="${REPO}" && \
+        export ORG="git" && export REPO="git" && export VERSION="2.26.2" && export ARTIFACT="${REPO}" && \
         curl -sSfL https://github.com/"${ORG}"/"${REPO}"/archive/v"${VERSION}".tar.gz | tar xz && cd git-* && \
         make configure && ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr git-*
 
