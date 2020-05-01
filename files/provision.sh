@@ -445,6 +445,11 @@ function layer_build_apps_not_provided_by_os_packages() {
             --with-compress-install && \
         make && make install && cd .. && rm -fr emacs-*
 
+    echo "Install jwt-cli." && \
+	curl https://sh.rustup.rs -sSf | sh -s -- -y && source ~/.cargo/env && \
+        git clone https://github.com/mike-engel/jwt-cli /tmp/jwt-cli && cd /tmp/jwt-cli && git checkout 3.1.0 && \
+        cargo update && cargo build --release && mv target/release/jwt /usr/local/bin
+
     echo "Install pyenv with dependencies." && \
         curl -sSfLo pyenv-installer https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer && \
         chmod a+x pyenv-installer && mv pyenv-installer /usr/local/bin && \
