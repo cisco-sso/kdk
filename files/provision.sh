@@ -200,8 +200,15 @@ function layer_install_os_packages() {
 
 function layer_install_python_based_utils_and_libs() {
     echo "#### ${FUNCNAME[0]}"
-    curl -sSfL https://bootstrap.pypa.io/get-pip.py | python3 && \
-        pip3 install --no-cache-dir -U setuptools && \
+
+    curl -sSfL https://bootstrap.pypa.io/get-pip.py | python3
+
+    # Workaround Pip3 with distutils-installed pyyaml error
+    #   Pip v10 stopped uninstalling distutils packages which don't have enough metadata for a sure uninstall
+    # MUST match the PyYAML version below
+    pip3 install --ignore-installed PyYAML==3.13
+
+    pip3 install --no-cache-dir -U setuptools && \
         pip3 install \
              --no-cache-dir \
              'ansible==2.9.5' \
