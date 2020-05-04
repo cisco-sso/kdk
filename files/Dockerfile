@@ -68,27 +68,28 @@ RUN echo "Configuring systemd" && \
         ls | grep -v systemd-tmpfiles-setup.service | xargs rm -f && \
         rm -f /lib/systemd/system/sockets.target.wants/*udev* && \
         systemctl mask -- \
-            tmp.mount \
-            etc-hostname.mount \
-            etc-hosts.mount \
-            etc-resolv.conf.mount \
-            -.mount \
-            swap.target \
-            getty.target \
+            apt-daily-upgrade.timer \
+            apt-daily.timer \
+            e2scrub_all.timer \
+            fstrim.timer \
             getty-static.service \
-            dev-mqueue.mount \
-            cgproxy.service \
-            systemd-tmpfiles-setup-dev.service \
-            systemd-remount-fs.service \
+            getty.target \
+            motd-news.timer \
+            swap.swap \
+            swap.target \
             systemd-ask-password-wall.path \
-            systemd-logind.service && \
-                systemctl mask -- \
-                        cron.service \
-                        dbus.service \
-                        exim4.service \
-                        ntp.service && \
+            systemd-logind.service \
+            systemd-remount-fs.service \
+            systemd-tmpfiles-setup.service \
+            tmp.mount && \
+        systemctl mask -- \
+            cron.service \
+            dbus.service \
+            ntp.service && \
         systemctl set-default multi-user.target || true && \
         sed -ri /etc/systemd/journald.conf -e 's!^#?Storage=.*!Storage=volatile!' && \
+        # Avoid port binding confict between dnsmasq and systemd-resolved && \
+        sed -i 's/#DNSStubListener=yes/DNSStubListener=no/' /etc/systemd/resolved.conf && \
         # Set locale && \
         localedef -i en_US -f UTF-8 en_US.UTF-8 && \
         # Configure openssh-server && \
