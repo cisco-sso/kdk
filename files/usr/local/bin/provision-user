@@ -60,8 +60,8 @@ if [[ ! -f "/etc/kdk/provisioned" ]]; then
     install -m 0600 -o ${KDK_USERNAME} /dev/null /var/log/kdk-provision.log
 
     # Setup yadm dotfiles
-    runuser -l ${KDK_USERNAME} -c "yadm clone --bootstrap ${KDK_DOTFILES_REPO}" >> /var/log/kdk-provision.log 2>&1
-
-    mkdir -p /etc/kdk
-    echo 1 > /etc/kdk/provisioned
+    if runuser -l ${KDK_USERNAME} -c "yadm clone --bootstrap ${KDK_DOTFILES_REPO}" >> /var/log/kdk-provision.log 2>&1; then
+	mkdir -p /etc/kdk
+	echo 1 > /etc/kdk/provisioned
+    fi
 fi
