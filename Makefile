@@ -23,7 +23,7 @@ LDFLAGS += -X github.com/cisco-sso/kdk/pkg/kdk.Version=${VERSION}
 LDFLAGS += -extldflags "-static"
 
 # Required for globs to work correctly
-SHELL=/bin/bash
+SHELL:=/bin/bash
 
 #####################################################################
 
@@ -90,7 +90,16 @@ ifdef NEEDS_BUILD_DOCKER
 
 	@# Build the docker image as latest, using a GITHUB_API_TOKEN to increase throttling limits
 	@if [[ -z "${GITHUB_API_TOKEN}" ]]; then echo "ERROR: GITHUB_API_TOKEN env var must be set: export GITHUB_API_TOKEN=(token created from https://github.com/settings/tokens)"; exit 1; fi
-	docker build --build-arg GITHUB_API_TOKEN=${GITHUB_API_TOKEN} --tag $(BASE_IMAGE):latest files/
+
+	@# Run the docker build, hiding the GITHUB_API_TOKEN in the Makefile output
+	@#   as well as 'docker build' history.  Ensure cleanup on exit.
+	@function tearDown { \
+	  rm -f github_api_token.txt; \
+	}; \
+	trap tearDown EXIT; \
+	echo ${GITHUB_API_TOKEN} > github_api_token.txt && \
+	echo "docker build --secret id=github_api_token,src=github_api_token.txt --tag $(BASE_IMAGE):latest files/" && \
+	docker build --secret id=github_api_token,src=github_api_token.txt --tag $(BASE_IMAGE):latest files/
 
 	@# Then retag as the new version
 	docker tag $(BASE_IMAGE):latest $(NEW_IMAGE_TAG)
