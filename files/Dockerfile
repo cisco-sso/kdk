@@ -1,7 +1,5 @@
 FROM ubuntu:focal AS build-cache-base
 
-ARG GITHUB_API_TOKEN
-
 LABEL maintainer="rluckie@cisco.com" \
       kdk=""
 
@@ -20,7 +18,7 @@ RUN /tmp/provision.sh layer_install_python_based_utils_and_libs
 #######################################
 # Install apps (with pinned version) that are not provided by the OS packages.
 
-RUN GITHUB_API_TOKEN=${GITHUB_API_TOKEN} /tmp/provision.sh layer_install_apps_not_provided_by_os_packages
+RUN GITHUB_API_TOKEN=$(cat /run/secrets/github_api_token) /tmp/provision.sh layer_install_apps_not_provided_by_os_packages
 
 #######################################
 # go get installs
