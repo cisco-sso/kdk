@@ -5,7 +5,7 @@ go_import_path: github.com/cisco-sso/kdk
 services:
 - docker
 before_install:
-- sudo /etc/docker/daemon.json
+- sudo cat /etc/docker/daemon.json
 - make checks
 script:
 - make bin-build docker-build
