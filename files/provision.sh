@@ -410,7 +410,7 @@ function layer_go_get_installs() {
         /usr/local/go/bin/go mod init github.com/cisco-sso/mh && \
         /usr/local/go/bin/go build -o /go/bin/mh && \
         ln -sf /go/bin/mh /go/bin/multihelm
-    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/mikefarah/yq/v2)
+    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/mikefarah/yq/v3)
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@v0.3.0)
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/mitchellh/gox@v1.0.1)
     rm -rf /root/.cache/go-build
