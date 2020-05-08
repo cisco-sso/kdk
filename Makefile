@@ -100,7 +100,7 @@ ifdef NEEDS_BUILD_DOCKER
 	trap tearDown EXIT; \
 	echo ${GITHUB_API_TOKEN} > github_api_token.txt && \
 	echo "docker build --secret id=github_api_token,src=github_api_token.txt --tag $(BASE_IMAGE):latest files/" && \
-	DOCKER_BUILDKIT=1 docker build --progress=plain --secret id=github_api_token,src=github_api_token.txt --tag $(BASE_IMAGE):latest files/
+	DOCKER_BUILDKIT=1 docker build --no-cache --progress=plain --secret id=github_api_token,src=github_api_token.txt --tag $(BASE_IMAGE):latest files/
 
 	@# Then retag as the new version
 	docker tag $(BASE_IMAGE):latest $(NEW_IMAGE_TAG)
