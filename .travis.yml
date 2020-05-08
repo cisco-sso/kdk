@@ -6,6 +6,9 @@ services:
 - docker
 before_install:
 - sudo cat /etc/docker/daemon.json
+- echo '{"mtu": 1460}' | sudo tee /etc/docker/daemon.json
+- sudo systemctl restart docker
+- sudo cat /etc/docker/daemon.json
 - make checks
 script:
 - make bin-build docker-build
