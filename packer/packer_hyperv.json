@@ -6,9 +6,9 @@
     {
       "type": "vagrant",
       "provider": "hyperv",
-      "box_name": "bento/ubuntu-18.04",
-      "box_version": "201912.13.0",
-      "source_path": "bento/ubuntu-18.04",
+      "box_name": "generic/ubuntu2004",
+      "box_version": "3.0.0",
+      "source_path": "generic/ubuntu2004",
       "add_force": true,
       "skip_add": true,
       "template": "Vagrantfile_hyperv.tmpl",

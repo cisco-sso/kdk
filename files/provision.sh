@@ -525,9 +525,11 @@ function exit_if_provisioned() {
 }
 
 function vagrant_fix_permissions() {
-    chown -R vagrant:vagrant /home/vagrant/.ssh
-    chown -R vagrant:vagrant /home/vagrant/.cache
-    chown -R vagrant:vagrant /home/vagrant/.wget-hsts
+    for item in /home/vagrant/.ssh /home/vagrant/.cache /home/vagrant/.wget-hsts; do
+	if [ -e $item ]; then
+	    chown -R vagrant:vagrant $item
+	fi
+    done
 }
 
 function mark_provisioned() {
