@@ -6,9 +6,9 @@
     {
       "type": "vagrant",
       "provider": "virtualbox",
-      "box_name": "bento/ubuntu-20.04",
-      "box_version": "202004.27.0",
-      "source_path": "bento/ubuntu-20.04",
+      "box_name": "generic/ubuntu2004",
+      "box_version": "3.0.0",
+      "source_path": "generic/ubuntu2004",
       "add_force": true,
       "skip_add": true,
       "communicator": "ssh"
