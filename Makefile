@@ -93,14 +93,12 @@ ifdef NEEDS_BUILD_DOCKER
 
 	@# Run the docker build, hiding the GITHUB_API_TOKEN in the Makefile output
 	@#   as well as 'docker build' history.  Ensure cleanup on exit.
-	docker pull docker.io/docker/dockerfile:1.0-experimental # Needed for DockerBuildKit.  Must match syntax version in Dockerfile
-	docker pull ubuntu:focal # Needed for DockerBuildKit.  Must match syntax version in Dockerfile
 	@function tearDown { \
 	  rm -f github_api_token.txt; \
 	}; \
 	trap tearDown EXIT; \
 	echo ${GITHUB_API_TOKEN} > github_api_token.txt && \
-	echo "docker build --secret id=github_api_token,src=github_api_token.txt --tag $(BASE_IMAGE):latest files/" && \
+	echo "DOCKER_BUILDKIT=1 docker build --no-cache --progress=plain --secret id=github_api_token,src=github_api_token.txt --tag $(BASE_IMAGE):latest files/" && \
 	DOCKER_BUILDKIT=1 docker build --no-cache --progress=plain --secret id=github_api_token,src=github_api_token.txt --tag $(BASE_IMAGE):latest files/
 
 	@# Then retag as the new version
