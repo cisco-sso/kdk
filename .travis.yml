@@ -5,6 +5,7 @@ go_import_path: github.com/cisco-sso/kdk
 services:
 - docker
 before_install:
+- "echo 'Removing travis-ci configuration of docker repository mirror'"
 - sudo cat /etc/docker/daemon.json
 - "echo '{\"mtu\": 1460}' | sudo tee /etc/docker/daemon.json"
 - sudo systemctl restart docker
