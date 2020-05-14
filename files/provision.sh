@@ -258,7 +258,7 @@ function layer_install_apps_not_provided_by_os_packages() {
         echo "Install etcdctl." && \
             export ORG="etcd-io" && export REPO="etcd" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="etcdctl" && \
             curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${REPO}"-v"${VERSION}"-linux-amd64.tar.gz | tar xz && \
-            mv "${REPO}"*/${ARTIFACT} /usr/local/bin/${ARTIFACT} && rm -rf "${REPO}"* && \
+            chown root:root "${REPO}"*/${ARTIFACT} && mv "${REPO}"*/${ARTIFACT} /usr/local/bin/${ARTIFACT} && rm -rf "${REPO}"* && \
         echo "Install fluxctl." && \
             export ORG="fluxcd" && export REPO="flux" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="fluxctl" && \
             curl -sSfLo /usr/local/bin/"${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/"${VERSION}"/"${ARTIFACT}"_linux_amd64 && \
