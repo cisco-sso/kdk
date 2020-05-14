@@ -29,12 +29,8 @@ Before you start the Windows Hyper-V build:
 * Ensure you are building from a wired connection.
   * Wireless connections almost always fail because the build is network-intensive.
 * Configure Hyper-V network settings.
-  * The Hyper-V packer build only works if the vagrant VM build machine is directly on the network.
-  * The packer build is configured to auto-select the network named 'External Switch'.
-  * Create a new network switch called 'External Switch'
-  * Ensure the 'External Switch' is set to Bridge Mode.
-  * Ensure you select the wired physical adapter for the 'External Switch'
-
+  * The packer build is configured to auto-select the network named 'Default Switch'.
+  * Ensure the Hyper-V 'Default Switch' exists.
 
 ```bash
 # Start Powershell as Administrator
