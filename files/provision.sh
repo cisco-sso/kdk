@@ -4,8 +4,9 @@ set -euo pipefail
 function main() {
     export DEBIAN_FRONTEND="noninteractive"
     if [ "$#" -eq 0 ]; then
-        # If this script was called with zero args, then we build for ubuntu bionic
-        ubuntu_bionic
+        # If this script was called with zero args, then exit with error
+        echo "Must provide script arg with name of function to be called"
+        exit 1
     else
         # If this script was called with arguments, then we build for docker
         #   The following expects the first argument to be the function name
@@ -49,29 +50,15 @@ function vagrant() {
     # Disable IPV6 temporarily for the current build
     #   Building on windows seems to require it because
     #     it hangs on add-apt-repository ppa...
-    echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
-    # Remove this workaround after bento releases new hyperv box
-    vagrant_disable_ssh_password_logins
-    vagrant_bento_workaround_openssl_bug
+    # echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+    # ^ Remove this workaround after bento releases new hyperv box
     layer_install_os_packages
     layer_install_python_based_utils_and_libs
     layer_install_apps_not_provided_by_os_packages
     layer_go_get_installs
     layer_build_apps_not_provided_by_os_packages
     vagrant_fix_permissions
-    mark_provisioned
-    rm -rf /tmp/* && popd
-}
-
-function ubuntu_bionic() {
-    exit_if_provisioned
-
-    pushd /tmp
-    layer_install_os_packages
-    layer_install_python_based_utils_and_libs
-    layer_install_apps_not_provided_by_os_packages
-    layer_go_get_installs
-    layer_build_apps_not_provided_by_os_packages
+    vagrant_disable_ssh_password_logins
     mark_provisioned
     rm -rf /tmp/* && popd
 }
@@ -81,15 +68,6 @@ function vagrant_disable_ssh_password_logins() {
     #   Disable this, since some boxes may run with bridged networking by default
     sed -i 's@#PasswordAuthentication yes@PasswordAuthentication no@g' \
         /etc/ssh/sshd_config
-}
-
-function vagrant_bento_workaround_openssl_bug() {
-    # https://github.com/chef/bento/issues/1201#issuecomment-503060115
-    echo "#### ${FUNCNAME[0]}"
-    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure libc6
-    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure libssl1.1
-    apt-get update
-    DEBIAN_FRONTEND=noninteractive apt-get install -y libssl1.1
 }
 
 function layer_install_os_packages() {
@@ -398,17 +376,17 @@ function layer_go_get_installs() {
         echo "go get installs" && \
         apt-get -y -qq update && apt-get --no-install-recommends -y -qq install git && \
         apt-get -y -qq clean && apt-get -y -qq autoremove && rm -rf /var/lib/apt/lists/*
-    /usr/local/go/bin/go get github.com/cloudflare/cfssl/cmd/cfssl
-    /usr/local/go/bin/go get github.com/cloudflare/cfssl/cmd/cfssljson
-    /usr/local/go/bin/go get github.com/spf13/cobra/cobra
-    /usr/local/go/bin/go get github.com/kubernetes-incubator/cri-tools/cmd/crictl
-    /usr/local/go/bin/go get golang.org/x/lint/golint
-    /usr/local/go/bin/go get github.com/gpmgo/gopm
-    /usr/local/go/bin/go get github.com/vmware/govmomi/govc
-    /usr/local/go/bin/go get github.com/github/hub
+    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/cloudflare/cfssl/cmd/cfssl)
+    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/cloudflare/cfssl/cmd/cfssljson)
+    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/spf13/cobra/cobra)
+    (cd /tmp; GO111MODULE=off /usr/local/go/bin/go get github.com/kubernetes-incubator/cri-tools/cmd/crictl)
+    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get golang.org/x/lint/golint)
+    (cd /tmp; GO111MODULE=off /usr/local/go/bin/go get github.com/gpmgo/gopm)
+    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/vmware/govmomi/govc)
+    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/github/hub)
     git clone https://github.com/cisco-sso/mh.git /tmp/mh && cd /tmp/mh && \
-        /usr/local/go/bin/go mod init github.com/cisco-sso/mh && \
-        /usr/local/go/bin/go build -o /go/bin/mh && \
+        GO111MODULE=on /usr/local/go/bin/go mod init github.com/cisco-sso/mh && \
+        GO111MODULE=on /usr/local/go/bin/go build -o /go/bin/mh && \
         ln -sf /go/bin/mh /go/bin/multihelm
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/mikefarah/yq/v3)
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@v0.3.0)
@@ -457,7 +435,7 @@ function layer_build_apps_not_provided_by_os_packages() {
         make && make install && cd .. && rm -fr emacs-*
 
     echo "Install jwt-cli." && \
-	curl https://sh.rustup.rs -sSf | sh -s -- -y && source ~/.cargo/env && \
+        curl https://sh.rustup.rs -sSf | sh -s -- -y && source ~/.cargo/env && \
         git clone https://github.com/mike-engel/jwt-cli /tmp/jwt-cli && cd /tmp/jwt-cli && git checkout 3.1.0 && \
         cargo update && cargo build --release && mv target/release/jwt /usr/local/bin
 
@@ -526,9 +504,9 @@ function exit_if_provisioned() {
 
 function vagrant_fix_permissions() {
     for item in /home/vagrant/.ssh /home/vagrant/.cache /home/vagrant/.wget-hsts; do
-	if [ -e $item ]; then
-	    chown -R vagrant:vagrant $item
-	fi
+        if [ -e $item ]; then
+            chown -R vagrant:vagrant $item
+        fi
     done
 }
 

@@ -1,5 +1,11 @@
-# https://github.com/hashicorp/packer/blob/master/builder/vagrant/step_create_vagrantfile.go#L25
-
+# The purpose of copying this file is to set the default switch template
+#   to use a specific HyperV switch, the 'default' switch.
+#
+# The sources come from:
+#   https://github.com/hashicorp/packer/blob/master/builder/vagrant/step_create_vagrantfile.go#L25
+#
+# And there is only one line edited below
+#
 Vagrant.configure("2") do |config|
   config.vm.define "source", autostart: false do |source|
 	source.vm.box = "{{.SourceBox}}"
@@ -16,6 +22,7 @@ Vagrant.configure("2") do |config|
     config.vm.synced_folder ".", "/vagrant", disabled: true
   {{- end}}
 
-  # The line below allows Packer to auto-select the network device
-  config.vm.network 'public_network', bridge: 'External Switch'
+  # The line below has been added to allow Packer to auto-select the
+  #   network device
+  config.vm.network 'public_network', bridge: 'Default Switch'
 end
