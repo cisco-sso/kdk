@@ -348,7 +348,7 @@ function layer_install_apps_not_provided_by_os_packages() {
             curl -sSfLo /usr/local/bin/"${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-v"${VERSION}".linux && \
             chmod a+x /usr/local/bin/"${ARTIFACT}" && \
         echo "Install terraform." && \
-            export ORG="hashicorp" && export REPO="terraform" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
+            export ORG="hashicorp" && export REPO="terraform" && export VERSION=0.12.26 && export ARTIFACT="${REPO}" && \
             curl -sSfLo "${ARTIFACT}".zip https://releases."${ORG}".com/"${REPO}"/"${VERSION}"/"${ARTIFACT}"_"${VERSION}"_linux_amd64.zip && \
             unzip -qq "${ARTIFACT}".zip && chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && rm -f "${ARTIFACT}".zip && \
             ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
