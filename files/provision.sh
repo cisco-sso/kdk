@@ -308,9 +308,6 @@ function layer_install_apps_not_provided_by_os_packages() {
             export ORG="stedolan" && export REPO="jq" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
             curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/"${VERSION}"/"${ARTIFACT}"-linux64 && \
             chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin/ && \
-        echo "Install jsonnet." && \
-            export ORG="google" && export REPO="jsonnet" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="jsonnet" && \
-            curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-bin-v"${VERSION}"-linux.tar.gz | tar -C /usr/local/bin -xz && \
         echo "Install kops." && \
             export ORG="kubernetes" && export REPO="kops" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
             curl -sSfLo /usr/local/bin/"${ARTIFACT}"-"${VERSION}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-linux-amd64 && \
@@ -384,6 +381,7 @@ function layer_go_get_installs() {
     (cd /tmp; GO111MODULE=off /usr/local/go/bin/go get github.com/gpmgo/gopm)
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/vmware/govmomi/govc)
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/github/hub)
+    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/google/go-jsonnet/cmd/jsonnet)
     git clone https://github.com/cisco-sso/mh.git /tmp/mh && cd /tmp/mh && \
         GO111MODULE=on /usr/local/go/bin/go mod init github.com/cisco-sso/mh && \
         GO111MODULE=on /usr/local/go/bin/go build -o /go/bin/mh && \
