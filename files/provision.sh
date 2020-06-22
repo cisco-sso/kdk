@@ -382,6 +382,7 @@ function layer_go_get_installs() {
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/vmware/govmomi/govc)
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/github/hub)
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/google/go-jsonnet/cmd/jsonnet)
+    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/google/go-jsonnet/cmd/jsonnetfmt)
     git clone https://github.com/cisco-sso/mh.git /tmp/mh && cd /tmp/mh && \
         GO111MODULE=on /usr/local/go/bin/go mod init github.com/cisco-sso/mh && \
         GO111MODULE=on /usr/local/go/bin/go build -o /go/bin/mh && \
