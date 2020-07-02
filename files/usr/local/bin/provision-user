@@ -56,6 +56,12 @@ if [[ ! -f "/etc/kdk/provisioned" ]]; then
 
     # Ensure permissions for a few locations
     chown ${KDK_USERNAME}:${KDK_USERNAME} /home/${KDK_USERNAME}
+    for item in config cache local; do
+      ITEM_PATH="/home/${KDK_USERNAME}/.${item}"
+      if [[ -d "${ITEM_PATH}" ]]; then
+        chown -R ${KDK_USERNAME}:${KDK_USERNAME} ${ITEM_PATH}
+      fi
+    done
     chown -R ${KDK_USERNAME}:${KDK_USERNAME} /go
     install -m 0600 -o ${KDK_USERNAME} /dev/null /var/log/kdk-provision.log
 
