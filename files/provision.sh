@@ -271,7 +271,7 @@ function layer_install_apps_not_provided_by_os_packages() {
             curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_linux-amd64 && \
             chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
         echo "Install golang." && \
-            export ORG="golang" && export REPO="go" && export VERSION="1.13.5" && export ARTIFACT="${REPO}" && \
+            export ORG="golang" && export REPO="go" && export VERSION="1.14.4" && export ARTIFACT="${REPO}" && \
             curl -sSfL https://dl.google.com/"${REPO}"/"${ARTIFACT}""${VERSION}".linux-amd64.tar.gz | tar -C /usr/local -xz && \
             mkdir -p /"${ARTIFACT}" && chmod a+rw /"${ARTIFACT}" && \
         echo "Install goreleaser." && \
