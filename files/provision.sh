@@ -207,6 +207,7 @@ function layer_install_python_based_utils_and_libs() {
              'openshift==0.10.2' \
              'peru==1.2.0' \
              'pipenv==2018.11.26' \
+             'pre-commit==2.6.0' \
              'pytest==5.3.5' \
              'python-neutronclient==7.0.0' \
              'python-octaviaclient==2.0.0' \
