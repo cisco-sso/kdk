@@ -90,11 +90,12 @@ function layer_install_os_packages() {
         dnsmasq \
         dnsutils \
         dos2unix \
+        emacs-nox \
         fonts-powerline \
         fio \
+        fzf \
         gcc \
         gettext \
-        gnupg \
         gnupg2 \
         htop \
         iputils-ping \
@@ -133,12 +134,11 @@ function layer_install_os_packages() {
         xauth \
         zip && \
     curl -sSfL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
-        # TODO: Docker does not have a release file for Ubuntu 20.04 focal yet
-        #   Thus use bionic.  Eventually 'bionic' with '$(lsb_release -cs)` in the line below
         add-apt-repository \
             "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-         bionic \
+         $(lsb_release -cs) \
          stable" && \
+
         # TODO: Google does not have a release file for Ubuntu 20.04 focal yet
         #   Thus use bionic.  Eventually replace 'bionic' with '$(lsb_release -c -s)' in the line below
         echo "Configure apt for google-cloud-sdk." && \
@@ -149,7 +149,7 @@ function layer_install_os_packages() {
             export POSTGRESQL_REPO="$(lsb_release -c -s)-pgdg" && \
             echo "deb https://apt.postgresql.org/pub/repos/apt $POSTGRESQL_REPO main" | tee -a /etc/apt/sources.list.d/pgdg.list && \
             curl -sSfL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
-            curl -sSfL https://deb.nodesource.com/setup_13.x | bash - && \
+            curl -sSfL https://deb.nodesource.com/setup_current.x | bash - && \
             curl -sSfL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
         echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee -a /etc/apt/sources.list.d/yarn.list && \
         echo "Install apt package extras." && \
@@ -198,6 +198,7 @@ function layer_install_python_based_utils_and_libs() {
              'boto3==1.12.3' \
              'boto==2.49.0' \
              'click==7.0' \
+             'diff-highlight==1.2.0' \
              'docker-compose==1.25.4' \
              'ipython==7.12.0' \
              'ipdb' \
@@ -238,10 +239,6 @@ function layer_install_apps_not_provided_by_os_packages() {
             curl -sSfLo "${ARTIFACT}".zip https://releases."${ORG}".com/"${ARTIFACT}"/"${VERSION}"/"${ARTIFACT}"_"${VERSION}"_linux_amd64.zip && \
             unzip -qq "${ARTIFACT}".zip && chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
             rm -rf "${ARTIFACT}"* && \
-        echo "Install dep." && \
-            export ORG="golang" && export REPO="dep" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}"  && \
-            curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"-linux-amd64 && \
-            chmod a+x "${ARTIFACT}" && mv "${ARTIFACT}" /usr/local/bin && \
         echo "Install direnv." && \
             export ORG="direnv" && export REPO="direnv" && export VERSION=$(get_latest_github_release_version "${ORG}" "${REPO}") && export ARTIFACT="${REPO}" && \
             curl -sSfLo "${ARTIFACT}" https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${REPO}".linux-amd64 && \
@@ -290,11 +287,11 @@ function layer_install_apps_not_provided_by_os_packages() {
             curl -sSfL https://github.com/"${ORG}"/"${REPO}"/releases/download/v"${VERSION}"/"${ARTIFACT}"_"${VERSION}"_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz "${ARTIFACT}" && chmod a+x /usr/local/bin/"${ARTIFACT}" && \
         echo "Install helm." && \
             export ORG="helm" && export REPO="helm" && export ARTIFACT="${REPO}" && \
-            export VERSION="3.0.1" && curl -sSfL https://get.helm.sh/"${ARTIFACT}"-v"${VERSION}"-linux-amd64.tar.gz | tar xz && \
+            export VERSION="3.2.4" && curl -sSfL https://get.helm.sh/"${ARTIFACT}"-v"${VERSION}"-linux-amd64.tar.gz | tar xz && \
             chmod a+x linux-amd64/"${ARTIFACT}" && mv linux-amd64/"${ARTIFACT}" /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && rm -fr linux-amd64 &&
             ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}"3 && \
             ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}" && \
-            export VERSION="2.16.1" && curl -sSfL https://get.helm.sh/"${ARTIFACT}"-v"${VERSION}"-linux-amd64.tar.gz | tar xz && \
+            export VERSION="2.16.9" && curl -sSfL https://get.helm.sh/"${ARTIFACT}"-v"${VERSION}"-linux-amd64.tar.gz | tar xz && \
             chmod a+x linux-amd64/"${ARTIFACT}" && mv linux-amd64/"${ARTIFACT}" /usr/local/bin/"${ARTIFACT}"-"${VERSION}" && rm -fr linux-amd64 &&
             ln -sf /usr/local/bin/"${ARTIFACT}"-"${VERSION}" /usr/local/bin/"${ARTIFACT}"2 && \
         echo "Install helmfile" && \
@@ -401,7 +398,6 @@ function layer_build_apps_not_provided_by_os_packages() {
         autoconf \
         build-essential \
         gcc \
-        libgnutls28-dev \
         libncurses5-dev \
         libz-dev \
         texinfo \
@@ -416,23 +412,6 @@ function layer_build_apps_not_provided_by_os_packages() {
     echo "Install bats" && \
         curl -sSfL https://github.com/sstephenson/bats/archive/v0.4.0.tar.gz | tar xz && cd bats-* && \
         ./install.sh /usr/local && cd .. && rm -fr bats-*
-
-    echo "Install emacs." && \
-        curl -sSfL http://mirrors.ibiblio.org/gnu/ftp/gnu/emacs/emacs-26.3.tar.gz | tar xz && cd emacs-* && \
-        CANNOT_DUMP=yes ./configure \
-            --prefix=/usr/local \
-            --disable-build-details \
-            --without-all \
-            --without-x \
-            --without-x-toolkit \
-            --without-sound \
-            --with-xml2 \
-            --with-zlib \
-            --with-modules \
-            --with-file-notification \
-            --with-gnutls \
-            --with-compress-install && \
-        make && make install && cd .. && rm -fr emacs-*
 
     echo "Install jwt-cli." && \
         curl https://sh.rustup.rs -sSf | sh -s -- -y && source ~/.cargo/env && \
@@ -463,7 +442,7 @@ function layer_build_apps_not_provided_by_os_packages() {
     echo "Install tmux." && \
         curl -sSfL https://github.com/libevent/libevent/releases/download/release-2.1.11-stable/libevent-2.1.11-stable.tar.gz | tar xz && cd libevent-* && \
         ./configure && make && make install && cd .. && rm -fr libevent-* && \
-        curl -sSfL https://github.com/tmux/tmux/releases/download/3.1a/tmux-3.1a.tar.gz | tar xz && cd tmux-* && \
+        curl -sSfL https://github.com/tmux/tmux/releases/download/3.2-rc/tmux-3.2-rc.tar.gz | tar xz && cd tmux-* && \
         ./configure --prefix=/usr/local && make && make install && cd .. && rm -fr tmux-*
 
     echo "Install zsh." && \
