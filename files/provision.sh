@@ -389,7 +389,6 @@ function layer_go_get_installs() {
         GO111MODULE=on /usr/local/go/bin/go build -o /go/bin/mh && \
         ln -sf /go/bin/mh /go/bin/multihelm
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/mikefarah/yq/v3)
-    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@v0.3.0)
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/mitchellh/gox@v1.0.1)
     rm -rf /root/.cache/go-build
     rm -rf /go/src
@@ -492,6 +491,10 @@ function layer_build_apps_not_provided_by_os_packages() {
     echo "Install redis-cli tools." && \
         curl -sSfL http://download.redis.io/releases/redis-5.0.7.tar.gz | tar xz && cd redis-* && \
         make && cp src/redis-cli src/redis-benchmark /usr/local/bin && cd .. && rm -fr redis-*
+
+    echo "Install jsonnet-bundler." && \
+        curl -o /usr/local/bin/jb -L https://github.com/jsonnet-bundler/jsonnet-bundler/releases/download/v0.4.0/jb-linux-amd64 && \
+        chmod +x /usr/local/bin/jb
 }
 
 function exit_if_provisioned() {
