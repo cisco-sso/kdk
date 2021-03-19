@@ -213,13 +213,13 @@ function layer_install_python_based_utils_and_libs() {
              'python-octaviaclient==2.0.0' \
              'python-openstackclient==4.0.0' \
              'pyvmomi==6.7.3' \
-             'pyyaml==3.13' \
+             'pyyaml==5.1' \
              'requests==2.23.0' \
              'sh==1.12.14' \
              'sshuttle==0.78.5' \
              'structlog==20.1.0' \
              'urllib3==1.25.8' \
-             'virtualenv==20.0.4' \
+             'virtualenv==20.0.8' \
              'yamllint==1.20.0' \
              'yapf' \
              'yq' && \

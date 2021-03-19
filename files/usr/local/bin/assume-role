@@ -1,0 +1,36 @@
+#!/usr/bin/env bash -x
+
+aws_account_id=${1:-""}
+aws_assume_role=${2:-""}
+aws_role_session=${3:-${USER}}-"$aws_assume_role"
+
+unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+
+if [ -z "$aws_account_id" ]
+then
+  echo "Missing account_id"
+  usage()
+fi
+
+if [ -z "$aws_assume_role" ]
+then
+  echo "Missing assume_role"
+  usage()
+fi
+
+credentials=$(aws sts assume-role \
+    --role-arn arn:aws:iam::${aws_account_id}:role/${aws_assume_role} \
+    --role-session-name ${aws_role_session}\@cisco.com \
+    --query Credentials --output=json)
+
+
+export AWS_ACCESS_KEY_ID=$(echo $credentials | jq -r '.AccessKeyId')
+export AWS_SECRET_ACCESS_KEY=$(echo $credentials | jq -r '.SecretAccessKey')
+export AWS_SESSION_TOKEN=$(echo $credentials | jq -r '.SessionToken')
+
+
+usage() {
+  echo "assume-role <account_id> <assume_role> (session_name)\n"
+  echo "Required: account_id, assume_role\n"
+  echo 'Optional: session_name '
+}
