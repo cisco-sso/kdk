@@ -104,13 +104,13 @@ kdk destroy
 kdk update
 ```
 
-## Saving State between Resetting your KDK Enviroment
+## Saving State between Resetting your KDK Environment
 
-The KDK is meant to be ephemeral.  You should be able to `kdk destroy && kdk ssh` whenever you need to reset your enviroment.  Resetting should be done often, because over time your environment will diverge from original state as you use it.
+The KDK is meant to be ephemeral.  You should be able to `kdk destroy && kdk ssh` whenever you need to reset your environment.  Resetting should be done often, because over time your environment will diverge from original state as you use it.
 
 Here are a few approaches for saving state in between resets.
 
-### Customing your `.bash_profile`
+### Customizing your `.bash_profile`
 
 The KDK default [dotfiles](https://github.com/cisco-sso/yadm-dotfiles) includes a default [`.bash_profile`](https://github.com/cisco-sso/yadm-dotfiles/blob/master/.bash_profile#L103) that will search for additional bash profiles in a few pre-defined locations.  If files in any of these locations exist, they will be sourced automatically.
 
@@ -119,7 +119,7 @@ The KDK default [dotfiles](https://github.com/cisco-sso/yadm-dotfiles) includes 
 * `/keybase/private/<user-keybase-id>/.bash_profile_private`
   * If the user has installed [Keybase](https://keybase.io/)
 
-Thus, one may customize their own private settings by creating any of the files above by host-mounting directories into the KDK when prompted during `kdk init`.  This method may be used to set enviroment variables as well as create entire dotfiles, such as `~/.aws/credentials` and `~/.aws/config`.  See [here for an example](https://github.com/cisco-sso/yadm-dotfiles#customizing-your-setup).
+Thus, one may customize their own private settings by creating any of the files above by host-mounting directories into the KDK when prompted during `kdk init`.  This method may be used to set environment variables as well as create entire dotfiles, such as `~/.aws/credentials` and `~/.aws/config`.  See [here for an example](https://github.com/cisco-sso/yadm-dotfiles#customizing-your-setup).
 
 ### Mounting Directories Directly into the KDK
 
