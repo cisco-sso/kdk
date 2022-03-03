@@ -376,7 +376,7 @@ function layer_go_get_installs() {
         apt-get -y -qq clean && apt-get -y -qq autoremove && rm -rf /var/lib/apt/lists/*
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/cloudflare/cfssl/cmd/cfssl)
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/cloudflare/cfssl/cmd/cfssljson)
-    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/spf13/cobra/cobra)
+    (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get github.com/spf13/cobra-cli)
     (cd /tmp; GO111MODULE=off /usr/local/go/bin/go get github.com/kubernetes-incubator/cri-tools/cmd/crictl)
     (cd /tmp; GO111MODULE=on /usr/local/go/bin/go get golang.org/x/lint/golint)
     (cd /tmp; GO111MODULE=off /usr/local/go/bin/go get github.com/gpmgo/gopm)
