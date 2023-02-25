@@ -58,7 +58,7 @@ require (
 	github.com/theupdateframework/notary v0.6.1 // indirect
 	github.com/ulikunitz/xz v0.5.4 // indirect
 	github.com/xlab/handysort v0.0.0-20150421192137-fb3537ed64a1 // indirect
-	golang.org/x/crypto v0.0.0-20191205180655-e7c4368fe9dd
+	golang.org/x/crypto v0.1.0
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	google.golang.org/grpc v1.27.1 // indirect
 	gopkg.in/dancannon/gorethink.v3 v3.0.5 // indirect
