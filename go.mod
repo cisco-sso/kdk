@@ -46,10 +46,10 @@ require (
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/nwaples/rardecode v0.0.0-20171029023500-e06696f847ae // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
-	github.com/opencontainers/runc v0.1.1 // indirect
+	github.com/opencontainers/runc v1.1.5 // indirect
 	github.com/pelletier/go-toml v1.2.0 // indirect
 	github.com/savaki/jq v0.0.0-20161209013833-0e6baecebbf8
-	github.com/sirupsen/logrus v1.4.1
+	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/afero v1.1.1 // indirect
 	github.com/spf13/cast v1.2.0 // indirect
 	github.com/spf13/cobra v0.0.3
